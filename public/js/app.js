@@ -12,6 +12,7 @@ const views = {
   config: $("viewConfig"),
   login: $("viewLogin"),
   pending: $("viewPending"),
+  rejected: $("viewRejected"),
   app: $("viewApp"),
 };
 
@@ -251,6 +252,7 @@ function hideAuthError() {
 
 $("btnLogout").addEventListener("click", () => signOut(auth));
 $("btnLogoutPending").addEventListener("click", () => signOut(auth));
+$("btnLogoutRejected").addEventListener("click", () => signOut(auth));
 
 /* ============================================================
    2. 로그인 상태 → 화면 라우팅
@@ -305,6 +307,9 @@ onAuthStateChanged(auth, async (user) => {
     if (myProfile.role === "pending") {
       $("pendingName").textContent = myProfile.name;
       showView("pending");
+    } else if (myProfile.role === "rejected") {
+      $("rejectedName").textContent = myProfile.name;
+      showView("rejected");
     } else {
       enterApp();
     }
@@ -511,10 +516,11 @@ function renderNotices() {
       <div class="app-card-head">
         <div>
           <h4>${n.pinned ? '<span class="pin-badge">📌 고정</span>' : ""}${esc(n.title)}</h4>
-          <p class="app-card-meta">${esc(n.author || "")} · ${fmtDate(n.createdAt)}</p>
+          <p class="app-card-meta">${esc(n.author || "")} · ${fmtDate(n.createdAt)}${n.updatedAt ? " (수정됨)" : ""}</p>
         </div>
         ${isAdmin ? `
         <div class="card-actions">
+          <button class="btn-mini dark" data-action="edit-notice" data-id="${n.id}">수정</button>
           <button class="btn-mini dark" data-action="pin-notice" data-id="${n.id}" data-pinned="${!!n.pinned}">${n.pinned ? "고정 해제" : "고정"}</button>
           <button class="btn-mini danger" data-action="del-notice" data-id="${n.id}">삭제</button>
         </div>` : ""}
@@ -533,9 +539,34 @@ $("noticeList").addEventListener("click", async (e) => {
       await deleteDoc(doc(db, "notices", id));
     } else if (action === "pin-notice") {
       await updateDoc(doc(db, "notices", id), { pinned: btn.dataset.pinned !== "true" });
+    } else if (action === "edit-notice") {
+      const n = state.notices.find((x) => x.id === id);
+      if (!n) return;
+      editNoticeId = id;
+      $("editNoticeTitle").value = n.title || "";
+      $("editNoticeBody").value = n.body || "";
+      $("editNoticeMsg").hidden = true;
+      openModal("editNoticeModal");
     }
   } catch (err) {
     alert("처리에 실패했어요: " + err.message);
+  }
+});
+
+let editNoticeId = null;
+
+$("editNoticeForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (!editNoticeId) return;
+  try {
+    await updateDoc(doc(db, "notices", editNoticeId), {
+      title: $("editNoticeTitle").value.trim(),
+      body: $("editNoticeBody").value.trim(),
+      updatedAt: serverTimestamp(),
+    });
+    closeModal("editNoticeModal");
+  } catch (err) {
+    showFormMsg("editNoticeMsg", "수정에 실패했어요: " + err.message, "error");
   }
 });
 
@@ -593,9 +624,13 @@ function eventCardHtml(ev, isPast) {
       <div class="event-main">
         <div class="app-card-head">
           <h4>${esc(ev.title)}</h4>
-          ${isAdmin ? `<button class="btn-mini danger" data-action="del-event" data-id="${ev.id}">삭제</button>` : ""}
+          ${isAdmin ? `
+          <div class="card-actions">
+            <button class="btn-mini dark" data-action="edit-event" data-id="${ev.id}">수정</button>
+            <button class="btn-mini danger" data-action="del-event" data-id="${ev.id}">삭제</button>
+          </div>` : ""}
         </div>
-        <p class="event-info">🕖 ${esc(ev.time)} · 📍 ${esc(ev.place)}${ev.note ? ` · ${esc(ev.note)}` : ""}</p>
+        <p class="event-info">🕖 ${esc(ev.time)} · 📍 ${esc(ev.place)}${ev.note ? ` · ${esc(ev.note)}` : ""}${ev.updatedAt ? ` <span class="muted">(수정됨)</span>` : ""}</p>
         ${attendHtml}
       </div>
     </article>
@@ -633,6 +668,17 @@ async function handleEventClick(e) {
       }
     } else if (action === "del-event" && confirm("이 일정을 삭제할까요? (출석 기록도 함께 사라져요)")) {
       await deleteDoc(doc(db, "events", id));
+    } else if (action === "edit-event") {
+      const ev = state.events.find((x) => x.id === id);
+      if (!ev) return;
+      editEventId = id;
+      $("editEventTitle").value = ev.title || "";
+      $("editEventDate").value = ev.date || "";
+      $("editEventTime").value = ev.time || "";
+      $("editEventPlace").value = ev.place || "";
+      $("editEventNote").value = ev.note || "";
+      $("editEventMsg").hidden = true;
+      openModal("editEventModal");
     } else if (action === "load-past-att") {
       const qs = await getDocs(collection(db, "events", id, "attendance"));
       const yes = qs.docs.map((d) => d.data()).filter((v) => v.status === "yes");
@@ -651,6 +697,26 @@ async function handleEventClick(e) {
 
 $("eventUpcoming").addEventListener("click", handleEventClick);
 $("eventPast").addEventListener("click", handleEventClick);
+
+let editEventId = null;
+
+$("editEventForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (!editEventId) return;
+  try {
+    await updateDoc(doc(db, "events", editEventId), {
+      title: $("editEventTitle").value.trim(),
+      date: $("editEventDate").value,
+      time: $("editEventTime").value,
+      place: $("editEventPlace").value.trim(),
+      note: $("editEventNote").value.trim(),
+      updatedAt: serverTimestamp(),
+    });
+    closeModal("editEventModal");
+  } catch (err) {
+    showFormMsg("editEventMsg", "수정에 실패했어요: " + err.message, "error");
+  }
+});
 
 /* ============================================================
    7. 투표
@@ -697,12 +763,13 @@ function renderPolls() {
       <div class="app-card-head">
         <div>
           <h4>${esc(p.question)}</h4>
-          <p class="app-card-meta">${esc(p.author || "")} · ${fmtDate(p.createdAt)} ·
+          <p class="app-card-meta">${esc(p.author || "")} · ${fmtDate(p.createdAt)}${p.updatedAt ? " (수정됨)" : ""} ·
             <span class="poll-status ${p.closed ? "closed" : "open"}">${p.closed ? "마감" : "진행 중"}</span>
           </p>
         </div>
         ${isAdmin ? `
         <div class="card-actions">
+          <button class="btn-mini dark" data-action="edit-poll" data-id="${p.id}">수정</button>
           <button class="btn-mini dark" data-action="toggle-poll" data-id="${p.id}" data-closed="${!!p.closed}">${p.closed ? "재개" : "마감"}</button>
           <button class="btn-mini danger" data-action="del-poll" data-id="${p.id}">삭제</button>
         </div>` : ""}
@@ -740,9 +807,40 @@ $("pollList").addEventListener("click", async (e) => {
       await updateDoc(doc(db, "polls", id), { closed: btn.dataset.closed !== "true" });
     } else if (action === "del-poll" && confirm("이 투표를 삭제할까요?")) {
       await deleteDoc(doc(db, "polls", id));
+    } else if (action === "edit-poll") {
+      const p = state.polls.find((x) => x.id === id);
+      if (!p) return;
+      editPollId = id;
+      $("editPollQuestion").value = p.question || "";
+      $("editPollOptions").value = (p.options || []).join("\n");
+      $("editPollMsg").hidden = true;
+      openModal("editPollModal");
     }
   } catch (err) {
     alert("처리에 실패했어요: " + err.message);
+  }
+});
+
+let editPollId = null;
+
+$("editPollForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (!editPollId) return;
+  const options = $("editPollOptions").value
+    .split("\n").map((s) => s.trim()).filter(Boolean);
+  if (options.length < 2) {
+    showFormMsg("editPollMsg", "선택지를 2개 이상 입력해 주세요.", "error");
+    return;
+  }
+  try {
+    await updateDoc(doc(db, "polls", editPollId), {
+      question: $("editPollQuestion").value.trim(),
+      options,
+      updatedAt: serverTimestamp(),
+    });
+    closeModal("editPollModal");
+  } catch (err) {
+    showFormMsg("editPollMsg", "수정에 실패했어요: " + err.message, "error");
   }
 });
 
@@ -754,6 +852,9 @@ function renderMembers() {
     .filter((m) => m.role === "member" || m.role === "admin")
     .sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
   const pending = state.members.filter((m) => m.role === "pending");
+  const rejected = state.members
+    .filter((m) => m.role === "rejected")
+    .sort((a, b) => (b.rejectedAt?.seconds || 0) - (a.rejectedAt?.seconds || 0));
 
   $("memberCount").textContent = `${approved.length}명`;
 
@@ -775,6 +876,9 @@ function renderMembers() {
 
   if (!isAdmin) return;
 
+  $("pendingCount").textContent = pending.length;
+  $("rejectedCount").textContent = rejected.length;
+
   $("pendingList").innerHTML = pending.length ? pending.map((m) => `
     <article class="app-card">
       <div class="app-card-head">
@@ -789,6 +893,21 @@ function renderMembers() {
       </div>
     </article>
   `).join("") : `<p class="empty-note">대기 중인 멤버가 없습니다.</p>`;
+
+  $("rejectedList").innerHTML = rejected.length ? rejected.map((m) => `
+    <article class="app-card rejected-card">
+      <div class="app-card-head">
+        <div>
+          <h4>${esc(m.name)} <span class="rejected-badge">거절됨</span></h4>
+          <p class="app-card-meta">${esc(m.email || "")} · ${fmtDate(m.createdAt)} 신청 · ${fmtDate(m.rejectedAt)} 거절</p>
+        </div>
+        <div class="card-actions">
+          <button class="btn-mini leaf" data-action="approve" data-id="${m.id}">✓ 승인으로 변경</button>
+          <button class="btn-mini danger" data-action="del-rejected" data-id="${m.id}" data-name="${esc(m.name)}">기록 삭제</button>
+        </div>
+      </div>
+    </article>
+  `).join("") : `<p class="empty-note">거절 기록이 없습니다.</p>`;
 
   $("applicationList").innerHTML = state.applications.length ? state.applications.map((a) => `
     <article class="app-card">
@@ -806,6 +925,16 @@ function renderMembers() {
   `).join("") : `<p class="empty-note">새 신청서가 없습니다.</p>`;
 }
 
+/* 승인 대기 / 거절 서브탭 전환 */
+$("memberSubTabs").addEventListener("click", (e) => {
+  const btn = e.target.closest(".sub-tab");
+  if (!btn) return;
+  document.querySelectorAll("#memberSubTabs .sub-tab").forEach((t) =>
+    t.classList.toggle("active", t === btn));
+  document.querySelectorAll("#adminSection .sub-panel").forEach((p) =>
+    p.classList.toggle("active", p.id === `subtab-${btn.dataset.subtab}`));
+});
+
 $("tab-members").addEventListener("click", async (e) => {
   const btn = e.target.closest("[data-action]");
   if (!btn) return;
@@ -814,7 +943,9 @@ $("tab-members").addEventListener("click", async (e) => {
   try {
     if (action === "approve") {
       await updateDoc(doc(db, "members", id), { role: "member" });
-    } else if (action === "reject" && confirm(`${btn.dataset.name}님의 가입을 거절할까요?`)) {
+    } else if (action === "reject" && confirm(`${btn.dataset.name}님의 가입을 거절할까요?\n(거절 기록은 '거절' 탭에 남고, 나중에 승인으로 바꿀 수 있어요)`)) {
+      await updateDoc(doc(db, "members", id), { role: "rejected", rejectedAt: serverTimestamp() });
+    } else if (action === "del-rejected" && confirm(`${btn.dataset.name}님의 거절 기록을 완전히 삭제할까요?\n(삭제하면 이 사람이 다시 로그인할 때 '승인 대기'로 새로 등록돼요)`)) {
       await deleteDoc(doc(db, "members", id));
     } else if (action === "toggle-admin") {
       const newRole = btn.dataset.role === "admin" ? "member" : "admin";
