@@ -36,7 +36,15 @@ service cloud.firestore {
                     && request.resource.data.role == 'pending'
                     && request.resource.data.name is string
                     && request.resource.data.name.size() <= 40;
-      allow update, delete: if isAdmin();
+      // 본인은 이름(name)만 수정 가능, 그 외(역할 변경 등)는 운영진만
+      allow update: if isAdmin()
+                    || (signedIn()
+                        && request.auth.uid == uid
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name'])
+                        && request.resource.data.name is string
+                        && request.resource.data.name.size() > 0
+                        && request.resource.data.name.size() <= 40);
+      allow delete: if isAdmin();
     }
 
     // ----- 가입 신청서 (공개 페이지 폼) -----

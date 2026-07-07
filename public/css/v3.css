@@ -474,6 +474,103 @@
   background: #c0392b;
 }
 
+/* ============================================================
+   모달 (비밀번호 재설정 · 내 정보 수정)
+   ============================================================ */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  background: rgba(20, 15, 11, 0.62);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.2rem;
+}
+
+.modal-card {
+  background: var(--white);
+  border-radius: calc(var(--radius) + 4px);
+  box-shadow: 0 24px 60px rgba(20, 15, 11, 0.35);
+  width: 100%;
+  max-width: 420px;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 1.8rem 1.6rem;
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.modal-head h3 {
+  font-size: 1.15rem;
+  font-weight: 900;
+}
+
+.modal-close {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--cream);
+  color: var(--ink-soft);
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.modal-close:hover {
+  background: var(--carrot-soft);
+  color: var(--carrot-deep);
+}
+
+.modal-desc {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  margin-bottom: 1.2rem;
+}
+
+.modal .auth-form .btn {
+  margin-top: 0.4rem;
+}
+
+/* ============================================================
+   헤더 (앱/관리자 공통)
+   ============================================================ */
+/* 아이콘 전용 버튼 (⚙️ 페이지 관리, 🔑 크루 공간) */
+.icon-btn {
+  display: inline-block;
+  padding: 0.35em 0.55em;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* 상단 이름 → 내 정보 수정 열기 (app.html 에서는 button) */
+button.app-user-name {
+  background: none;
+  border: none;
+  padding: 0 0 1px;
+  color: #fff;
+  font-family: var(--font);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  border-bottom: 1.5px dashed rgba(255, 255, 255, 0.5);
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+button.app-user-name:hover {
+  color: var(--carrot);
+  border-color: var(--carrot);
+}
+
 /* ----- 모바일 ----- */
 @media (max-width: 640px) {
   .admin-block {
@@ -508,5 +605,23 @@
   .record-table.slim th,
   .record-table.slim td {
     padding: 0.75rem 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  /* 모바일 헤더: 한 줄 유지 (이름은 말줄임) */
+  .app-user {
+    gap: 0.45rem;
+  }
+
+  .app-user-name {
+    max-width: 108px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .modal-card {
+    padding: 1.5rem 1.2rem;
   }
 }

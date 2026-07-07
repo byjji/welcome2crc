@@ -31,8 +31,7 @@ const SDK = window.FIREBASE_SDK;
 
 const { initializeApp } = await import(`${SDK}/firebase-app.js`);
 const {
-  getAuth, onAuthStateChanged, signOut,
-  GoogleAuthProvider, signInWithPopup, signInWithEmailAndPassword,
+  getAuth, onAuthStateChanged, signOut, signInWithEmailAndPassword,
 } = await import(`${SDK}/firebase-auth.js`);
 const {
   getFirestore, collection, doc,
@@ -79,15 +78,6 @@ const EVENT_OPTIONS = ["풀코스", "하프", "10km", "5km", "3km"];
 /* ============================================================
    1. 인증 + 운영진 확인
    ============================================================ */
-$("btnGoogle").addEventListener("click", async () => {
-  hideAuthError();
-  try {
-    await signInWithPopup(auth, new GoogleAuthProvider());
-  } catch (err) {
-    showAuthError(err);
-  }
-});
-
 $("emailForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   hideAuthError();

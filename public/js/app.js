@@ -31,9 +31,9 @@ const SDK = window.FIREBASE_SDK;
 const { initializeApp } = await import(`${SDK}/firebase-app.js`);
 const {
   getAuth, onAuthStateChanged, signOut,
-  GoogleAuthProvider, signInWithPopup,
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
   sendPasswordResetEmail, updateProfile,
+  EmailAuthProvider, reauthenticateWithCredential, updatePassword,
 } = await import(`${SDK}/firebase-auth.js`);
 const {
   getFirestore, collection, doc,
@@ -125,15 +125,6 @@ document.querySelectorAll(".auth-mode").forEach((btn) => {
   });
 });
 
-$("btnGoogle").addEventListener("click", async () => {
-  hideAuthError();
-  try {
-    await signInWithPopup(auth, new GoogleAuthProvider());
-  } catch (err) {
-    showAuthError(err);
-  }
-});
-
 $("emailForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   hideAuthError();
@@ -157,14 +148,94 @@ $("emailForm").addEventListener("submit", async (e) => {
   }
 });
 
-$("btnReset").addEventListener("click", async () => {
-  const email = $("authEmail").value.trim() || prompt("비밀번호를 재설정할 이메일을 입력하세요:");
-  if (!email) return;
+/* ---------- 모달 공통 (열기/닫기) ---------- */
+function openModal(id) {
+  $(id).hidden = false;
+  document.body.style.overflow = "hidden";
+}
+
+function closeModal(id) {
+  $(id).hidden = true;
+  document.body.style.overflow = "";
+}
+
+document.querySelectorAll(".modal").forEach((modal) => {
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal || e.target.closest("[data-close]")) closeModal(modal.id);
+  });
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  document.querySelectorAll(".modal").forEach((m) => {
+    if (!m.hidden) closeModal(m.id);
+  });
+});
+
+function showFormMsg(id, text, type) {
+  const el = $(id);
+  el.hidden = false;
+  el.textContent = text;
+  el.className = `form-msg ${type}`;
+}
+
+/* ---------- 비밀번호 재설정 (메일 링크로 새 비밀번호 설정) ---------- */
+$("btnReset").addEventListener("click", () => {
+  $("resetEmail").value = $("authEmail").value.trim();
+  $("resetMsg").hidden = true;
+  openModal("resetModal");
+});
+
+$("resetForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const email = $("resetEmail").value.trim();
   try {
     await sendPasswordResetEmail(auth, email);
-    alert(`${email} 로 재설정 메일을 보냈어요. 메일함을 확인해 주세요.`);
+    showFormMsg("resetMsg", `${email} 로 재설정 메일을 보냈어요! 메일의 링크에서 새 비밀번호를 설정한 뒤, 그 비밀번호로 로그인해 주세요. (메일이 안 보이면 스팸함 확인)`, "ok");
   } catch (err) {
-    showAuthError(err);
+    showFormMsg("resetMsg", authErrorMsg(err), "error");
+  }
+});
+
+/* ---------- 내 정보 수정 (이름 · 비밀번호) ---------- */
+$("userName").addEventListener("click", () => {
+  if (!me || !myProfile) return;
+  $("profileName").value = myProfile.name || "";
+  $("nameMsg").hidden = true;
+  $("pwMsg").hidden = true;
+  $("pwForm").reset();
+  openModal("profileModal");
+});
+
+$("nameForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = $("profileName").value.trim();
+  if (!name) return;
+  try {
+    await updateDoc(doc(db, "members", me.uid), { name });
+    await updateProfile(me, { displayName: name });
+    showFormMsg("nameMsg", "이름을 변경했어요 ✅", "ok");
+  } catch (err) {
+    showFormMsg("nameMsg", "이름 변경에 실패했어요: " + err.message, "error");
+  }
+});
+
+$("pwForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  try {
+    // 본인 확인(현재 비밀번호) 후 새 비밀번호 적용
+    const cred = EmailAuthProvider.credential(me.email, $("pwCurrent").value);
+    await reauthenticateWithCredential(me, cred);
+    await updatePassword(me, $("pwNew").value);
+    e.target.reset();
+    showFormMsg("pwMsg", "비밀번호를 변경했어요 ✅ 다음 로그인부터 새 비밀번호를 사용하세요.", "ok");
+  } catch (err) {
+    const map = {
+      "auth/invalid-credential": "현재 비밀번호가 올바르지 않아요.",
+      "auth/wrong-password": "현재 비밀번호가 올바르지 않아요.",
+      "auth/weak-password": "새 비밀번호는 6자 이상으로 해주세요.",
+    };
+    showFormMsg("pwMsg", map[err.code] || authErrorMsg(err), "error");
   }
 });
 
@@ -186,6 +257,8 @@ $("btnLogoutPending").addEventListener("click", () => signOut(auth));
    ============================================================ */
 onAuthStateChanged(auth, async (user) => {
   cleanupAll();
+  closeModal("resetModal");
+  closeModal("profileModal");
   me = user;
 
   if (!user) {
