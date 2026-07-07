@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>당근러닝크루 C.R.C — 울산 러닝크루</title>
+  <meta name="description" content="울산에서 함께 달리는 당근러닝크루(C.R.C). 정기런 일정, 크루 기록, 가입 안내를 확인하세요." />
+
+  <!-- 오픈그래프 (링크 공유 시 미리보기) -->
+  <meta property="og:title" content="당근러닝크루 C.R.C — 울산 러닝크루" />
+  <meta property="og:description" content="울산을 달리는 가장 신선한 방법, 당근러닝크루와 함께 뛰어요." />
+  <meta property="og:type" content="website" />
+
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥕</text></svg>" />
+
+  <!-- Pretendard 폰트 -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/v2.css" />
+  <link rel="stylesheet" href="css/v3.css" />
+</head>
+<body>
+
+  <!-- ===== 헤더 / 내비게이션 ===== -->
+  <header class="site-header" id="siteHeader">
+    <div class="container header-inner">
+      <a href="index.html" class="logo" aria-label="당근러닝크루 홈">
+        <span class="logo-mark">🥕</span>
+        <span class="logo-text">C.R.C <small data-site="crewName">당근러닝크루</small></span>
+      </a>
+
+      <nav class="main-nav" id="mainNav" aria-label="주 메뉴">
+        <a href="#about">소개</a>
+        <a href="#schedule">정기런</a>
+        <a href="#records">기록</a>
+        <a href="#gallery">갤러리</a>
+        <a href="#join">가입하기</a>
+        <a href="app.html" class="nav-cta">크루 공간 🔑</a>
+        <a href="#" class="nav-insta" data-insta-link target="_blank" rel="noopener">Instagram ↗</a>
+      </nav>
+
+      <button class="nav-toggle" id="navToggle" aria-label="메뉴 열기" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ===== 히어로 ===== -->
+    <section class="hero">
+      <div class="hero-bg" aria-hidden="true">
+        <div class="hero-track"></div>
+      </div>
+      <div class="container hero-inner">
+        <p class="hero-eyebrow reveal">ULSAN · CARROT RUNNING CREW</p>
+        <h1 class="hero-title reveal">
+          <span data-site="slogan">울산을 달리는<br />가장 신선한 방법</span>
+        </h1>
+        <p class="hero-sub reveal" data-site="subSlogan">
+          함께 달리면 더 멀리 갈 수 있습니다. 울산 당근러닝크루와 함께 뛰어요.
+        </p>
+        <div class="hero-actions reveal">
+          <a href="#join" class="btn btn-primary">크루 가입하기</a>
+          <a href="app.html" class="btn btn-ghost">크루원 로그인 🔑</a>
+        </div>
+      </div>
+
+      <!-- 크루 현황 통계 -->
+      <div class="container">
+        <ul class="stats reveal" id="statsList"></ul>
+      </div>
+    </section>
+
+    <!-- ===== 소개 ===== -->
+    <section class="section" id="about">
+      <div class="container">
+        <p class="section-eyebrow">ABOUT US</p>
+        <h2 class="section-title">당근러닝크루를 소개합니다</h2>
+        <p class="section-desc" data-site="aboutDesc">
+          당근러닝크루(C.R.C)는 울산을 기반으로 활동하는 러닝 크루입니다.
+          초보 러너부터 마라톤 완주자까지, 페이스와 상관없이 누구나 함께 달릴 수 있습니다.
+          태화강과 울산 곳곳을 달리며 건강한 러닝 문화를 만들어 갑니다.
+        </p>
+        <div class="value-grid" id="valueGrid"></div>
+      </div>
+    </section>
+
+    <!-- ===== 정기런 일정 ===== -->
+    <section class="section section-alt" id="schedule">
+      <div class="container">
+        <p class="section-eyebrow">WEEKLY RUN</p>
+        <h2 class="section-title">정기런 일정</h2>
+        <p class="section-desc">매주 함께 달리는 당근러닝크루의 정기 러닝 일정입니다. 게스트 참여도 언제나 환영해요.</p>
+        <div class="schedule-grid" id="scheduleGrid"></div>
+        <p class="section-note">※ 날씨·대회 일정에 따라 변동될 수 있습니다. 크루원은 <a href="app.html" class="inline-link">크루 공간</a>에서 이번 주 일정과 출석체크를 확인하세요.</p>
+      </div>
+    </section>
+
+    <!-- ===== 공식 기록 ===== -->
+    <section class="section" id="records">
+      <div class="container">
+        <p class="section-eyebrow">OFFICIAL RECORDS</p>
+        <h2 class="section-title">크루 공식 기록</h2>
+        <p class="section-desc">최근 3년간 당근러닝크루 멤버들이 대회에서 세운 기록입니다.</p>
+        <div class="record-tabs" id="recordTabs" role="tablist"></div>
+        <div class="record-panels" id="recordPanels"></div>
+      </div>
+    </section>
+
+    <!-- ===== 갤러리 ===== -->
+    <section class="section section-alt" id="gallery">
+      <div class="container">
+        <p class="section-eyebrow">GALLERY</p>
+        <h2 class="section-title">함께 달린 순간들</h2>
+        <p class="section-desc">
+          더 많은 사진과 소식은
+          <a href="#" data-insta-link target="_blank" rel="noopener" class="inline-link" data-insta-handle>@carrot_running_crew</a>
+          에서 만나보세요.
+        </p>
+        <div class="gallery-grid" id="galleryGrid"></div>
+      </div>
+    </section>
+
+    <!-- ===== 가입 안내 ===== -->
+    <section class="section join-section" id="join">
+      <div class="container">
+        <p class="section-eyebrow">JOIN US</p>
+        <h2 class="section-title">크루 가입 안내</h2>
+        <p class="section-desc">달리고 싶은 마음만 있다면 준비 끝! 아래 절차로 당근러닝크루에 합류하세요.</p>
+
+        <div class="join-steps" id="joinSteps"></div>
+
+        <!-- 가입 신청 폼 → Firebase Firestore 에 저장됩니다.
+             신청 내역은 크루 공간(app.html)의 멤버 탭에서 운영진이 확인합니다. -->
+        <div class="join-form-wrap reveal">
+          <h3 class="join-form-title">가입 신청서</h3>
+          <form id="joinForm" class="join-form">
+            <div class="form-row">
+              <label for="name">이름 <span class="req">*</span></label>
+              <input type="text" id="name" name="name" required maxlength="30" placeholder="홍길동" />
+            </div>
+
+            <div class="form-row">
+              <label for="contact">연락처 (전화 또는 인스타 아이디) <span class="req">*</span></label>
+              <input type="text" id="contact" name="contact" required maxlength="60" placeholder="010-0000-0000 / @insta_id" />
+            </div>
+
+            <div class="form-row form-row-half">
+              <div>
+                <label for="age">연령대</label>
+                <select id="age" name="age">
+                  <option value="">선택</option>
+                  <option>10대</option>
+                  <option>20대</option>
+                  <option>30대</option>
+                  <option>40대</option>
+                  <option>50대 이상</option>
+                </select>
+              </div>
+              <div>
+                <label for="level">러닝 경력</label>
+                <select id="level" name="level">
+                  <option value="">선택</option>
+                  <option>입문 (이제 시작해요)</option>
+                  <option>초급 (5km 완주 가능)</option>
+                  <option>중급 (10km~하프)</option>
+                  <option>상급 (풀코스 완주)</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label for="message">하고 싶은 말</label>
+              <textarea id="message" name="message" rows="4" maxlength="1000" placeholder="러닝 목표, 궁금한 점 등을 자유롭게 적어주세요."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" id="joinSubmit">가입 신청하기 🥕</button>
+            <p class="form-msg" id="joinMsg" hidden></p>
+          </form>
+          <p class="join-alt">
+            폼 작성이 번거롭다면 인스타그램
+            <a href="#" data-insta-link target="_blank" rel="noopener" class="inline-link" data-insta-handle>@carrot_running_crew</a>
+            DM으로 편하게 연락 주세요.
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== 푸터 ===== -->
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="logo-mark">🥕</span>
+        <strong>당근러닝크루 C.R.C</strong>
+        <p>울산을 달리는 가장 신선한 방법</p>
+      </div>
+      <div class="footer-links">
+        <a href="#about">소개</a>
+        <a href="#schedule">정기런</a>
+        <a href="#records">기록</a>
+        <a href="#join">가입하기</a>
+        <a href="app.html">크루 공간</a>
+        <a href="#" data-insta-link target="_blank" rel="noopener">Instagram</a>
+      </div>
+    </div>
+    <div class="container footer-copy">
+      <p>© <span id="year"></span> Carrot Running Crew. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="js/firebase-config.js"></script>
+  <script src="js/site-data.js"></script>
+  <script src="js/public.js"></script>
+</body>
+</html>

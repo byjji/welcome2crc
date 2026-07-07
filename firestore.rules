@@ -1,0 +1,113 @@
+rules_version = '2';
+
+// ============================================================
+// 당근러닝크루 크루 공간 — Firestore 보안 규칙
+// ------------------------------------------------------------
+// 역할(role): pending(승인 대기) → member(크루원) → admin(운영진)
+// 배포: firebase deploy --only firestore:rules
+// ============================================================
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function myRole() {
+      return get(/databases/$(database)/documents/members/$(request.auth.uid)).data.role;
+    }
+
+    function isMember() {
+      return signedIn() && myRole() in ['member', 'admin'];
+    }
+
+    function isAdmin() {
+      return signedIn() && myRole() == 'admin';
+    }
+
+    // ----- 멤버 -----
+    // 가입 시 본인 문서를 'pending' 역할로만 생성 가능.
+    // 역할 변경(승인/운영진 지정)과 삭제는 운영진만.
+    match /members/{uid} {
+      allow get: if signedIn() && (request.auth.uid == uid || isMember());
+      allow list: if isMember();
+      allow create: if signedIn()
+                    && request.auth.uid == uid
+                    && request.resource.data.role == 'pending'
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() <= 40;
+      allow update, delete: if isAdmin();
+    }
+
+    // ----- 가입 신청서 (공개 페이지 폼) -----
+    // 누구나 제출 가능, 열람/처리는 운영진만.
+    match /applications/{id} {
+      allow create: if request.resource.data.keys().hasOnly(['name', 'contact', 'age', 'level', 'message', 'createdAt'])
+                    && request.resource.data.name is string
+                    && request.resource.data.name.size() > 0
+                    && request.resource.data.name.size() <= 40
+                    && request.resource.data.contact is string
+                    && request.resource.data.contact.size() > 0
+                    && request.resource.data.contact.size() <= 80
+                    && request.resource.data.message.size() <= 1200;
+      allow read, update, delete: if isAdmin();
+    }
+
+    // ----- 공지 -----
+    match /notices/{id} {
+      allow read: if isMember();
+      allow create, update, delete: if isAdmin();
+    }
+
+    // ----- 일정 + 출석체크 -----
+    match /events/{eventId} {
+      allow read: if isMember();
+      allow create, update, delete: if isAdmin();
+
+      // 출석: 본인 것만 기록/수정/취소 가능 (운영진은 정리 가능)
+      match /attendance/{uid} {
+        allow read: if isMember();
+        allow create, update: if isMember() && request.auth.uid == uid;
+        allow delete: if isAdmin() || (isMember() && request.auth.uid == uid);
+      }
+    }
+
+    // ----- 공개 사이트 콘텐츠 (소개 페이지) -----
+    // 소개 페이지(index.html)는 로그인 없이 보므로 누구나 읽기 가능.
+    // 수정은 관리자 페이지(admin.html)에서 운영진만.
+    match /site/{docId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ----- 크루 공식 기록 (대회별) -----
+    match /records/{raceId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // ----- 갤러리 (앨범 + 사진) -----
+    match /gallery/{albumId} {
+      allow read: if true;
+      allow write: if isAdmin();
+
+      match /photos/{photoId} {
+        allow read: if true;
+        allow write: if isAdmin();
+      }
+    }
+
+    // ----- 투표 -----
+    match /polls/{pollId} {
+      allow read: if isMember();
+      allow create, update, delete: if isAdmin();
+
+      // 투표: 본인 표만 기록/변경 가능
+      match /votes/{uid} {
+        allow read: if isMember();
+        allow create, update: if isMember() && request.auth.uid == uid;
+        allow delete: if isAdmin() || (isMember() && request.auth.uid == uid);
+      }
+    }
+  }
+}
