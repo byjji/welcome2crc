@@ -1,7 +1,7 @@
 /* ============================================================
    크루 공간 (app.html) — Firebase Auth + Firestore
    ------------------------------------------------------------
-   기능: 로그인/회원가입 → 운영진 승인 → 공지 / 일정·출석체크 /
+   기능: 로그인/가입신청 → 운영진 승인 → 공지 / 일정·출석체크 /
         투표 / 멤버 관리(운영진)
    ============================================================ */
 
@@ -33,7 +33,7 @@ const { initializeApp } = await import(`${SDK}/firebase-app.js`);
 const {
   getAuth, onAuthStateChanged, signOut,
   createUserWithEmailAndPassword, signInWithEmailAndPassword,
-  sendPasswordResetEmail, updateProfile,
+  updateProfile,
   EmailAuthProvider, reauthenticateWithCredential, updatePassword,
 } = await import(`${SDK}/firebase-auth.js`);
 const {
@@ -56,7 +56,6 @@ let state = {
   events: [],
   polls: [],
   members: [],
-  applications: [],
   attendance: {},   // eventId → { uid: {name, status} }
   votes: {},        // pollId → { uid: {name, option} }
 };
@@ -96,11 +95,11 @@ function parseDateParts(dateStr) {
 function authErrorMsg(err) {
   const code = err && err.code ? err.code : "";
   const map = {
-    "auth/invalid-email": "이메일 형식이 올바르지 않아요.",
-    "auth/user-not-found": "등록되지 않은 이메일이에요. 회원가입을 먼저 해주세요.",
+    "auth/invalid-email": "계정 형식이 올바르지 않아요. 영문, 숫자, 점(.), 밑줄(_), 하이픈(-)만 사용해 주세요.",
+    "auth/user-not-found": "등록되지 않은 계정이에요. 가입 신청을 먼저 해주세요.",
     "auth/wrong-password": "비밀번호가 틀렸어요.",
-    "auth/invalid-credential": "이메일 또는 비밀번호가 올바르지 않아요.",
-    "auth/email-already-in-use": "이미 가입된 이메일이에요. 로그인해 주세요.",
+    "auth/invalid-credential": "계정 또는 비밀번호가 올바르지 않아요.",
+    "auth/email-already-in-use": "이미 사용 중인 계정이에요. 다른 계정을 입력해 주세요.",
     "auth/weak-password": "비밀번호는 6자 이상으로 해주세요.",
     "auth/too-many-requests": "시도가 너무 많았어요. 잠시 후 다시 시도해 주세요.",
     "auth/popup-closed-by-user": "로그인 창이 닫혔어요. 다시 시도해 주세요.",
@@ -110,42 +109,173 @@ function authErrorMsg(err) {
 }
 
 /* ============================================================
-   1. 인증 (로그인 / 회원가입 / 로그아웃)
+   계정(아이디) ↔ 내부 인증 주소 변환
+   ------------------------------------------------------------
+   Firebase 인증은 이메일 형식을 요구하므로, 아이디 뒤에 내부용
+   가짜 도메인(@crc.ulsan)을 자동으로 붙여 저장합니다.
+   화면에는 아이디만 보이고, 이메일은 어디에도 쓰이지 않습니다.
+   계정은 대소문자를 구분하는데 Firebase 가 대문자를 소문자로
+   바꿔 저장하므로, 대문자는 "+소문자" 로 인코딩해 보존합니다.
+   (HongGil → +hong+gil@crc.ulsan / "+" 는 계정에 쓸 수 없는 문자)
+   (예전에 이메일 형식으로 가입한 계정은 그대로 입력하면 됩니다)
+   ============================================================ */
+const ACCOUNT_RE = /^[a-zA-Z0-9._-]+$/;
+
+function toAuthEmail(account) {
+  const id = String(account || "").trim();
+  if (id.includes("@")) return id.toLowerCase(); // 예전 이메일 계정
+  return id.replace(/[A-Z]/g, (c) => "+" + c.toLowerCase()) + "@crc.ulsan";
+}
+
+/* 화면 표시용: 내부 도메인을 감추고 대문자 인코딩을 원래대로 복원 */
+function displayAccount(email) {
+  const m = String(email || "").match(/^(.*)@crc\.(ulsan|local)$/);
+  if (!m) return String(email || "");
+  return m[1].replace(/\+([a-z])/g, (_, c) => c.toUpperCase());
+}
+
+/* ============================================================
+   비밀번호 힌트 (질문/답변) — 브라우저 암호화(Web Crypto)로 저장
+   ------------------------------------------------------------
+   비밀번호를 "답변"을 열쇠로 잠근 암호문(pwSealed)으로 Firestore
+   pwhints/{계정} 에 저장합니다. 비밀번호 찾기에서 답변이 맞으면
+   복호화 → 그 비밀번호로 본인 확인 → 새 비밀번호를 적용합니다.
+   답변은 비밀번호를 열쇠로 잠가(ansSealed) 함께 저장해서,
+   비밀번호를 변경할 때 힌트가 자동으로 새 비밀번호로 갱신됩니다.
+   ============================================================ */
+const textEnc = new TextEncoder();
+const textDec = new TextDecoder();
+const toB64 = (buf) => btoa(String.fromCharCode(...new Uint8Array(buf)));
+const fromB64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+/* 답변 비교는 공백만 무시하고 대소문자는 구분합니다 ("나이키 " = "나이키", "Nike" ≠ "nike") */
+const normAnswer = (s) => String(s || "").trim().replace(/\s+/g, "");
+const hintDocId = (email) => String(email || "").trim().toLowerCase();
+
+async function hintKey(secret, salt) {
+  const base = await crypto.subtle.importKey("raw", textEnc.encode(secret), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey(
+    { name: "PBKDF2", salt, iterations: 310000, hash: "SHA-256" },
+    base, { name: "AES-GCM", length: 256 }, false, ["encrypt", "decrypt"]);
+}
+
+async function sealText(plain, secret) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await hintKey(secret, salt);
+  const data = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, textEnc.encode(plain));
+  return { data: toB64(data), salt: toB64(salt), iv: toB64(iv) };
+}
+
+async function openSealed(sealed, secret) {
+  try {
+    const key = await hintKey(secret, fromB64(sealed.salt));
+    const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: fromB64(sealed.iv) }, key, fromB64(sealed.data));
+    return textDec.decode(plain);
+  } catch {
+    return null; // 열쇠(답변 또는 비밀번호)가 맞지 않으면 실패
+  }
+}
+
+async function savePwHint(uid, email, pw, question, answer) {
+  const ans = normAnswer(answer);
+  await setDoc(doc(db, "pwhints", hintDocId(email)), {
+    uid,
+    question,
+    pwSealed: await sealText(pw, ans),
+    ansSealed: await sealText(ans, pw),
+    updatedAt: serverTimestamp(),
+  });
+}
+
+/* ============================================================
+   1. 인증 (로그인 / 가입신청 / 로그아웃)
    ============================================================ */
 let authMode = "login"; // 'login' | 'signup'
 let signupName = "";
+let signupExtra = null; // 가입신청서 추가 정보 → members 문서에 함께 저장
+
+function setAuthMode(mode) {
+  authMode = mode;
+  document.querySelectorAll(".auth-mode").forEach((b) =>
+    b.classList.toggle("active", b.dataset.mode === mode));
+  $("signupRows").hidden = mode !== "signup";
+  $("btnEmailSubmit").textContent = mode === "signup" ? "가입 신청하기 🥕" : "로그인";
+  $("authPw").setAttribute("autocomplete", mode === "signup" ? "new-password" : "current-password");
+  hideAuthError();
+}
 
 document.querySelectorAll(".auth-mode").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    authMode = btn.dataset.mode;
-    document.querySelectorAll(".auth-mode").forEach((b) =>
-      b.classList.toggle("active", b === btn));
-    $("rowName").hidden = authMode !== "signup";
-    $("btnEmailSubmit").textContent = authMode === "signup" ? "회원가입" : "로그인";
-    hideAuthError();
-  });
+  btn.addEventListener("click", () => setAuthMode(btn.dataset.mode));
+});
+
+// 소개 페이지의 "크루 가입하기" (app.html#signup) 로 들어오면 가입신청 탭을 먼저 보여줌
+if (location.hash === "#signup") setAuthMode("signup");
+
+/* 연락처 하이픈 자동 입력 (예: 010-1234-5678) */
+$("signupContact").addEventListener("input", (e) => {
+  const d = e.target.value.replace(/\D/g, "").slice(0, 11);
+  e.target.value =
+    d.length <= 3 ? d :
+    d.length <= 7 ? `${d.slice(0, 3)}-${d.slice(3)}` :
+    d.length <= 10 ? `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6)}` :
+    `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7)}`;
 });
 
 $("emailForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   hideAuthError();
-  const email = $("authEmail").value.trim();
+  const account = $("authEmail").value.trim();
+  const email = toAuthEmail(account); // 내부 인증용 (아이디@crc.local)
   const pw = $("authPw").value;
 
   try {
     if (authMode === "signup") {
       signupName = $("authName").value.trim();
-      if (!signupName) {
-        showAuthError({ code: "", message: "" }, "크루에서 쓸 이름을 입력해 주세요.");
+      const hintQ = $("signupHintQ").value;
+      const hintA = $("signupHintA").value;
+      const gender = document.querySelector('input[name="signupGender"]:checked')?.value || "";
+      const contact = $("signupContact").value.trim();
+      const region = $("signupRegion").value.trim();
+      const ageGroup = document.querySelector('input[name="signupAge"]:checked')?.value || "";
+      const career = document.querySelector('input[name="signupCareer"]:checked')?.value || "";
+
+      const problem =
+        (!account.includes("@") && !ACCOUNT_RE.test(account))
+          ? "계정은 영문, 숫자, 점(.), 밑줄(_), 하이픈(-)만 사용할 수 있어요." :
+        !hintQ ? "비밀번호 힌트 질문을 선택해 주세요." :
+        !normAnswer(hintA) ? "비밀번호 힌트 답변을 입력해 주세요." :
+        !signupName ? "크루에서 쓸 이름을 입력해 주세요." :
+        !gender ? "성별을 선택해 주세요." :
+        !/^\d{2,3}-\d{3,4}-\d{4}$/.test(contact) ? "연락처를 끝까지 입력해 주세요." :
+        !region ? "사는 곳(지역/구)을 입력해 주세요." :
+        !ageGroup ? "연령대를 선택해 주세요." :
+        !career ? "대회 경력을 선택해 주세요." : "";
+      if (problem) {
+        showAuthError({ code: "", message: "" }, problem);
         return;
       }
+
+      signupExtra = {
+        gender, contact, region, ageGroup, career,
+        intro: $("signupIntro").value.trim(),
+      };
       const cred = await createUserWithEmailAndPassword(auth, email, pw);
       await updateProfile(cred.user, { displayName: signupName });
+      try {
+        await savePwHint(cred.user.uid, email, pw, hintQ, hintA);
+      } catch (err) {
+        console.error("비밀번호 힌트 저장 실패 (가입은 완료됨):", err);
+      }
     } else {
       await signInWithEmailAndPassword(auth, email, pw);
     }
   } catch (err) {
     showAuthError(err);
+    // 중복 계정이면 계정 칸으로 되돌려 다시 입력하게 함
+    if (err && err.code === "auth/email-already-in-use") {
+      $("authEmail").focus();
+      $("authEmail").select();
+    }
   }
 });
 
@@ -180,8 +310,11 @@ function showFormMsg(id, text, type) {
   el.className = `form-msg ${type}`;
 }
 
-/* ---------- 비밀번호 재설정 (메일 링크로 새 비밀번호 설정) ---------- */
+/* ---------- 비밀번호 찾기 (힌트 질문/답변 확인 → 새 비밀번호 설정) ---------- */
+let pendingReset = null; // 힌트 확인을 통과한 재설정 정보
+
 $("btnReset").addEventListener("click", () => {
+  $("resetForm").reset();
   $("resetEmail").value = $("authEmail").value.trim();
   $("resetMsg").hidden = true;
   openModal("resetModal");
@@ -189,22 +322,66 @@ $("btnReset").addEventListener("click", () => {
 
 $("resetForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const email = $("resetEmail").value.trim();
+  const email = toAuthEmail($("resetEmail").value);
+  const question = $("resetQuestion").value;
+  const answer = normAnswer($("resetAnswer").value);
   try {
-    await sendPasswordResetEmail(auth, email);
-    showFormMsg("resetMsg", `${email} 로 재설정 메일을 보냈어요! 메일의 링크에서 새 비밀번호를 설정한 뒤, 그 비밀번호로 로그인해 주세요. (메일이 안 보이면 스팸함 확인)`, "ok");
+    const snap = await getDoc(doc(db, "pwhints", hintDocId(email)));
+    if (!snap.exists()) {
+      showFormMsg("resetMsg", "이 계정은 비밀번호 힌트가 등록되어 있지 않아요. 운영진에게 문의해 주세요.", "error");
+      return;
+    }
+    const hint = snap.data();
+    // 질문이 다르거나 답변이 틀리면 복호화 실패 → 어떤 항목이 틀렸는지는 알려주지 않음
+    const oldPw = hint.question === question ? await openSealed(hint.pwSealed, answer) : null;
+    if (!oldPw) {
+      showFormMsg("resetMsg", "계정·질문·답변이 맞지 않아요. 다시 확인해 주세요.", "error");
+      return;
+    }
+    pendingReset = { email, oldPw, question, answer };
+    closeModal("resetModal");
+    $("newPwForm").reset();
+    $("newPwMsg").hidden = true;
+    openModal("newPwModal");
   } catch (err) {
-    showFormMsg("resetMsg", authErrorMsg(err), "error");
+    showFormMsg("resetMsg", "확인에 실패했어요: " + err.message, "error");
   }
 });
 
-/* ---------- 내 정보 수정 (이름 · 비밀번호) ---------- */
+$("newPwForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (!pendingReset) return;
+  const pw1 = $("newPw1").value;
+  if (pw1 !== $("newPw2").value) {
+    showFormMsg("newPwMsg", "새 비밀번호가 서로 달라요.", "error");
+    return;
+  }
+  try {
+    // 힌트로 되찾은 기존 비밀번호로 본인 확인(로그인) 후 새 비밀번호 적용
+    const cred = await signInWithEmailAndPassword(auth, pendingReset.email, pendingReset.oldPw);
+    await updatePassword(cred.user, pw1);
+    try {
+      await savePwHint(cred.user.uid, pendingReset.email, pw1, pendingReset.question, pendingReset.answer);
+    } catch (err) {
+      console.error("비밀번호 힌트 갱신 실패:", err);
+    }
+    pendingReset = null;
+    closeModal("newPwModal");
+    alert("비밀번호가 변경되었어요! 🥕 그대로 로그인됩니다.");
+  } catch (err) {
+    showFormMsg("newPwMsg", authErrorMsg(err), "error");
+  }
+});
+
+/* ---------- 내 정보 수정 (이름 · 비밀번호 · 비밀번호 힌트) ---------- */
 $("userName").addEventListener("click", () => {
   if (!me || !myProfile) return;
   $("profileName").value = myProfile.name || "";
   $("nameMsg").hidden = true;
   $("pwMsg").hidden = true;
+  $("hintMsg").hidden = true;
   $("pwForm").reset();
+  $("hintForm").reset();
   openModal("profileModal");
 });
 
@@ -223,11 +400,24 @@ $("nameForm").addEventListener("submit", async (e) => {
 
 $("pwForm").addEventListener("submit", async (e) => {
   e.preventDefault();
+  const currentPw = $("pwCurrent").value;
+  const newPw = $("pwNew").value;
   try {
     // 본인 확인(현재 비밀번호) 후 새 비밀번호 적용
-    const cred = EmailAuthProvider.credential(me.email, $("pwCurrent").value);
+    const cred = EmailAuthProvider.credential(me.email, currentPw);
     await reauthenticateWithCredential(me, cred);
-    await updatePassword(me, $("pwNew").value);
+    await updatePassword(me, newPw);
+    // 비밀번호 힌트도 새 비밀번호 기준으로 자동 갱신 (기존 답변 재사용)
+    try {
+      const snap = await getDoc(doc(db, "pwhints", hintDocId(me.email)));
+      if (snap.exists()) {
+        const hint = snap.data();
+        const answer = await openSealed(hint.ansSealed, currentPw);
+        if (answer) await savePwHint(me.uid, me.email, newPw, hint.question, answer);
+      }
+    } catch (err) {
+      console.error("비밀번호 힌트 갱신 실패:", err);
+    }
     e.target.reset();
     showFormMsg("pwMsg", "비밀번호를 변경했어요 ✅ 다음 로그인부터 새 비밀번호를 사용하세요.", "ok");
   } catch (err) {
@@ -237,6 +427,32 @@ $("pwForm").addEventListener("submit", async (e) => {
       "auth/weak-password": "새 비밀번호는 6자 이상으로 해주세요.",
     };
     showFormMsg("pwMsg", map[err.code] || authErrorMsg(err), "error");
+  }
+});
+
+/* 비밀번호 힌트 등록/변경 (힌트 없이 가입한 기존 계정도 여기서 등록) */
+$("hintForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const question = $("profileHintQ").value;
+  const answer = $("profileHintA").value;
+  const pw = $("profileHintPw").value;
+  if (!question || !normAnswer(answer)) {
+    showFormMsg("hintMsg", "질문을 선택하고 답변을 입력해 주세요.", "error");
+    return;
+  }
+  try {
+    // 현재 비밀번호로 본인 확인 (힌트에는 이 비밀번호가 잠겨 들어감)
+    const cred = EmailAuthProvider.credential(me.email, pw);
+    await reauthenticateWithCredential(me, cred);
+    await savePwHint(me.uid, me.email, pw, question, answer);
+    e.target.reset();
+    showFormMsg("hintMsg", "비밀번호 힌트를 저장했어요 ✅ 이제 비밀번호 찾기에서 사용할 수 있어요.", "ok");
+  } catch (err) {
+    const map = {
+      "auth/invalid-credential": "현재 비밀번호가 올바르지 않아요.",
+      "auth/wrong-password": "현재 비밀번호가 올바르지 않아요.",
+    };
+    showFormMsg("hintMsg", map[err.code] || authErrorMsg(err), "error");
   }
 });
 
@@ -281,6 +497,7 @@ onAuthStateChanged(auth, async (user) => {
         email: user.email || "",
         role: "pending",
         createdAt: serverTimestamp(),
+        ...(signupExtra || {}), // 가입신청서 정보 (성별·연락처·사는 곳·연령대·대회 경력·하고 싶은 말)
       });
     }
   } catch (err) {
@@ -325,8 +542,6 @@ function enterApp() {
   $("adminSection").hidden = !isAdmin;
   showView("app");
   if (appEntered) {
-    // 이미 접속 중에 운영진으로 승격된 경우 → 가입신청 구독 추가
-    if (isAdmin && !appsSubscribed) startApplicationsListener();
     renderAll();
     return;
   }
@@ -343,8 +558,7 @@ function cleanupAll() {
   voteUnsubs = {};
   if (profileUnsub) { profileUnsub(); profileUnsub = null; }
   appEntered = false;
-  appsSubscribed = false;
-  state = { notices: [], events: [], polls: [], members: [], applications: [], attendance: {}, votes: {} };
+  state = { notices: [], events: [], polls: [], members: [], attendance: {}, votes: {} };
 }
 
 /* ============================================================
@@ -387,22 +601,6 @@ function startListeners() {
       renderMembers();
     },
     (e) => console.error("멤버 구독 오류:", e)
-  ));
-
-  if (isAdmin) startApplicationsListener();
-}
-
-let appsSubscribed = false;
-
-function startApplicationsListener() {
-  appsSubscribed = true;
-  unsubs.push(onSnapshot(
-    query(collection(db, "applications"), orderBy("createdAt", "desc")),
-    (qs) => {
-      state.applications = qs.docs.map((d) => ({ id: d.id, ...d.data() }));
-      renderMembers();
-    },
-    (e) => console.error("가입신청 구독 오류:", e)
   ));
 }
 
@@ -511,22 +709,31 @@ function renderNotices() {
     return;
   }
 
+  // 재렌더링(실시간 갱신) 후에도 펼쳐둔 공지는 그대로 유지
+  const openIds = new Set(
+    [...list.querySelectorAll("details[open]")].map((d) => d.dataset.id)
+  );
+
+  // 고정 | 제목 | 날짜 한 줄 → 누르면 펼쳐서 내용 확인
   list.innerHTML = sorted.map((n) => `
-    <article class="app-card">
-      <div class="app-card-head">
-        <div>
-          <h4>${n.pinned ? '<span class="pin-badge">📌 고정</span>' : ""}${esc(n.title)}</h4>
-          <p class="app-card-meta">${esc(n.author || "")} · ${fmtDate(n.createdAt)}${n.updatedAt ? " (수정됨)" : ""}</p>
-        </div>
+    <details class="app-card notice-row" data-id="${n.id}"${openIds.has(n.id) ? " open" : ""}>
+      <summary>
+        <span class="notice-pin">${n.pinned ? "📌" : ""}</span>
+        <span class="notice-title">${esc(n.title)}</span>
+        <span class="notice-date">${fmtDate(n.createdAt)}</span>
+        <span class="notice-arrow" aria-hidden="true">▾</span>
+      </summary>
+      <div class="notice-body">${esc(n.body)}</div>
+      <div class="notice-foot">
+        <span class="app-card-meta">${esc(n.author || "")}${n.updatedAt ? " · (수정됨)" : ""}</span>
         ${isAdmin ? `
         <div class="card-actions">
-          <button class="btn-mini dark" data-action="edit-notice" data-id="${n.id}">수정</button>
           <button class="btn-mini dark" data-action="pin-notice" data-id="${n.id}" data-pinned="${!!n.pinned}">${n.pinned ? "고정 해제" : "고정"}</button>
+          <button class="btn-mini dark" data-action="edit-notice" data-id="${n.id}">수정</button>
           <button class="btn-mini danger" data-action="del-notice" data-id="${n.id}">삭제</button>
         </div>` : ""}
       </div>
-      <div class="app-card-body">${esc(n.body)}</div>
-    </article>
+    </details>
   `).join("");
 }
 
@@ -884,13 +1091,14 @@ function renderMembers() {
       <div class="app-card-head">
         <div>
           <h4>${esc(m.name)}</h4>
-          <p class="app-card-meta">${esc(m.email || "")} · ${fmtDate(m.createdAt)} 신청</p>
+          <p class="app-card-meta">${esc(displayAccount(m.email))} · ${fmtDate(m.createdAt)} 신청</p>
         </div>
         <div class="card-actions">
           <button class="btn-mini leaf" data-action="approve" data-id="${m.id}">✓ 승인</button>
           <button class="btn-mini danger" data-action="reject" data-id="${m.id}" data-name="${esc(m.name)}">거절</button>
         </div>
       </div>
+      ${applicantInfoHtml(m)}
     </article>
   `).join("") : `<p class="empty-note">대기 중인 멤버가 없습니다.</p>`;
 
@@ -899,30 +1107,26 @@ function renderMembers() {
       <div class="app-card-head">
         <div>
           <h4>${esc(m.name)} <span class="rejected-badge">거절됨</span></h4>
-          <p class="app-card-meta">${esc(m.email || "")} · ${fmtDate(m.createdAt)} 신청 · ${fmtDate(m.rejectedAt)} 거절</p>
+          <p class="app-card-meta">${esc(displayAccount(m.email))} · ${fmtDate(m.createdAt)} 신청 · ${fmtDate(m.rejectedAt)} 거절</p>
         </div>
         <div class="card-actions">
           <button class="btn-mini leaf" data-action="approve" data-id="${m.id}">✓ 승인으로 변경</button>
           <button class="btn-mini danger" data-action="del-rejected" data-id="${m.id}" data-name="${esc(m.name)}">기록 삭제</button>
         </div>
       </div>
+      ${applicantInfoHtml(m)}
     </article>
   `).join("") : `<p class="empty-note">거절 기록이 없습니다.</p>`;
+}
 
-  $("applicationList").innerHTML = state.applications.length ? state.applications.map((a) => `
-    <article class="app-card">
-      <div class="app-card-head">
-        <div>
-          <h4>${esc(a.name)} <span class="muted">${esc(a.age || "")} ${esc(a.level || "")}</span></h4>
-          <p class="app-card-meta">📱 ${esc(a.contact)} · ${fmtDate(a.createdAt)}</p>
-        </div>
-        <div class="card-actions">
-          <button class="btn-mini danger" data-action="del-application" data-id="${a.id}">처리 완료 (삭제)</button>
-        </div>
-      </div>
-      ${a.message ? `<div class="app-card-body">${esc(a.message)}</div>` : ""}
-    </article>
-  `).join("") : `<p class="empty-note">새 신청서가 없습니다.</p>`;
+/* 가입신청서에 적은 정보 (승인 대기/거절 카드에 표시) */
+function applicantInfoHtml(m) {
+  const line1 = [m.gender, m.ageGroup, m.career, m.region].filter(Boolean).map(esc).join(" · ");
+  const line2 = m.contact ? `📱 ${esc(m.contact)}` : "";
+  return `
+    ${line1 ? `<p class="app-card-meta">${line1}</p>` : ""}
+    ${line2 ? `<p class="app-card-meta">${line2}</p>` : ""}
+    ${m.intro ? `<div class="app-card-body">${esc(m.intro)}</div>` : ""}`;
 }
 
 /* 승인 대기 / 거절 서브탭 전환 */
@@ -954,8 +1158,6 @@ $("tab-members").addEventListener("click", async (e) => {
       }
     } else if (action === "remove-member" && confirm(`${btn.dataset.name}님을 크루에서 내보낼까요?`)) {
       await deleteDoc(doc(db, "members", id));
-    } else if (action === "del-application" && confirm("이 신청서를 삭제할까요?")) {
-      await deleteDoc(doc(db, "applications", id));
     }
   } catch (err) {
     alert("처리에 실패했어요: " + err.message);

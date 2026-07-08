@@ -32,9 +32,9 @@
       <nav class="main-nav" id="mainNav" aria-label="주 메뉴">
         <a href="#about">소개</a>
         <a href="#schedule">정기런</a>
-        <a href="#records">기록</a>
-        <a href="#gallery">갤러리</a>
-        <a href="#join">가입하기</a>
+        <a href="#records" hidden>기록</a>
+        <a href="#gallery" hidden>갤러리</a>
+        <a href="#join" hidden>가입하기</a>
         <a href="app.html" class="nav-cta">크루 공간 🔑</a>
         <a href="#" class="nav-insta" data-insta-link target="_blank" rel="noopener">Instagram ↗</a>
       </nav>
@@ -60,7 +60,7 @@
           함께 달리면 더 멀리 갈 수 있습니다. 울산 당근러닝크루와 함께 뛰어요.
         </p>
         <div class="hero-actions reveal">
-          <a href="#join" class="btn btn-primary">크루 가입하기</a>
+          <a href="app.html#signup" class="btn btn-primary">크루 가입하기</a>
           <a href="app.html" class="btn btn-ghost">크루원 로그인 🔑</a>
         </div>
       </div>
@@ -96,8 +96,8 @@
       </div>
     </section>
 
-    <!-- ===== 공식 기록 ===== -->
-    <section class="section" id="records">
+    <!-- ===== 공식 기록 (운영진이 저장한 대회가 있을 때만 표시) ===== -->
+    <section class="section" id="records" hidden>
       <div class="container">
         <p class="section-eyebrow">OFFICIAL RECORDS</p>
         <h2 class="section-title">크루 공식 기록</h2>
@@ -107,8 +107,8 @@
       </div>
     </section>
 
-    <!-- ===== 갤러리 ===== -->
-    <section class="section section-alt" id="gallery">
+    <!-- ===== 갤러리 (운영진이 저장한 앨범이 있을 때만 표시) ===== -->
+    <section class="section section-alt" id="gallery" hidden>
       <div class="container">
         <p class="section-eyebrow">GALLERY</p>
         <h2 class="section-title">함께 달린 순간들</h2>
@@ -121,68 +121,21 @@
       </div>
     </section>
 
-    <!-- ===== 가입 안내 ===== -->
-    <section class="section join-section" id="join">
+    <!-- ===== 가입 안내 (운영진이 페이지 관리에서 저장한 내용이 있을 때만 표시) ===== -->
+    <section class="section join-section" id="join" hidden>
       <div class="container">
         <p class="section-eyebrow">JOIN US</p>
         <h2 class="section-title">크루 가입 안내</h2>
-        <p class="section-desc">달리고 싶은 마음만 있다면 준비 끝! 아래 절차로 당근러닝크루에 합류하세요.</p>
-
         <div class="join-steps" id="joinSteps"></div>
+      </div>
+    </section>
 
-        <!-- 가입 신청 폼 → Firebase Firestore 에 저장됩니다.
-             신청 내역은 크루 공간(app.html)의 멤버 탭에서 운영진이 확인합니다. -->
-        <div class="join-form-wrap reveal">
-          <h3 class="join-form-title">가입 신청서</h3>
-          <form id="joinForm" class="join-form">
-            <div class="form-row">
-              <label for="name">이름 <span class="req">*</span></label>
-              <input type="text" id="name" name="name" required maxlength="30" placeholder="홍길동" />
-            </div>
-
-            <div class="form-row">
-              <label for="contact">연락처 (전화 또는 인스타 아이디) <span class="req">*</span></label>
-              <input type="text" id="contact" name="contact" required maxlength="60" placeholder="010-0000-0000 / @insta_id" />
-            </div>
-
-            <div class="form-row form-row-half">
-              <div>
-                <label for="age">연령대</label>
-                <select id="age" name="age">
-                  <option value="">선택</option>
-                  <option>10대</option>
-                  <option>20대</option>
-                  <option>30대</option>
-                  <option>40대</option>
-                  <option>50대 이상</option>
-                </select>
-              </div>
-              <div>
-                <label for="level">러닝 경력</label>
-                <select id="level" name="level">
-                  <option value="">선택</option>
-                  <option>입문 (이제 시작해요)</option>
-                  <option>초급 (5km 완주 가능)</option>
-                  <option>중급 (10km~하프)</option>
-                  <option>상급 (풀코스 완주)</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="form-row">
-              <label for="message">하고 싶은 말</label>
-              <textarea id="message" name="message" rows="4" maxlength="1000" placeholder="러닝 목표, 궁금한 점 등을 자유롭게 적어주세요."></textarea>
-            </div>
-
-            <button type="submit" class="btn btn-primary btn-block" id="joinSubmit">가입 신청하기 🥕</button>
-            <p class="form-msg" id="joinMsg" hidden></p>
-          </form>
-          <p class="join-alt">
-            폼 작성이 번거롭다면 인스타그램
-            <a href="#" data-insta-link target="_blank" rel="noopener" class="inline-link" data-insta-handle>@carrot_running_crew</a>
-            DM으로 편하게 연락 주세요.
-          </p>
-        </div>
+    <!-- ===== 가입 문의 (운영진이 페이지 관리에서 저장한 내용이 있을 때만 표시) ===== -->
+    <section class="section" id="contact" hidden>
+      <div class="container">
+        <p class="section-eyebrow">CONTACT</p>
+        <h2 class="section-title">가입 문의</h2>
+        <p class="section-desc" id="joinContactText"></p>
       </div>
     </section>
   </main>
@@ -198,8 +151,8 @@
       <div class="footer-links">
         <a href="#about">소개</a>
         <a href="#schedule">정기런</a>
-        <a href="#records">기록</a>
-        <a href="#join">가입하기</a>
+        <a href="#records" hidden>기록</a>
+        <a href="#join" hidden>가입하기</a>
         <a href="app.html">크루 공간</a>
         <a href="#" data-insta-link target="_blank" rel="noopener">Instagram</a>
       </div>

@@ -22,7 +22,7 @@
     <div class="container header-inner">
       <a href="index.html" class="logo" aria-label="당근러닝크루 홈">
         <span class="logo-mark">🥕</span>
-        <span class="logo-text">C.R.C</span>
+        <span class="logo-text">C.R.C <small>크루공간</small></span>
       </a>
       <div class="app-user" id="appUser" hidden>
         <button class="app-user-name" id="userName" title="내 정보 수정"></button>
@@ -67,22 +67,78 @@
 
           <div class="auth-mode-tabs">
             <button class="auth-mode active" data-mode="login">로그인</button>
-            <button class="auth-mode" data-mode="signup">회원가입</button>
+            <button class="auth-mode" data-mode="signup">가입신청</button>
           </div>
 
           <form id="emailForm" class="auth-form">
             <div class="form-row">
-              <label for="authEmail">계정 (이메일)</label>
-              <input type="email" id="authEmail" required placeholder="me@example.com" autocomplete="email" />
-            </div>
-            <div class="form-row" id="rowName" hidden>
-              <label for="authName">이름 (크루에서 쓰는 이름)</label>
-              <input type="text" id="authName" maxlength="20" placeholder="홍길동" autocomplete="name" />
+              <label for="authEmail">계정</label>
+              <input type="text" id="authEmail" required maxlength="40" autocomplete="username"
+                     autocapitalize="none" autocorrect="off" spellcheck="false" />
             </div>
             <div class="form-row">
               <label for="authPw">비밀번호</label>
               <input type="password" id="authPw" required minlength="6" placeholder="6자 이상" autocomplete="current-password" />
             </div>
+
+            <!-- 가입신청 전용 입력 (숨김 상태에서는 JS 검증도 건너뜀) -->
+            <div id="signupRows" hidden>
+              <div class="form-row">
+                <label for="signupHintQ">비밀번호 힌트 <span class="muted">(비밀번호 찾기에 사용돼요)</span></label>
+                <select id="signupHintQ">
+                  <option value="" disabled selected>질문 선택</option>
+                  <option>내가 좋아하는 숫자는?</option>
+                  <option>내 러닝화 브랜드는?</option>
+                </select>
+                <input type="text" id="signupHintA" maxlength="40" placeholder="답변 (대소문자 구분)" autocomplete="off"
+                       autocapitalize="none" autocorrect="off" spellcheck="false" />
+              </div>
+              <div class="form-row name-gender-row">
+                <div>
+                  <label for="authName">이름</label>
+                  <input type="text" id="authName" maxlength="20" placeholder="홍길동" autocomplete="name" />
+                </div>
+                <div class="radio-group" role="radiogroup" aria-label="성별">
+                  <span class="radio-legend">성별</span>
+                  <div class="radio-opts">
+                    <label class="radio-pill"><input type="radio" name="signupGender" value="남" /><span>남</span></label>
+                    <label class="radio-pill"><input type="radio" name="signupGender" value="여" /><span>여</span></label>
+                  </div>
+                </div>
+              </div>
+              <div class="form-row">
+                <label for="signupContact">연락처</label>
+                <input type="tel" id="signupContact" inputmode="numeric" maxlength="13" placeholder="숫자 입력" autocomplete="tel" />
+              </div>
+              <div class="form-row">
+                <label for="signupRegion">사는 곳 (지역/구)</label>
+                <input type="text" id="signupRegion" maxlength="30" placeholder="예) 울산 남구" />
+              </div>
+              <div class="form-row radio-group" role="radiogroup" aria-label="연령대">
+                <span class="radio-legend">연령대</span>
+                <div class="radio-opts">
+                  <label class="radio-pill"><input type="radio" name="signupAge" value="10대" /><span>10대</span></label>
+                  <label class="radio-pill"><input type="radio" name="signupAge" value="20대" /><span>20대</span></label>
+                  <label class="radio-pill"><input type="radio" name="signupAge" value="30대" /><span>30대</span></label>
+                  <label class="radio-pill"><input type="radio" name="signupAge" value="40대" /><span>40대</span></label>
+                  <label class="radio-pill"><input type="radio" name="signupAge" value="50대 이상" /><span>50대 이상</span></label>
+                </div>
+              </div>
+              <div class="form-row radio-group" role="radiogroup" aria-label="대회 경력">
+                <span class="radio-legend">대회 경력</span>
+                <div class="radio-opts">
+                  <label class="radio-pill"><input type="radio" name="signupCareer" value="입문 (이제 시작해요)" /><span>입문 (이제 시작해요)</span></label>
+                  <label class="radio-pill"><input type="radio" name="signupCareer" value="초급 (5km)" /><span>초급 (5km)</span></label>
+                  <label class="radio-pill"><input type="radio" name="signupCareer" value="중급 (10km~하프)" /><span>중급 (10km~하프)</span></label>
+                  <label class="radio-pill"><input type="radio" name="signupCareer" value="상급 (풀코스)" /><span>상급 (풀코스)</span></label>
+                </div>
+              </div>
+              <div class="form-row">
+                <label for="signupIntro">하고 싶은 말</label>
+                <textarea id="signupIntro" rows="3" maxlength="500" placeholder="러닝 목표, 궁금한 점 등을 자유롭게 적어주세요."></textarea>
+              </div>
+            </div>
+
             <button type="submit" class="btn btn-primary btn-block" id="btnEmailSubmit">로그인</button>
           </form>
 
@@ -205,8 +261,6 @@
             <div class="sub-panel" id="subtab-rejected">
               <div class="card-list" id="rejectedList"><p class="empty-note">거절 기록이 없습니다.</p></div>
             </div>
-            <h3 class="panel-subtitle">📩 가입 신청서 <span class="muted">(소개 페이지에서 접수)</span></h3>
-            <div class="card-list" id="applicationList"><p class="empty-note">새 신청서가 없습니다.</p></div>
           </div>
           <h3 class="panel-subtitle">크루 멤버 <span id="memberCount" class="muted"></span></h3>
           <div class="member-grid" id="memberList"></div>
@@ -216,24 +270,58 @@
     </div>
   </main>
 
-  <!-- ===== 비밀번호 재설정 모달 ===== -->
+  <!-- ===== 비밀번호 찾기 모달 (힌트 질문/답변 확인) ===== -->
   <div class="modal" id="resetModal" hidden>
     <div class="modal-card">
       <div class="modal-head">
-        <h3>🔑 비밀번호 재설정</h3>
+        <h3>🔑 비밀번호를 잊었나요?</h3>
         <button type="button" class="modal-close" data-close="resetModal" aria-label="닫기">✕</button>
       </div>
-      <p class="modal-desc">
-        가입한 계정(이메일)으로 재설정 링크를 보내드려요.<br />
-        메일의 링크를 누르고 <strong>새 비밀번호를 설정</strong>하면 바로 적용됩니다.
-      </p>
+      <p class="modal-desc">질문항목을 선택하여 답변하시면 새 비밀번호를 설정 할 수 있습니다.</p>
       <form id="resetForm" class="auth-form">
         <div class="form-row">
-          <label for="resetEmail">계정 (이메일)</label>
-          <input type="email" id="resetEmail" required placeholder="me@example.com" autocomplete="email" />
+          <label for="resetEmail">계정</label>
+          <input type="text" id="resetEmail" required maxlength="40" autocomplete="username"
+                 autocapitalize="none" autocorrect="off" spellcheck="false" />
         </div>
-        <button type="submit" class="btn btn-primary btn-block">재설정 메일 보내기</button>
+        <div class="form-row">
+          <label for="resetQuestion">질문</label>
+          <select id="resetQuestion" required>
+            <option value="" disabled selected>질문 선택</option>
+            <option>내가 좋아하는 숫자는?</option>
+            <option>내 러닝화 브랜드는?</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="resetAnswer">답변</label>
+          <input type="text" id="resetAnswer" required maxlength="40" placeholder="대소문자 구분" autocomplete="off"
+                 autocapitalize="none" autocorrect="off" spellcheck="false" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">확인</button>
         <p class="form-msg" id="resetMsg" hidden></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== 새 비밀번호 설정 모달 (힌트 확인 통과 후) ===== -->
+  <div class="modal" id="newPwModal" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>🔑 비밀번호 재설정</h3>
+        <button type="button" class="modal-close" data-close="newPwModal" aria-label="닫기">✕</button>
+      </div>
+      <p class="modal-desc">확인되었습니다. 새 비밀번호를 설정해 주세요.</p>
+      <form id="newPwForm" class="auth-form">
+        <div class="form-row">
+          <label for="newPw1">새 비밀번호 (6자 이상)</label>
+          <input type="password" id="newPw1" required minlength="6" autocomplete="new-password" />
+        </div>
+        <div class="form-row">
+          <label for="newPw2">새 비밀번호 확인</label>
+          <input type="password" id="newPw2" required minlength="6" autocomplete="new-password" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">비밀번호 변경</button>
+        <p class="form-msg" id="newPwMsg" hidden></p>
       </form>
     </div>
   </div>
@@ -268,6 +356,30 @@
         </div>
         <button type="submit" class="btn btn-primary btn-block">비밀번호 변경</button>
         <p class="form-msg" id="pwMsg" hidden></p>
+      </form>
+
+      <div class="auth-divider"><span>비밀번호 힌트 (비밀번호 찾기용)</span></div>
+
+      <form id="hintForm" class="auth-form">
+        <div class="form-row">
+          <label for="profileHintQ">질문</label>
+          <select id="profileHintQ" required>
+            <option value="" disabled selected>질문 선택</option>
+            <option>내가 좋아하는 숫자는?</option>
+            <option>내 러닝화 브랜드는?</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label for="profileHintA">답변</label>
+          <input type="text" id="profileHintA" required maxlength="40" placeholder="답변 (대소문자 구분)" autocomplete="off"
+                 autocapitalize="none" autocorrect="off" spellcheck="false" />
+        </div>
+        <div class="form-row">
+          <label for="profileHintPw">현재 비밀번호 (본인 확인)</label>
+          <input type="password" id="profileHintPw" required minlength="6" autocomplete="current-password" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">힌트 저장</button>
+        <p class="form-msg" id="hintMsg" hidden></p>
       </form>
     </div>
   </div>

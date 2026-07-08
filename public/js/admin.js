@@ -52,10 +52,10 @@ function esc(s) {
 function authErrorMsg(err) {
   const code = err && err.code ? err.code : "";
   const map = {
-    "auth/invalid-email": "이메일 형식이 올바르지 않아요.",
-    "auth/user-not-found": "등록되지 않은 이메일이에요.",
+    "auth/invalid-email": "계정 형식이 올바르지 않아요.",
+    "auth/user-not-found": "등록되지 않은 계정이에요.",
     "auth/wrong-password": "비밀번호가 틀렸어요.",
-    "auth/invalid-credential": "이메일 또는 비밀번호가 올바르지 않아요.",
+    "auth/invalid-credential": "계정 또는 비밀번호가 올바르지 않아요.",
     "auth/too-many-requests": "시도가 너무 많았어요. 잠시 후 다시 시도해 주세요.",
     "auth/popup-closed-by-user": "로그인 창이 닫혔어요. 다시 시도해 주세요.",
     "auth/network-request-failed": "네트워크 오류예요. 인터넷 연결을 확인해 주세요.",
@@ -78,11 +78,26 @@ const EVENT_OPTIONS = ["풀코스", "하프", "10km", "5km", "3km"];
 /* ============================================================
    1. 인증 + 운영진 확인
    ============================================================ */
+/* 계정(아이디) → 내부 인증 주소 (크루 공간 app.js 와 동일한 규칙)
+   대소문자 구분: 대문자는 "+소문자" 로 인코딩 (HongGil → +hong+gil@crc.ulsan) */
+function toAuthEmail(account) {
+  const id = String(account || "").trim();
+  if (id.includes("@")) return id.toLowerCase(); // 예전 이메일 계정
+  return id.replace(/[A-Z]/g, (c) => "+" + c.toLowerCase()) + "@crc.ulsan";
+}
+
+/* 화면 표시용: 내부 도메인을 감추고 대문자 인코딩 복원 */
+function displayAccount(email) {
+  const m = String(email || "").match(/^(.*)@crc\.(ulsan|local)$/);
+  if (!m) return String(email || "");
+  return m[1].replace(/\+([a-z])/g, (_, c) => c.toUpperCase());
+}
+
 $("emailForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   hideAuthError();
   try {
-    await signInWithEmailAndPassword(auth, $("authEmail").value.trim(), $("authPw").value);
+    await signInWithEmailAndPassword(auth, toAuthEmail($("authEmail").value), $("authPw").value);
   } catch (err) {
     showAuthError(err);
   }
@@ -127,13 +142,13 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   if (role !== "admin") {
-    $("deniedName").textContent = user.displayName || user.email || "";
+    $("deniedName").textContent = user.displayName || displayAccount(user.email) || "";
     showView("denied");
     return;
   }
 
   $("appUser").hidden = false;
-  $("userName").textContent = `${user.displayName || user.email} 👑`;
+  $("userName").textContent = `${user.displayName || displayAccount(user.email)} 👑`;
   showView("admin");
   startAdmin();
 });
@@ -168,6 +183,8 @@ let siteData = { ...SITE };
 let statsData = STATS.map((s) => ({ ...s }));
 let valuesData = VALUES.map((v) => ({ ...v }));
 let scheduleData = SCHEDULE.map((s) => ({ ...s }));
+let joinData = [];      // 가입 안내 절차 (기본값 없음 — 저장해야 소개 페이지에 표시)
+let contactData = "";   // 가입 문의 문구 (기본값 없음)
 
 async function loadSiteContent() {
   try {
@@ -175,9 +192,12 @@ async function loadSiteContent() {
     if (snap.exists()) {
       const d = snap.data();
       if (d.site) Object.assign(siteData, d.site);
-      if (Array.isArray(d.stats) && d.stats.length) statsData = d.stats;
-      if (Array.isArray(d.values) && d.values.length) valuesData = d.values;
-      if (Array.isArray(d.schedule) && d.schedule.length) scheduleData = d.schedule;
+      // 빈 목록도 그대로 반영 (항목을 모두 지워 저장하면 소개 페이지에서 해당 섹션이 숨겨짐)
+      if (Array.isArray(d.stats)) statsData = d.stats;
+      if (Array.isArray(d.values)) valuesData = d.values;
+      if (Array.isArray(d.schedule)) scheduleData = d.schedule;
+      if (Array.isArray(d.joinSteps)) joinData = d.joinSteps;
+      if (typeof d.joinContact === "string") contactData = d.joinContact;
     }
   } catch (err) {
     console.error("사이트 콘텐츠 로드 실패:", err);
@@ -195,6 +215,8 @@ function fillContentForms() {
   $("statRows").innerHTML = statsData.map(statRowHtml).join("");
   $("valueRows").innerHTML = valuesData.map(valueRowHtml).join("");
   $("scheduleRows").innerHTML = scheduleData.map(scheduleRowHtml).join("");
+  $("joinRows").innerHTML = joinData.map(joinRowHtml).join("");
+  $("joinContactInput").value = contactData;
 }
 
 /* ----- 동적 행 템플릿 ----- */
@@ -229,12 +251,21 @@ function scheduleRowHtml(s = {}) {
   </div>`;
 }
 
+function joinRowHtml(s = {}) {
+  return `
+  <div class="dyn-row join-row">
+    <input class="f-title" maxlength="30" placeholder="제목 (예: 가입 신청)" value="${esc(s.title || "")}" />
+    <button type="button" class="row-del" aria-label="이 절차 삭제">✕</button>
+    <textarea class="f-desc" rows="2" maxlength="200" placeholder="설명 (예: 크루 가입하기 버튼으로 신청해 주세요)">${esc(s.desc || "")}</textarea>
+  </div>`;
+}
+
 /* ----- 행 추가 / 삭제 ----- */
 document.querySelectorAll("[data-add]").forEach((btn) => {
   btn.addEventListener("click", () => {
     const kind = btn.dataset.add;
-    const target = { stat: "statRows", value: "valueRows", schedule: "scheduleRows" }[kind];
-    const html = { stat: statRowHtml, value: valueRowHtml, schedule: scheduleRowHtml }[kind]();
+    const target = { stat: "statRows", value: "valueRows", schedule: "scheduleRows", join: "joinRows" }[kind];
+    const html = { stat: statRowHtml, value: valueRowHtml, schedule: scheduleRowHtml, join: joinRowHtml }[kind]();
     $(target).insertAdjacentHTML("beforeend", html);
   });
 });
@@ -313,6 +344,35 @@ $("formSchedule").addEventListener("submit", async (e) => {
   try {
     await setDoc(contentRef, { schedule, updatedAt: serverTimestamp() }, { merge: true });
     scheduleData = schedule;
+    flashSaved(e.target);
+  } catch (err) {
+    alert("저장에 실패했어요: " + err.message);
+  }
+});
+
+$("formJoin").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const joinSteps = [...$("joinRows").querySelectorAll(".dyn-row")]
+    .map((row) => ({
+      title: row.querySelector(".f-title").value.trim(),
+      desc: row.querySelector(".f-desc").value.trim(),
+    }))
+    .filter((s) => s.title);
+  try {
+    await setDoc(contentRef, { joinSteps, updatedAt: serverTimestamp() }, { merge: true });
+    joinData = joinSteps;
+    flashSaved(e.target);
+  } catch (err) {
+    alert("저장에 실패했어요: " + err.message);
+  }
+});
+
+$("formContact").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const joinContact = $("joinContactInput").value.trim();
+  try {
+    await setDoc(contentRef, { joinContact, updatedAt: serverTimestamp() }, { merge: true });
+    contactData = joinContact;
     flashSaved(e.target);
   } catch (err) {
     alert("저장에 실패했어요: " + err.message);

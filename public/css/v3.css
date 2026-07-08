@@ -302,6 +302,15 @@
   grid-column: 1 / -1;
 }
 
+.join-row {
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.join-row .f-desc {
+  grid-column: 1 / -1;
+}
+
 .row-del {
   width: 32px;
   height: 32px;
@@ -582,19 +591,93 @@
 button.app-user-name {
   background: none;
   border: none;
-  padding: 0 0 1px;
+  padding: 0;
   color: #fff;
   font-family: var(--font);
   font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
-  border-bottom: 1.5px dashed rgba(255, 255, 255, 0.5);
-  transition: color 0.15s ease, border-color 0.15s ease;
+  transition: color 0.15s ease;
 }
 
 button.app-user-name:hover {
   color: var(--carrot);
-  border-color: var(--carrot);
+}
+
+/* ============================================================
+   공지 목록 — 고정 | 제목 | 날짜 한 줄, 누르면 펼쳐짐
+   ============================================================ */
+details.notice-row summary {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+details.notice-row summary::-webkit-details-marker {
+  display: none;
+}
+
+.notice-pin {
+  flex: none;
+  width: 1.25em;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.notice-title {
+  flex: 1;
+  min-width: 0;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+details.notice-row[open] .notice-title {
+  white-space: normal; /* 펼치면 제목 전체 표시 */
+}
+
+.notice-date {
+  flex: none;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  opacity: 0.85;
+}
+
+.notice-arrow {
+  flex: none;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  transition: transform 0.15s ease;
+}
+
+details.notice-row[open] .notice-arrow {
+  transform: rotate(180deg);
+}
+
+.notice-body {
+  margin-top: 0.9rem;
+  padding-top: 0.9rem;
+  border-top: 1px dashed var(--line);
+  white-space: pre-line;
+  font-size: 0.95rem;
+  word-break: break-word;
+}
+
+.notice-foot {
+  margin-top: 0.9rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.notice-foot .app-card-meta {
+  margin: 0;
 }
 
 /* ============================================================
@@ -722,4 +805,96 @@ button.app-user-name:hover {
   .modal-card {
     padding: 1.5rem 1.2rem;
   }
+}
+
+/* ============================================================
+   가입신청 폼 (크루 공간 로그인 화면)
+   ============================================================ */
+.auth-form select {
+  width: 100%;
+  font-family: var(--font);
+  font-size: 1rem;
+  padding: 0.7em 1em;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: var(--cream);
+  color: var(--ink);
+}
+
+.auth-form select:focus {
+  outline: none;
+  border-color: var(--carrot);
+  background: #fff;
+}
+
+/* 힌트 질문 select 바로 아래 답변 입력 칸 간격 */
+.auth-form select + input {
+  margin-top: 0.45rem;
+}
+
+.auth-form textarea {
+  width: 100%;
+  font-family: var(--font);
+  font-size: 1rem;
+  padding: 0.7em 1em;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: var(--cream);
+  resize: vertical;
+}
+
+.auth-form textarea:focus {
+  outline: none;
+  border-color: var(--carrot);
+  background: #fff;
+}
+
+/* 이름 + 성별 한 줄 배치 */
+.name-gender-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.9rem;
+  align-items: start;
+}
+
+.radio-legend {
+  display: block;
+  font-weight: 700;
+  font-size: 0.88rem;
+  margin-bottom: 0.35rem;
+}
+
+.radio-opts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.radio-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.5em 0.9em;
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  background: var(--cream);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+}
+
+.auth-form .radio-pill input {
+  width: auto;
+  padding: 0;
+  border: none;
+  background: none;
+  margin: 0;
+  accent-color: var(--carrot);
+}
+
+.radio-pill:has(input:checked) {
+  border-color: var(--carrot);
+  background: var(--carrot-soft);
+  color: var(--carrot-deep);
 }

@@ -4,7 +4,10 @@
    — 기본 내용은 js/site-data.js 의 값으로 먼저 그려지고,
      운영진이 관리자 페이지(admin.html)에서 저장한 내용이
      Firestore 에 있으면 불러와서 자동으로 덮어씁니다.
-   — 가입 신청서는 Firebase Firestore(applications)에 저장됩니다.
+   — 항목이 하나도 없는 섹션(크루 현황 숫자·핵심 가치·정기런 일정)은
+     자동으로 숨겨지고, 공식 기록·갤러리 섹션은 운영진이 저장한
+     내용이 있을 때만 표시됩니다.
+   — 가입 신청은 폼 없이 인스타그램 DM 으로만 받습니다.
    ============================================================ */
 
 /* 현재 화면에 그릴 콘텐츠 (기본값: site-data.js → Firestore 로 덮어씀) */
@@ -13,6 +16,8 @@ const content = {
   stats: STATS,
   values: VALUES,
   schedule: SCHEDULE,
+  joinSteps: [],   // 가입 안내 절차 — 운영진이 저장한 내용만 표시 (기본값 없음)
+  joinContact: "", // 가입 문의 문구 — 운영진이 저장한 내용만 표시 (기본값 없음)
 };
 
 /* 종목(거리) 탭 표시 순서 */
@@ -26,14 +31,10 @@ document.addEventListener("DOMContentLoaded", () => {
   renderStats();
   renderValues();
   renderSchedule();
-  renderRecords(recordsFromSiteData());
-  renderGalleryFallback();
-  renderJoinSteps();
   setupNav();
   setupReveal();
   setupRecordTabs();
   setupGalleryViewer();
-  setupJoinForm();
   document.getElementById("year").textContent = new Date().getFullYear();
 
   loadRemoteContent(); // Firestore 에 저장된 내용이 있으면 자동 반영
@@ -74,26 +75,33 @@ async function loadRemoteContent() {
     if (siteSnap && siteSnap.exists()) {
       const data = siteSnap.data();
       if (data.site) Object.assign(content.site, data.site);
-      if (Array.isArray(data.stats) && data.stats.length) content.stats = data.stats;
-      if (Array.isArray(data.values) && data.values.length) content.values = data.values;
-      if (Array.isArray(data.schedule) && data.schedule.length) content.schedule = data.schedule;
+      // 빈 목록도 그대로 반영 → 운영진이 항목을 모두 지우면 해당 섹션이 숨겨집니다.
+      if (Array.isArray(data.stats)) content.stats = data.stats;
+      if (Array.isArray(data.values)) content.values = data.values;
+      if (Array.isArray(data.schedule)) content.schedule = data.schedule;
+      if (Array.isArray(data.joinSteps)) content.joinSteps = data.joinSteps;
+      if (typeof data.joinContact === "string") content.joinContact = data.joinContact;
       applySiteInfo();
       renderStats();
       renderValues();
       renderSchedule();
+      renderJoinSteps();
+      renderJoinContact();
     }
 
-    // 크루 공식 기록
+    // 크루 공식 기록 — 운영진이 저장한 대회가 있을 때만 섹션 표시
     if (recordSnap && recordSnap.size) {
       renderRecords(recordsFromDocs(recordSnap.docs));
+      toggleSection("records", true);
     }
 
-    // 갤러리 앨범
+    // 갤러리 — 운영진이 저장한 앨범이 있을 때만 섹션 표시
     if (gallerySnap && gallerySnap.size) {
       const albums = gallerySnap.docs
         .map((d) => ({ id: d.id, ...d.data() }))
         .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
       renderAlbums(albums);
+      toggleSection("gallery", true);
     }
   } catch (err) {
     console.warn("원격 콘텐츠 로드 실패 (기본 내용으로 표시):", err);
@@ -111,17 +119,26 @@ function applySiteInfo() {
   });
 }
 
-/* ---------- 크루 현황 통계 ---------- */
+/* ---------- 섹션 표시/숨김 (내용 없는 섹션은 메뉴 링크까지 숨김) ---------- */
+function toggleSection(id, show) {
+  const section = document.getElementById(id);
+  if (section) section.hidden = !show;
+  document.querySelectorAll(`a[href="#${id}"]`).forEach((a) => (a.hidden = !show));
+}
+
+/* ---------- 크루 현황 통계 (항목이 없으면 숨김) ---------- */
 function renderStats() {
   const ul = document.getElementById("statsList");
+  ul.hidden = !content.stats.length;
   ul.innerHTML = content.stats.map(
     (s) => `<li><strong>${esc(s.value)}</strong><span>${esc(s.label)}</span></li>`
   ).join("");
 }
 
-/* ---------- 핵심 가치 카드 ---------- */
+/* ---------- 핵심 가치 카드 (항목이 없으면 숨김) ---------- */
 function renderValues() {
   const grid = document.getElementById("valueGrid");
+  grid.hidden = !content.values.length;
   grid.innerHTML = content.values.map(
     (v) => `
     <article class="value-card reveal">
@@ -133,8 +150,9 @@ function renderValues() {
   observeReveals(grid);
 }
 
-/* ---------- 정기런 일정 ---------- */
+/* ---------- 정기런 일정 (항목이 없으면 섹션 전체 숨김) ---------- */
 function renderSchedule() {
+  toggleSection("schedule", content.schedule.length > 0);
   const grid = document.getElementById("scheduleGrid");
   grid.innerHTML = content.schedule.map(
     (s) => `
@@ -154,13 +172,6 @@ function renderSchedule() {
 /* ============================================================
    공식 기록 — 연도 탭 → 대회 카드 → 종목(거리) 탭
    ============================================================ */
-
-/* site-data.js 의 RECORDS → 공통 구조로 변환 */
-function recordsFromSiteData() {
-  return Object.keys(RECORDS)
-    .sort((a, b) => b - a)
-    .map((year) => ({ year, races: RECORDS[year] }));
-}
 
 /* Firestore records 문서들 → 공통 구조로 변환 */
 function recordsFromDocs(docs) {
@@ -305,22 +316,8 @@ function setupRecordTabs() {
 }
 
 /* ============================================================
-   갤러리 — 기본(색상 카드) / Firestore 앨범
+   갤러리 — Firestore 앨범 (운영진이 저장한 앨범만 표시)
    ============================================================ */
-function renderGalleryFallback() {
-  const grid = document.getElementById("galleryGrid");
-  grid.innerHTML = GALLERY.map((g, i) => {
-    const media = g.image
-      ? `<img src="${esc(g.image)}" alt="${esc(g.caption)}" loading="lazy" />`
-      : `<div class="gallery-placeholder p${(i % 4) + 1}"><span>🥕</span></div>`;
-    return `
-      <figure class="gallery-item reveal">
-        ${media}
-        <figcaption>${esc(g.caption)}</figcaption>
-      </figure>`;
-  }).join("");
-}
-
 /* Firestore 앨범 목록 */
 function renderAlbums(albums) {
   const grid = document.getElementById("galleryGrid");
@@ -400,71 +397,27 @@ async function loadAlbumPhotos(albumId) {
   return photos;
 }
 
-/* ---------- 가입 절차 ---------- */
+/* ---------- 가입 안내 (JOIN US) — 운영진이 저장한 절차가 있을 때만 표시 ---------- */
 function renderJoinSteps() {
+  const steps = content.joinSteps || [];
+  toggleSection("join", steps.length > 0);
   const wrap = document.getElementById("joinSteps");
-  wrap.innerHTML = JOIN_STEPS.map(
-    (s) => `
+  wrap.innerHTML = steps.map(
+    (s, i) => `
     <article class="join-step reveal">
-      <span class="join-step-num">${s.step}</span>
-      <h3>${s.title}</h3>
-      <p>${s.desc}</p>
+      <span class="join-step-num">${String(i + 1).padStart(2, "0")}</span>
+      <h3>${esc(s.title)}</h3>
+      <p>${escMultiline(s.desc)}</p>
     </article>`
   ).join("");
+  observeReveals(wrap);
 }
 
-/* ---------- 가입 신청 폼 → Firestore ---------- */
-function setupJoinForm() {
-  const form = document.getElementById("joinForm");
-  const msg = document.getElementById("joinMsg");
-  const submitBtn = document.getElementById("joinSubmit");
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    if (!window.FIREBASE_READY) {
-      showMsg("아직 신청서 저장소(Firebase)가 연결되지 않았어요. 인스타그램 DM으로 연락해 주세요! 🙏", "error");
-      return;
-    }
-
-    submitBtn.disabled = true;
-    submitBtn.textContent = "신청서 보내는 중...";
-
-    try {
-      // Firebase SDK는 필요할 때만 불러옵니다 (페이지 로딩 속도 보호)
-      const { initializeApp, getApps } = await import(`${window.FIREBASE_SDK}/firebase-app.js`);
-      const { getFirestore, collection, addDoc, serverTimestamp } = await import(
-        `${window.FIREBASE_SDK}/firebase-firestore.js`
-      );
-
-      const app = getApps().length ? getApps()[0] : initializeApp(window.FIREBASE_CONFIG);
-      const db = getFirestore(app);
-
-      await addDoc(collection(db, "applications"), {
-        name: form.name.value.trim(),
-        contact: form.contact.value.trim(),
-        age: form.age.value,
-        level: form.level.value,
-        message: form.message.value.trim(),
-        createdAt: serverTimestamp(),
-      });
-
-      form.reset();
-      showMsg("가입 신청이 접수되었습니다! 운영진이 확인 후 연락드릴게요 🥕", "ok");
-    } catch (err) {
-      console.error("가입 신청 저장 실패:", err);
-      showMsg("전송에 실패했어요. 잠시 후 다시 시도하거나 인스타그램 DM으로 연락해 주세요.", "error");
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = "가입 신청하기 🥕";
-    }
-  });
-
-  function showMsg(text, type) {
-    msg.hidden = false;
-    msg.textContent = text;
-    msg.className = `form-msg ${type}`;
-  }
+/* ---------- 가입 문의 — 운영진이 저장한 문구가 있을 때만 표시 ---------- */
+function renderJoinContact() {
+  const text = String(content.joinContact || "").trim();
+  toggleSection("contact", text.length > 0);
+  document.getElementById("joinContactText").innerHTML = escMultiline(text);
 }
 
 /* ---------- 내비게이션 (모바일 메뉴 + 스크롤 헤더) ---------- */

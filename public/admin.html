@@ -63,8 +63,9 @@
 
           <form id="emailForm" class="auth-form">
             <div class="form-row">
-              <label for="authEmail">계정 (이메일)</label>
-              <input type="email" id="authEmail" required placeholder="me@example.com" autocomplete="email" />
+              <label for="authEmail">계정</label>
+              <input type="text" id="authEmail" required maxlength="40" autocomplete="username"
+                     autocapitalize="none" autocorrect="off" spellcheck="false" />
             </div>
             <div class="form-row">
               <label for="authPw">비밀번호</label>
@@ -165,6 +166,32 @@
               <button type="button" class="btn-mini dark" data-add="schedule">＋ 일정 추가</button>
               <div class="save-row">
                 <button type="submit" class="btn btn-primary">정기런 일정 저장</button>
+                <span class="save-msg" hidden></span>
+              </div>
+            </form>
+          </section>
+
+          <section class="admin-block">
+            <h3>가입 안내 (JOIN US) <span class="muted">(절차가 하나도 없으면 소개 페이지에서 섹션이 숨겨져요)</span></h3>
+            <form id="formJoin">
+              <div class="row-list" id="joinRows"></div>
+              <button type="button" class="btn-mini dark" data-add="join">＋ 절차 추가</button>
+              <div class="save-row">
+                <button type="submit" class="btn btn-primary">가입 안내 저장</button>
+                <span class="save-msg" hidden></span>
+              </div>
+            </form>
+          </section>
+
+          <section class="admin-block">
+            <h3>가입 문의 <span class="muted">(내용이 없으면 소개 페이지에서 섹션이 숨겨져요)</span></h3>
+            <form id="formContact">
+              <div class="form-row">
+                <label for="joinContactInput">문의 안내 문구 <span class="muted">(줄바꿈 그대로 표시돼요)</span></label>
+                <textarea id="joinContactInput" rows="3" maxlength="500" placeholder="예) 인스타그램 @carrot_running_crew DM으로 편하게 연락 주세요."></textarea>
+              </div>
+              <div class="save-row">
+                <button type="submit" class="btn btn-primary">가입 문의 저장</button>
                 <span class="save-msg" hidden></span>
               </div>
             </form>
