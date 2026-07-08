@@ -658,17 +658,11 @@ details.notice-row[open] .notice-arrow {
   transform: rotate(180deg);
 }
 
-.notice-body {
+/* 펼친 화면 상단: 작성자 + 고정/수정/삭제 버튼 */
+.notice-tools {
   margin-top: 0.9rem;
   padding-top: 0.9rem;
   border-top: 1px dashed var(--line);
-  white-space: pre-line;
-  font-size: 0.95rem;
-  word-break: break-word;
-}
-
-.notice-foot {
-  margin-top: 0.9rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -676,8 +670,15 @@ details.notice-row[open] .notice-arrow {
   flex-wrap: wrap;
 }
 
-.notice-foot .app-card-meta {
+.notice-tools .app-card-meta {
   margin: 0;
+}
+
+.notice-body {
+  margin-top: 0.75rem;
+  white-space: pre-line;
+  font-size: 0.95rem;
+  word-break: break-word;
 }
 
 /* ============================================================
@@ -897,4 +898,102 @@ details.notice-row[open] .notice-arrow {
   border-color: var(--carrot);
   background: var(--carrot-soft);
   color: var(--carrot-deep);
+}
+
+/* ============================================================
+   일정 카테고리 — 만들기/수정 폼 선택 + 목록 배지/필터
+   ============================================================ */
+/* 날짜·시간은 모바일에서도 항상 한 줄 */
+.form-row-datetime {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+}
+
+.cat-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+.admin-form .cat-row .radio-pill input {
+  width: auto;
+  padding: 0;
+  border: none;
+  background: none;
+  margin: 0;
+  accent-color: var(--carrot);
+}
+
+/* 카테고리 추가(＋)/삭제(－) 버튼 */
+.cat-manage {
+  width: 2.1em;
+  height: 2.1em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px dashed var(--line);
+  border-radius: 999px;
+  background: var(--white);
+  font-family: var(--font);
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.cat-manage:hover {
+  border-color: var(--carrot);
+  color: var(--carrot-deep);
+}
+
+/* 일정 카드의 카테고리 배지 */
+.event-cat {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #fff;
+  padding: 0.18em 0.65em;
+  border-radius: 999px;
+  margin-right: 0.45em;
+  vertical-align: 2px;
+  white-space: nowrap;
+}
+
+/* 일정 목록 카테고리 필터 칩 */
+.cat-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.1rem;
+}
+
+.cat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4em;
+  padding: 0.42em 0.95em;
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  background: var(--white);
+  font-family: var(--font);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.cat-chip.active {
+  border-color: var(--carrot);
+  background: var(--carrot-soft);
+  color: var(--carrot-deep);
+  font-weight: 800;
+}
+
+.cat-dot {
+  flex: none;
+  width: 0.55em;
+  height: 0.55em;
+  border-radius: 50%;
 }

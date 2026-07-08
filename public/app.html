@@ -210,7 +210,11 @@
               <div class="form-row">
                 <input type="text" id="eventTitle" required maxlength="80" placeholder="일정 이름 (예: 화요 트랙런)" />
               </div>
-              <div class="form-row form-row-half">
+              <div class="form-row">
+                <label>카테고리</label>
+                <div class="cat-row" id="eventCatRow"></div>
+              </div>
+              <div class="form-row form-row-datetime">
                 <div><label for="eventDate">날짜</label><input type="date" id="eventDate" required /></div>
                 <div><label for="eventTime">시간</label><input type="time" id="eventTime" required value="19:20" /></div>
               </div>
@@ -223,6 +227,7 @@
               <button type="submit" class="btn btn-primary">일정 등록</button>
             </form>
           </details>
+          <div class="cat-filter" id="eventCatFilter" hidden></div>
           <h3 class="panel-subtitle">다가오는 일정</h3>
           <div class="card-list" id="eventUpcoming"><p class="empty-note">일정을 불러오는 중...</p></div>
           <details class="past-events">
@@ -418,7 +423,11 @@
           <label for="editEventTitle">일정 이름</label>
           <input type="text" id="editEventTitle" required maxlength="80" />
         </div>
-        <div class="form-row form-row-half">
+        <div class="form-row">
+          <label>카테고리</label>
+          <div class="cat-row" id="editEventCatRow"></div>
+        </div>
+        <div class="form-row form-row-datetime">
           <div>
             <label for="editEventDate">날짜</label>
             <input type="date" id="editEventDate" required />

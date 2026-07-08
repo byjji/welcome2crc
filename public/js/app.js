@@ -51,6 +51,8 @@ let me = null;          // 로그인한 auth 유저
 let myProfile = null;   // members/{uid} 문서 데이터
 let isAdmin = false;
 
+const DEFAULT_EVENT_CATS = ["대회", "러닝", "이벤트", "모임"];
+
 let state = {
   notices: [],
   events: [],
@@ -58,7 +60,10 @@ let state = {
   members: [],
   attendance: {},   // eventId → { uid: {name, status} }
   votes: {},        // pollId → { uid: {name, option} }
+  eventCats: [...DEFAULT_EVENT_CATS],  // 일정 카테고리 (site/eventCategories)
 };
+
+let eventCatFilter = "all";  // 일정 목록 카테고리 필터
 
 // onSnapshot 해제 함수 모음
 let unsubs = [];                 // 컬렉션 리스너
@@ -90,6 +95,17 @@ function parseDateParts(dateStr) {
   const [y, m, d] = dateStr.split("-").map(Number);
   const dow = DOW[new Date(y, m - 1, d).getDay()];
   return { month: `${m}월`, day: String(d), dow: `${dow}요일` };
+}
+
+/* 일정 카테고리 배지 색 — 기본 4종은 고정, 새로 만든 카테고리는 이름 기반 자동 배정 */
+const CAT_COLORS = { "대회": "#d94f2b", "러닝": "#e8871e", "이벤트": "#7c5cd6", "모임": "#2f9e6e" };
+const CAT_FALLBACK_COLORS = ["#3a7bd5", "#c4527a", "#5f8f3e", "#b8860b", "#5e6ad2"];
+
+function catColor(cat) {
+  if (CAT_COLORS[cat]) return CAT_COLORS[cat];
+  let h = 0;
+  for (const ch of String(cat)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return CAT_FALLBACK_COLORS[h % CAT_FALLBACK_COLORS.length];
 }
 
 function authErrorMsg(err) {
@@ -558,7 +574,8 @@ function cleanupAll() {
   voteUnsubs = {};
   if (profileUnsub) { profileUnsub(); profileUnsub = null; }
   appEntered = false;
-  state = { notices: [], events: [], polls: [], members: [], attendance: {}, votes: {} };
+  state = { notices: [], events: [], polls: [], members: [], attendance: {}, votes: {}, eventCats: [...DEFAULT_EVENT_CATS] };
+  eventCatFilter = "all";
 }
 
 /* ============================================================
@@ -582,6 +599,17 @@ function startListeners() {
       renderEvents();
     },
     (e) => console.error("일정 구독 오류:", e)
+  ));
+
+  // 일정 카테고리 목록 (운영진이 추가/삭제한 내용 실시간 반영)
+  unsubs.push(onSnapshot(
+    doc(db, "site", "eventCategories"),
+    (snap) => {
+      const list = snap.exists() ? snap.data().list : null;
+      state.eventCats = Array.isArray(list) && list.length ? list : [...DEFAULT_EVENT_CATS];
+      renderEventCatRow();
+    },
+    (e) => console.error("일정 카테고리 구독 오류:", e)
   ));
 
   unsubs.push(onSnapshot(
@@ -663,6 +691,7 @@ function syncVoteListeners() {
 
 function renderAll() {
   renderNotices();
+  renderEventCatRow();
   renderEvents();
   renderPolls();
   renderMembers();
@@ -723,8 +752,7 @@ function renderNotices() {
         <span class="notice-date">${fmtDate(n.createdAt)}</span>
         <span class="notice-arrow" aria-hidden="true">▾</span>
       </summary>
-      <div class="notice-body">${esc(n.body)}</div>
-      <div class="notice-foot">
+      <div class="notice-tools">
         <span class="app-card-meta">${esc(n.author || "")}${n.updatedAt ? " · (수정됨)" : ""}</span>
         ${isAdmin ? `
         <div class="card-actions">
@@ -733,6 +761,7 @@ function renderNotices() {
           <button class="btn-mini danger" data-action="del-notice" data-id="${n.id}">삭제</button>
         </div>` : ""}
       </div>
+      <div class="notice-body">${esc(n.body)}</div>
     </details>
   `).join("");
 }
@@ -780,11 +809,68 @@ $("editNoticeForm").addEventListener("submit", async (e) => {
 /* ============================================================
    6. 일정 · 출석체크
    ============================================================ */
+/* ---------- 일정 카테고리 (site/eventCategories 문서에 저장) ---------- */
+function catPillsHtml(name, selected) {
+  // 이미 지운 카테고리로 등록된 일정을 수정할 때도 선택 상태가 보이도록 목록에 포함
+  const list = selected && !state.eventCats.includes(selected)
+    ? [...state.eventCats, selected]
+    : state.eventCats;
+  return list.map((c) => `
+    <label class="radio-pill">
+      <input type="radio" name="${name}" value="${esc(c)}" required${c === selected ? " checked" : ""} />
+      <span>${esc(c)}</span>
+    </label>`).join("");
+}
+
+function renderEventCatRow() {
+  const row = $("eventCatRow");
+  if (!row) return;
+  const keep = row.querySelector("input:checked")?.value || "";
+  row.innerHTML = catPillsHtml("eventCat", keep) + `
+    <button type="button" class="cat-manage" data-cat-manage="add" title="카테고리 추가">＋</button>
+    <button type="button" class="cat-manage" data-cat-manage="del" title="선택한 카테고리 삭제">－</button>`;
+}
+
+async function saveEventCats(list, selectAfter) {
+  try {
+    await setDoc(doc(db, "site", "eventCategories"), { list }, { merge: true });
+    state.eventCats = list;
+    renderEventCatRow();
+    if (selectAfter) {
+      const input = $("eventCatRow").querySelector(`input[value="${CSS.escape(selectAfter)}"]`);
+      if (input) input.checked = true;
+    }
+  } catch (err) {
+    alert("카테고리 저장에 실패했어요: " + err.message);
+  }
+}
+
+$("eventCatRow").addEventListener("click", async (e) => {
+  const btn = e.target.closest("[data-cat-manage]");
+  if (!btn) return;
+  const list = [...state.eventCats];
+
+  if (btn.dataset.catManage === "add") {
+    const name = (prompt("추가할 카테고리 이름을 입력해 주세요. (예: 번개런)") || "").trim();
+    if (!name) return;
+    if (name.length > 12) return alert("카테고리 이름은 12자 이내로 해주세요.");
+    if (list.includes(name)) return alert("이미 있는 카테고리예요.");
+    await saveEventCats([...list, name], name);
+  } else {
+    const sel = $("eventCatRow").querySelector("input:checked")?.value;
+    if (!sel) return alert("삭제할 카테고리를 먼저 선택해 주세요.");
+    if (list.length <= 1) return alert("카테고리는 1개 이상 있어야 해요.");
+    if (!confirm(`'${sel}' 카테고리를 삭제할까요?\n(이미 등록된 일정에는 그대로 남아 있어요)`)) return;
+    await saveEventCats(list.filter((c) => c !== sel));
+  }
+});
+
 $("eventForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   try {
     await addDoc(collection(db, "events"), {
       title: $("eventTitle").value.trim(),
+      category: $("eventCatRow").querySelector("input:checked")?.value || "",
       date: $("eventDate").value,          // "YYYY-MM-DD"
       time: $("eventTime").value,          // "HH:MM"
       place: $("eventPlace").value.trim(),
@@ -830,7 +916,7 @@ function eventCardHtml(ev, isPast) {
       </div>
       <div class="event-main">
         <div class="app-card-head">
-          <h4>${esc(ev.title)}</h4>
+          <h4>${ev.category ? `<span class="event-cat" style="background:${catColor(ev.category)}">${esc(ev.category)}</span>` : ""}${esc(ev.title)}</h4>
           ${isAdmin ? `
           <div class="card-actions">
             <button class="btn-mini dark" data-action="edit-event" data-id="${ev.id}">수정</button>
@@ -844,10 +930,41 @@ function eventCardHtml(ev, isPast) {
   `;
 }
 
+/* 일정에 실제로 쓰인 카테고리로 필터 칩 표시 */
+function renderEventCatFilter() {
+  const box = $("eventCatFilter");
+  const used = [...new Set(state.events.map((ev) => ev.category).filter(Boolean))]
+    .sort((a, b) => {
+      const ia = state.eventCats.indexOf(a), ib = state.eventCats.indexOf(b);
+      return (ia === -1 ? 99 : ia) - (ib === -1 ? 99 : ib);
+    });
+
+  if (eventCatFilter !== "all" && !used.includes(eventCatFilter)) eventCatFilter = "all";
+  box.hidden = used.length === 0;
+  box.innerHTML = used.length === 0 ? "" : [
+    `<button type="button" class="cat-chip${eventCatFilter === "all" ? " active" : ""}" data-cat="all">전체</button>`,
+    ...used.map((c) => `
+      <button type="button" class="cat-chip${eventCatFilter === c ? " active" : ""}" data-cat="${esc(c)}">
+        <span class="cat-dot" style="background:${catColor(c)}"></span>${esc(c)}
+      </button>`),
+  ].join("");
+}
+
+$("eventCatFilter").addEventListener("click", (e) => {
+  const btn = e.target.closest(".cat-chip");
+  if (!btn) return;
+  eventCatFilter = btn.dataset.cat;
+  renderEvents();
+});
+
 function renderEvents() {
+  renderEventCatFilter();
   const today = todayStr();
-  const upcoming = state.events.filter((ev) => ev.date >= today);
-  const past = state.events.filter((ev) => ev.date < today).reverse(); // 최근 것부터
+  const source = eventCatFilter === "all"
+    ? state.events
+    : state.events.filter((ev) => ev.category === eventCatFilter);
+  const upcoming = source.filter((ev) => ev.date >= today);
+  const past = source.filter((ev) => ev.date < today).reverse(); // 최근 것부터
 
   $("eventUpcoming").innerHTML = upcoming.length
     ? upcoming.map((ev) => eventCardHtml(ev, false)).join("")
@@ -880,6 +997,7 @@ async function handleEventClick(e) {
       if (!ev) return;
       editEventId = id;
       $("editEventTitle").value = ev.title || "";
+      $("editEventCatRow").innerHTML = catPillsHtml("editEventCat", ev.category || "");
       $("editEventDate").value = ev.date || "";
       $("editEventTime").value = ev.time || "";
       $("editEventPlace").value = ev.place || "";
@@ -913,6 +1031,7 @@ $("editEventForm").addEventListener("submit", async (e) => {
   try {
     await updateDoc(doc(db, "events", editEventId), {
       title: $("editEventTitle").value.trim(),
+      category: $("editEventCatRow").querySelector("input:checked")?.value || "",
       date: $("editEventDate").value,
       time: $("editEventTime").value,
       place: $("editEventPlace").value.trim(),
