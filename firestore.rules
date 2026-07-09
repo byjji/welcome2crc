@@ -71,12 +71,21 @@ service cloud.firestore {
       allow read: if isMember();
       allow create, update, delete: if isAdmin();
 
-      // 출석: 본인 것만 기록/수정/취소 가능 (운영진은 정리 가능)
+      // 출석 + 러닝 기록(거리·시간): 본인 것만 기록/수정/취소 가능.
+      // 운영진은 기록을 대신 입력/수정하거나 정리할 수 있음.
       match /attendance/{uid} {
         allow read: if isMember();
-        allow create, update: if isMember() && request.auth.uid == uid;
+        allow create, update: if isAdmin() || (isMember() && request.auth.uid == uid);
         allow delete: if isAdmin() || (isMember() && request.auth.uid == uid);
       }
+    }
+
+    // ----- 마일리지 (기록 보기: 각오·목표·현재 누적 거리) -----
+    // 본인 것은 본인이, 운영진은 모두 수정 가능.
+    match /mileage/{uid} {
+      allow read: if isMember();
+      allow create, update: if isAdmin() || (isMember() && request.auth.uid == uid);
+      allow delete: if isAdmin();
     }
 
     // ----- 공개 사이트 콘텐츠 (소개 페이지) -----

@@ -177,15 +177,95 @@
       <!-- ===== 크루 공간 본화면 ===== -->
       <section class="app-view" id="viewApp" hidden>
 
-        <nav class="app-tabs" id="appTabs">
-          <button class="app-tab active" data-tab="notices">📢 공지</button>
-          <button class="app-tab" data-tab="events">📅 일정·출첵</button>
-          <button class="app-tab" data-tab="polls">🗳️ 투표</button>
-          <button class="app-tab" data-tab="members">👥 멤버</button>
-        </nav>
+        <!-- 홈 (대시보드) -->
+        <div class="tab-panel active" id="tab-home">
+          <p class="dash-hello" id="dashHello"></p>
+          <div class="dday-row" id="ddayRow"></div>
+          <button type="button" class="dash-notice" id="dashNotice" data-goto="news" hidden></button>
+          <h3 class="panel-subtitle">다가오는 일정 <span class="muted">(오늘~2주)</span><button type="button" class="link-more" data-goto="events">전체 보기 ›</button></h3>
+          <article class="app-card sched-card" id="dashSched"><p class="empty-note">불러오는 중...</p></article>
+          <h3 class="panel-subtitle">진행 중인 투표<button type="button" class="link-more" data-goto="news">더 보기 ›</button></h3>
+          <div id="dashPoll"><p class="empty-note">불러오는 중...</p></div>
+        </div>
 
-        <!-- 공지 -->
-        <div class="tab-panel active" id="tab-notices">
+        <!-- 일정·출첵 -->
+        <div class="tab-panel" id="tab-events">
+          <div class="sub-tabs" id="eventSubTabs">
+            <button class="sub-tab active" data-subtab="ev-list">📅 일정</button>
+            <button class="sub-tab" data-subtab="ev-att">🥕 출석 현황</button>
+            <button class="sub-tab" data-subtab="ev-rec">⏱️ 기록 보기</button>
+            <button class="sub-tab" data-subtab="ev-rank">🏆 이달의 랭킹</button>
+          </div>
+
+          <!-- 서브탭 1: 일정 -->
+          <div class="sub-panel active" id="ev-list">
+            <details class="admin-form" id="eventAdmin" hidden>
+              <summary>＋ 일정 만들기</summary>
+              <form id="eventForm">
+                <div class="form-row">
+                  <input type="text" id="eventTitle" required maxlength="80" placeholder="일정 이름 (예: 화요 트랙런)" />
+                </div>
+                <div class="form-row">
+                  <label>카테고리</label>
+                  <div class="cat-row" id="eventCatRow"></div>
+                </div>
+                <div class="form-row form-row-datetime">
+                  <div><label for="eventDate">날짜</label><input type="date" id="eventDate" required /></div>
+                  <div><label for="eventTime">시간</label><input type="time" id="eventTime" required value="19:20" /></div>
+                </div>
+                <div class="form-row">
+                  <input type="text" id="eventPlace" required maxlength="80" placeholder="집결 장소 (예: 서부구장트랙)" />
+                </div>
+                <div class="form-row">
+                  <input type="text" id="eventNote" maxlength="120" placeholder="코스/메모 (예: 트랙런 5~7km)" />
+                </div>
+                <button type="submit" class="btn btn-primary">일정 등록</button>
+              </form>
+            </details>
+            <div class="cat-filter" id="eventCatFilter" hidden></div>
+            <h3 class="panel-subtitle">다가오는 일정</h3>
+            <div class="card-list" id="eventUpcoming"><p class="empty-note">일정을 불러오는 중...</p></div>
+            <details class="past-events">
+              <summary>지난 일정 보기</summary>
+              <div class="card-list" id="eventPast"></div>
+            </details>
+          </div>
+
+          <!-- 서브탭 2: 출석 현황 (정기런만 집계, 월별 매트릭스) -->
+          <div class="sub-panel" id="ev-att">
+            <div class="ev-chips" id="attChips"></div>
+            <div id="attDayPanel" hidden></div>
+            <div class="month-nav">
+              <button type="button" data-mnav="-1" aria-label="이전 달">‹</button>
+              <span class="m stat-month-label"></span>
+              <button type="button" data-mnav="1" aria-label="다음 달">›</button>
+            </div>
+            <div class="sum-chips" id="attSummary"></div>
+            <div id="attMatrix"><p class="empty-note">출석 현황을 불러오는 중...</p></div>
+            <p class="mtx-cap">🥕 = 참석 · <strong>정기런</strong> 일정만 출석으로 집계돼요 · 표를 좌우로 밀면 다른 일정도 보여요</p>
+          </div>
+
+          <!-- 서브탭 3: 기록 보기 (마일리지) -->
+          <div class="sub-panel" id="ev-rec">
+            <div id="myRecordBox"></div>
+            <h3 class="panel-subtitle">기록 보기</h3>
+            <div id="recTable"><p class="empty-note">기록을 불러오는 중...</p></div>
+          </div>
+
+          <!-- 서브탭 4: 이달의 랭킹 -->
+          <div class="sub-panel" id="ev-rank">
+            <div class="month-nav">
+              <button type="button" data-mnav="-1" aria-label="이전 달">‹</button>
+              <span class="m stat-month-label"></span>
+              <button type="button" data-mnav="1" aria-label="다음 달">›</button>
+            </div>
+            <div id="rankTable"><p class="empty-note">랭킹을 불러오는 중...</p></div>
+            <p class="mtx-cap">🏆 이달 총 거리 기준 정렬 · 같은 거리면 출석 횟수 순</p>
+          </div>
+        </div>
+
+        <!-- 소식 (공지 + 투표) -->
+        <div class="tab-panel" id="tab-news">
           <details class="admin-form" id="noticeAdmin" hidden>
             <summary>＋ 공지 작성</summary>
             <form id="noticeForm">
@@ -199,45 +279,6 @@
               <button type="submit" class="btn btn-primary">공지 올리기</button>
             </form>
           </details>
-          <div class="card-list" id="noticeList"><p class="empty-note">공지를 불러오는 중...</p></div>
-        </div>
-
-        <!-- 일정·출첵 -->
-        <div class="tab-panel" id="tab-events">
-          <details class="admin-form" id="eventAdmin" hidden>
-            <summary>＋ 일정 만들기</summary>
-            <form id="eventForm">
-              <div class="form-row">
-                <input type="text" id="eventTitle" required maxlength="80" placeholder="일정 이름 (예: 화요 트랙런)" />
-              </div>
-              <div class="form-row">
-                <label>카테고리</label>
-                <div class="cat-row" id="eventCatRow"></div>
-              </div>
-              <div class="form-row form-row-datetime">
-                <div><label for="eventDate">날짜</label><input type="date" id="eventDate" required /></div>
-                <div><label for="eventTime">시간</label><input type="time" id="eventTime" required value="19:20" /></div>
-              </div>
-              <div class="form-row">
-                <input type="text" id="eventPlace" required maxlength="80" placeholder="집결 장소 (예: 서부구장트랙)" />
-              </div>
-              <div class="form-row">
-                <input type="text" id="eventNote" maxlength="120" placeholder="코스/메모 (예: 트랙런 5~7km)" />
-              </div>
-              <button type="submit" class="btn btn-primary">일정 등록</button>
-            </form>
-          </details>
-          <div class="cat-filter" id="eventCatFilter" hidden></div>
-          <h3 class="panel-subtitle">다가오는 일정</h3>
-          <div class="card-list" id="eventUpcoming"><p class="empty-note">일정을 불러오는 중...</p></div>
-          <details class="past-events">
-            <summary>지난 일정 보기</summary>
-            <div class="card-list" id="eventPast"></div>
-          </details>
-        </div>
-
-        <!-- 투표 -->
-        <div class="tab-panel" id="tab-polls">
           <details class="admin-form" id="pollAdmin" hidden>
             <summary>＋ 투표 만들기</summary>
             <form id="pollForm">
@@ -250,7 +291,21 @@
               <button type="submit" class="btn btn-primary">투표 시작</button>
             </form>
           </details>
-          <div class="card-list" id="pollList"><p class="empty-note">투표를 불러오는 중...</p></div>
+
+          <div class="sub-tabs news-filter" id="newsFilter">
+            <button class="sub-tab active" data-news="all">전체</button>
+            <button class="sub-tab" data-news="notice">📢 공지</button>
+            <button class="sub-tab" data-news="poll">🗳️ 투표</button>
+          </div>
+
+          <div id="newsNotices">
+            <h3 class="panel-subtitle news-subtitle">📢 공지</h3>
+            <div class="card-list" id="noticeList"><p class="empty-note">공지를 불러오는 중...</p></div>
+          </div>
+          <div id="newsPolls">
+            <h3 class="panel-subtitle news-subtitle">🗳️ 투표</h3>
+            <div class="card-list" id="pollList"><p class="empty-note">투표를 불러오는 중...</p></div>
+          </div>
         </div>
 
         <!-- 멤버 -->
@@ -268,8 +323,18 @@
             </div>
           </div>
           <h3 class="panel-subtitle">크루 멤버 <span id="memberCount" class="muted"></span></h3>
-          <div class="member-grid" id="memberList"></div>
+          <div class="member-list" id="memberList"></div>
         </div>
+
+        <!-- 하단 고정 탭 -->
+        <nav class="bottom-nav" id="appTabs" aria-label="크루 공간 메뉴">
+          <div class="nav-inner">
+            <button class="app-tab active" data-tab="home"><span class="ic">🏠</span>홈</button>
+            <button class="app-tab" data-tab="events"><span class="ic">🥕</span>일정·출첵</button>
+            <button class="app-tab" data-tab="news"><span class="ic">📢</span>소식</button>
+            <button class="app-tab" data-tab="members"><span class="ic">👥</span>멤버</button>
+          </div>
+        </nav>
 
       </section>
     </div>
@@ -447,6 +512,35 @@
         </div>
         <button type="submit" class="btn btn-primary btn-block">수정 저장</button>
         <p class="form-msg" id="editEventMsg" hidden></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== 마일리지 수정 모달 (기록 보기) ===== -->
+  <div class="modal" id="mileageModal" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>🥕 기록 수정</h3>
+        <button type="button" class="modal-close" data-close="mileageModal" aria-label="닫기">✕</button>
+      </div>
+      <p class="modal-desc" id="mileageWho"></p>
+      <form id="mileageForm" class="auth-form">
+        <div class="form-row">
+          <label for="mileNote">각오</label>
+          <input type="text" id="mileNote" maxlength="30" placeholder="예) 이번 시즌 100km 도전!" />
+        </div>
+        <div class="form-row form-row-datetime">
+          <div>
+            <label for="mileGoal">목표 마일리지 (km)</label>
+            <input type="text" id="mileGoal" inputmode="decimal" placeholder="100" />
+          </div>
+          <div>
+            <label for="mileKm">현재 마일리지 (km)</label>
+            <input type="text" id="mileKm" inputmode="decimal" placeholder="0" />
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">저장</button>
+        <p class="form-msg" id="mileageMsg" hidden></p>
       </form>
     </div>
   </div>

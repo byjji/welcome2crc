@@ -997,3 +997,832 @@ details.notice-row[open] .notice-arrow {
   height: 0.55em;
   border-radius: 50%;
 }
+
+/* ============================================================
+   하단 고정 탭 (홈 / 일정·출첵 / 소식 / 멤버)
+   ============================================================ */
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  background: var(--white);
+  border-top: 1.5px solid var(--line);
+  box-shadow: 0 -6px 24px rgba(29, 23, 18, 0.07);
+}
+
+.bottom-nav .nav-inner {
+  max-width: 560px;
+  margin: 0 auto;
+  display: flex;
+}
+
+.bottom-nav .app-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0.5rem 0 calc(0.6rem + env(safe-area-inset-bottom));
+  border: none;
+  border-radius: 0;
+  background: none;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  opacity: 0.75;
+  white-space: nowrap;
+}
+
+.bottom-nav .app-tab .ic {
+  font-size: 1.25rem;
+  line-height: 1.2;
+  padding: 0.1em 0.7em;
+  border-radius: 999px;
+  transition: background 0.15s ease;
+}
+
+.bottom-nav .app-tab:hover {
+  border: none;
+  background: none;
+  color: var(--carrot-deep);
+}
+
+.bottom-nav .app-tab.active {
+  background: none;
+  border: none;
+  color: var(--carrot-deep);
+  opacity: 1;
+}
+
+.bottom-nav .app-tab.active .ic {
+  background: var(--carrot-soft);
+}
+
+/* 하단 탭에 내용이 가리지 않도록 본문 여백 확보 */
+.app-main {
+  padding-bottom: calc(96px + env(safe-area-inset-bottom));
+}
+
+/* ============================================================
+   홈 (대시보드)
+   ============================================================ */
+.dash-hello {
+  font-size: 1.15rem;
+  font-weight: 800;
+  margin-bottom: 1rem;
+}
+
+.dash-hello .muted {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* 카테고리별 D-day 카드 (가로 배치) */
+.dday-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 0.6rem;
+}
+
+.dday-card {
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 0.9rem 0.85rem;
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 150px;
+  cursor: pointer;
+  border: none;
+  text-align: left;
+}
+
+.dday-card .cat-name {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  background: rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  padding: 0.16em 0.75em;
+  align-self: flex-start;
+  white-space: nowrap;
+}
+
+.dday-card .dday-num {
+  font-size: 1.55rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+  margin-top: 0.4rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.dday-card .dday-title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  margin-top: 0.15rem;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.dday-card .dday-meta {
+  font-size: 0.7rem;
+  opacity: 0.93;
+  margin-top: auto;
+  padding-top: 0.5rem;
+  line-height: 1.5;
+}
+
+/* 고정 공지 배너 */
+.dash-notice {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: var(--carrot-soft);
+  border: 1.5px solid var(--carrot);
+  border-radius: 14px;
+  padding: 0.75rem 1.1rem;
+  margin-top: 1rem;
+  font-family: var(--font);
+  font-size: 0.92rem;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+
+.dash-notice strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dash-notice .go {
+  margin-left: auto;
+  color: var(--carrot-deep);
+  font-weight: 900;
+}
+
+/* 섹션 제목 옆 전체 보기 버튼 */
+.link-more {
+  float: right;
+  border: none;
+  background: none;
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--carrot-deep);
+  cursor: pointer;
+  padding: 0;
+}
+
+/* 다가오는 일정 간단 리스트 */
+.sched-card {
+  padding: 0.35rem 1.3rem;
+}
+
+.sched-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.8rem 0;
+}
+
+.sched-row + .sched-row {
+  border-top: 1px solid var(--line);
+}
+
+.sched-date {
+  flex: 0 0 52px;
+  text-align: center;
+}
+
+.sched-date .d {
+  font-size: 0.98rem;
+  font-weight: 900;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+}
+
+.sched-date .w {
+  font-size: 0.7rem;
+  color: var(--ink-soft);
+  font-weight: 700;
+}
+
+.sched-date .w.sat { color: #2563eb; }
+.sched-date .w.sun { color: #c0504d; }
+
+.sched-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.sched-body .t {
+  font-size: 0.9rem;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sched-body .m {
+  font-size: 0.76rem;
+  color: var(--ink-soft);
+  margin-top: 0.05rem;
+}
+
+/* 진행 중 투표 미리보기 */
+.dash-poll {
+  cursor: pointer;
+}
+
+.dash-poll .poll-q {
+  font-weight: 800;
+  font-size: 0.98rem;
+}
+
+.dash-poll .poll-meta {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  margin-top: 0.2rem;
+}
+
+/* ============================================================
+   출석 현황 · 일정별 기록 · 이달의 랭킹
+   ============================================================ */
+.month-nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.1rem;
+  margin: 0.4rem 0 0.9rem;
+}
+
+.month-nav button {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  background: var(--white);
+  font-size: 1rem;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.month-nav button:hover {
+  border-color: var(--carrot);
+  color: var(--carrot-deep);
+}
+
+.month-nav .m {
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+/* 요약 칩 */
+.sum-chips {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  padding-bottom: 0.3rem;
+  margin-bottom: 0.9rem;
+}
+
+.sum-chip {
+  flex-shrink: 0;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  background: var(--white);
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  padding: 0.45em 1em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.sum-chip b {
+  color: var(--ink);
+  font-weight: 800;
+}
+
+/* 출석 매트릭스 (이름 열 고정 + 가로 스크롤) */
+.mtx-scroll {
+  overflow-x: auto;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+
+table.mtx {
+  border-collapse: collapse;
+  width: max-content; /* 날짜가 많으면 줄이지 않고 옆으로 늘려서 스크롤 */
+  min-width: 100%;
+}
+
+table.mtx th,
+table.mtx td {
+  padding: 0.65rem 0.45rem;
+  text-align: center;
+  font-size: 0.82rem;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+/* 날짜 열 최소 폭 — 한 화면에 5개 정도, 넘으면 하단 좌우 스크롤 */
+table.mtx th:not(.nm),
+table.mtx td:not(.nm) {
+  min-width: 44px;
+}
+
+table.mtx thead th {
+  font-weight: 700;
+  color: var(--ink-soft);
+  font-size: 0.74rem;
+  background: var(--cream);
+}
+
+table.mtx thead th .dd {
+  display: block;
+  font-size: 0.8rem;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+table.mtx th.nm,
+table.mtx td.nm {
+  position: sticky;
+  left: 0;
+  background: var(--white);
+  text-align: center;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  font-weight: 700;
+  font-size: 0.86rem;
+  min-width: 80px;
+  border-right: 1px solid var(--line);
+  z-index: 1;
+}
+
+table.mtx thead th.nm {
+  background: var(--cream);
+  z-index: 2;
+}
+
+table.mtx tbody tr:last-child td {
+  border-bottom: none;
+}
+
+table.mtx .stamp {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+table.mtx .miss {
+  color: #d8cfc4;
+  font-size: 0.85rem;
+}
+
+table.mtx td.sum,
+table.mtx th.sum {
+  font-weight: 800;
+  color: var(--carrot-deep);
+  font-variant-numeric: tabular-nums;
+  background: #fff7f1;
+}
+
+.mtx-cap {
+  font-size: 0.76rem;
+  color: var(--ink-soft);
+  opacity: 0.8;
+  margin-top: 0.6rem;
+  padding: 0 0.2rem;
+}
+
+/* 일정 선택 칩 (일정별 기록) */
+.ev-chips {
+  display: flex;
+  gap: 0.4rem;
+  overflow-x: auto;
+  margin: 0.4rem 0 0.9rem;
+  padding-bottom: 0.3rem;
+}
+
+.ev-chip {
+  flex-shrink: 0;
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.5em 1em;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  background: var(--white);
+  color: var(--ink-soft);
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+  max-width: 16em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ev-chip.active {
+  background: var(--carrot);
+  border-color: var(--carrot);
+  color: #fff;
+}
+
+/* 기록 테이블 카드 */
+.rec-card {
+  overflow: hidden;
+  padding: 0;
+}
+
+.rec-head {
+  padding: 1.1rem 1.3rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.rec-head .t {
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.rec-head .m {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  margin-top: 0.1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+table.rec {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table.rec th,
+table.rec td {
+  padding: 0.7rem 0.55rem;
+  font-size: 0.86rem;
+  text-align: right;
+  border-bottom: 1px solid var(--line);
+  font-variant-numeric: tabular-nums;
+}
+
+table.rec th {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  background: var(--cream);
+}
+
+table.rec th:first-child,
+table.rec td:first-child {
+  text-align: left;
+  padding-left: 1.2rem;
+  font-weight: 700;
+}
+
+table.rec td:last-child,
+table.rec th:last-child {
+  padding-right: 1.2rem;
+}
+
+table.rec tr:last-child td {
+  border-bottom: none;
+}
+
+table.rec td.none {
+  color: #c9beb2;
+  font-weight: 400;
+}
+
+.st-yes,
+.st-no {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: 1px;
+}
+
+.st-yes { background: var(--leaf); }
+.st-no { background: #d8cfc4; }
+
+tr.me-row td {
+  background: #fff7f1;
+}
+
+.rec-foot {
+  padding: 0.8rem 1.2rem;
+  background: var(--cream);
+  border-top: 1px solid var(--line);
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.rec-foot b {
+  color: var(--ink);
+}
+
+/* 내 기록 입력 */
+.my-record {
+  margin: 0.2rem 0 1.2rem;
+  padding: 1.1rem 1.3rem;
+  background: var(--white);
+  border: 1.5px dashed var(--carrot);
+  border-radius: var(--radius);
+}
+
+.my-record .mr-title {
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: var(--carrot-deep);
+  margin-bottom: 0.6rem;
+}
+
+.my-record .mr-form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.my-record input {
+  font-family: var(--font);
+  font-size: 0.9rem;
+  padding: 0.55em 0.8em;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: var(--cream);
+  width: 92px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.my-record input:focus {
+  outline: none;
+  border-color: var(--carrot);
+  background: #fff;
+}
+
+.my-record .unit {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin-right: 0.3rem;
+}
+
+.btn-save {
+  font-family: var(--font);
+  font-size: 0.86rem;
+  font-weight: 800;
+  padding: 0.55em 1.3em;
+  border-radius: 999px;
+  border: none;
+  background: var(--carrot);
+  color: #fff;
+  cursor: pointer;
+}
+
+.btn-save:hover {
+  background: var(--carrot-deep);
+}
+
+.mr-pace {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  margin-top: 0.5rem;
+}
+
+.mr-pace b {
+  color: var(--leaf);
+}
+
+/* 랭킹 메달 + 운영진 대신 입력 버튼 */
+.rank-medal {
+  font-size: 0.95rem;
+  margin-right: 3px;
+}
+
+.btn-edit-rec {
+  border: none;
+  background: none;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0 0.15em;
+  opacity: 0.65;
+}
+
+.btn-edit-rec:hover {
+  opacity: 1;
+}
+
+/* 소식 탭 섹션 제목 */
+.news-subtitle {
+  margin-top: 1.3rem;
+}
+
+/* ============================================================
+   멤버 탭 — 한 줄 목록
+   ============================================================ */
+.member-list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.member-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  padding: 0.65rem 0.9rem;
+}
+
+.member-row .member-name {
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.member-row .member-since {
+  font-size: 0.74rem;
+}
+
+.member-row .member-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 0.3rem;
+}
+
+.member-row .btn-mini {
+  font-size: 0.7rem;
+  padding: 0.35em 0.75em;
+  white-space: nowrap;
+}
+
+/* ============================================================
+   일정 카드 아이콘 버튼 + 참석자 관리(체크박스) + 출석 현황 리스트
+   ============================================================ */
+.btn-icon {
+  padding: 0.35em 0.6em;
+  line-height: 1;
+}
+
+/* 일정 카드의 ✏️/✕: 배경은 카드(흰색)와 동일 */
+.btn-mini.btn-icon {
+  background: var(--white);
+  border: 1.5px solid var(--line);
+  color: var(--ink-soft);
+}
+
+.btn-mini.btn-icon:hover {
+  background: var(--cream);
+  border-color: var(--carrot);
+}
+
+/* 참석자 관리 (운영진, 일정 카드 안 펼치기) */
+.event-card details.att-manage {
+  margin-top: 0.8rem;
+}
+
+.event-card details.att-manage > summary {
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3em;
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--carrot-deep);
+}
+
+details.att-manage > summary::-webkit-details-marker {
+  display: none;
+}
+
+details.att-manage[open] > summary .notice-arrow {
+  transform: rotate(180deg);
+}
+
+.att-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.6rem;
+}
+
+.att-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0.35em 0.75em;
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  background: var(--cream);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+}
+
+.att-check input {
+  width: auto;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--carrot);
+}
+
+.att-check:has(input:checked) {
+  border-color: var(--carrot);
+  background: var(--carrot-soft);
+  color: var(--carrot-deep);
+}
+
+/* 출석 현황 상단: 정기런 날짜 칩 + 선택한 날짜 패널 */
+.att-day-panel {
+  padding: 0.9rem 1.1rem;
+  margin-bottom: 1.1rem;
+}
+
+.ael-line {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.ael-date {
+  flex: none;
+  font-weight: 800;
+  font-size: 0.88rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ael-cnt {
+  flex: none;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--leaf);
+  white-space: nowrap;
+}
+
+.ael-names {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.att-day-panel .att-checks {
+  border-top: 1px dashed var(--line);
+  padding-top: 0.7rem;
+  margin-top: 0.7rem;
+}
+
+.att-day-panel .attend-names {
+  margin-top: 0.5rem;
+}
+
+/* 일정 카드: 삭제 버튼 - 카드와 같은 배경에 빨간 X */
+.btn-mini.btn-x {
+  color: #c0392b;
+  font-weight: 800;
+}
+
+.btn-mini.btn-x:hover {
+  border-color: #c0392b;
+}
+
+/* 기록 보기(마일리지) 표: 각오는 왼쪽 정렬 + 말줄임 */
+table.rec.mileage td.mile-note {
+  text-align: left;
+  max-width: 8.5em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 400;
+}
+
+table.rec.mileage th:nth-child(2) {
+  text-align: left;
+}
