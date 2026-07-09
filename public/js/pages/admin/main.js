@@ -6,8 +6,11 @@
    자동으로 불러와 표시됩니다.
    ============================================================ */
 
+import { $ } from "../../lib/ui.js";
+import { esc } from "../../lib/format.js";
+import { toAuthEmail, displayAccount } from "../../lib/account.js";
+
 /* ---------- 화면 요소 ---------- */
-const $ = (id) => document.getElementById(id);
 const views = {
   loading: $("viewLoading"),
   config: $("viewConfig"),
@@ -26,28 +29,13 @@ if (!window.FIREBASE_READY) {
   throw new Error("Firebase 설정이 필요합니다 (js/firebase-config.js)");
 }
 
-/* ---------- Firebase SDK (CDN) ---------- */
-const SDK = window.FIREBASE_SDK;
-
-const { initializeApp } = await import(`${SDK}/firebase-app.js`);
+/* ---------- Firebase (공통 초기화 모듈) ---------- */
 const {
-  getAuth, onAuthStateChanged, signOut, signInWithEmailAndPassword,
-} = await import(`${SDK}/firebase-auth.js`);
-const {
-  getFirestore, collection, doc,
-  getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc,
+  auth, db,
+  onAuthStateChanged, signOut, signInWithEmailAndPassword,
+  collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc,
   onSnapshot, query, orderBy, serverTimestamp,
-} = await import(`${SDK}/firebase-firestore.js`);
-
-const app = initializeApp(window.FIREBASE_CONFIG);
-const auth = getAuth(app);
-const db = getFirestore(app);
-
-/* ---------- 유틸 ---------- */
-function esc(s) {
-  return String(s ?? "").replace(/[&<>"']/g, (c) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
+} = await import("../../lib/firebase.js");
 
 function authErrorMsg(err) {
   const code = err && err.code ? err.code : "";
@@ -77,22 +65,9 @@ const EVENT_OPTIONS = ["풀코스", "하프", "10km", "5km", "3km"];
 
 /* ============================================================
    1. 인증 + 운영진 확인
+   ------------------------------------------------------------
+   계정(아이디) 변환 규칙은 lib/account.js 공용 (크루 공간과 동일)
    ============================================================ */
-/* 계정(아이디) → 내부 인증 주소 (크루 공간 app.js 와 동일한 규칙)
-   대소문자 구분: 대문자는 "+소문자" 로 인코딩 (HongGil → +hong+gil@crc.ulsan) */
-function toAuthEmail(account) {
-  const id = String(account || "").trim();
-  if (id.includes("@")) return id.toLowerCase(); // 예전 이메일 계정
-  return id.replace(/[A-Z]/g, (c) => "+" + c.toLowerCase()) + "@crc.ulsan";
-}
-
-/* 화면 표시용: 내부 도메인을 감추고 대문자 인코딩 복원 */
-function displayAccount(email) {
-  const m = String(email || "").match(/^(.*)@crc\.(ulsan|local)$/);
-  if (!m) return String(email || "");
-  return m[1].replace(/\+([a-z])/g, (_, c) => c.toUpperCase());
-}
-
 $("emailForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   hideAuthError();

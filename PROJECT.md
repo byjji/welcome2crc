@@ -134,25 +134,56 @@ Firebase(Hosting + Auth + Firestore) 기반의 정적 사이트이며, **무료 
 
 ## 폴더 구조
 
+기준은 **공통이냐 화면 전용이냐**입니다 — 두 화면 이상에서 쓰면 `css/base·components`,
+`js/lib`, 한 화면에서만 쓰면 `css/pages`, `js/pages` 아래에 둡니다.
+
 ```
-public/                 ← Firebase Hosting 으로 배포되는 폴더
-  index.html            공개 소개 페이지
-  app.html              크루 공간 (가입신청/공지/일정·출첵/투표/멤버/내 정보)
-  admin.html            페이지 관리 (운영진 전용)
-  css/style.css         기본 디자인 테마 (색상·버튼·소개 페이지)
-  css/v2.css            크루 공간 스타일
-  css/v3.css            기록 탭·갤러리·모달·가입신청 폼·공지 목록·관리자 페이지 스타일
-  js/firebase-config.js ★ Firebase 연결 설정 (프로젝트 값 붙여넣는 곳)
-  js/site-data.js       소개 페이지 기본값 (문구·현황·가치·정기런만 — 저장 내용이 우선)
-  js/public.js          소개 페이지 동작 (Firestore 콘텐츠 로드, 빈 섹션 숨김)
-  js/app.js             크루 공간 동작 (인증·계정 변환·비밀번호 힌트 포함)
-  js/admin.js           페이지 관리 동작 (콘텐츠 저장, 사진 압축 업로드)
-firebase.json           Hosting 배포 설정 (no-cache 헤더, SPA rewrite)
-firestore.rules         DB 보안 규칙
-firestore.indexes.json  Firestore 인덱스 (현재 기본값)
-.github/workflows/      master 푸시 → 자동 배포 / PR → 미리보기 배포
-PROJECT.md              ← 이 문서
+public/                     ← Firebase Hosting 으로 배포되는 폴더
+├─ index.html               공개 소개 페이지
+├─ app.html                 크루 공간 (하단 4탭: 홈/일정·출첵/소식/멤버)
+├─ admin.html               페이지 관리 (운영진 전용)
+│
+├─ css/
+│  ├─ base.css              🎨 디자인 토큰(색·폰트·radius)·리셋·버튼·헤더 (전 페이지)
+│  ├─ components.css        🧩 공용 컴포넌트: 폼·로그인 카드·탭·작성 폼·카드·모달·btn-mini
+│  └─ pages/
+│     ├─ public.css         소개 페이지 전용 (히어로·섹션·기록·갤러리·푸터)
+│     ├─ app.css            크루 공간 전용 (일정·출첵·소식·멤버·하단탭·홈·마일리지)
+│     └─ admin.css          페이지 관리 전용 (편집 블록·동적 행)
+│
+└─ js/
+   ├─ firebase-config.js    ★ Firebase 연결 설정 (프로젝트 값 붙여넣는 곳)
+   ├─ lib/                  ⚙️ 공통 모듈 (화면과 무관)
+   │  ├─ firebase.js        SDK 초기화, auth·db·Firestore 함수 내보내기
+   │  ├─ account.js         계정↔이메일 변환, 비밀번호 힌트 암호화
+   │  ├─ format.js          esc, 날짜/월/페이스 포맷, 카테고리 색
+   │  └─ ui.js              $, 모달 열기/닫기, 폼 메시지
+   └─ pages/
+      ├─ public/
+      │  ├─ main.js         소개 페이지 동작 (Firestore 콘텐츠 로드, 빈 섹션 숨김)
+      │  └─ site-data.js    소개 페이지 기본값 (문구·현황·가치·정기런 — 저장 내용이 우선)
+      ├─ app/               크루 공간 (화면별 1파일)
+      │  ├─ main.js         진입점 (설정 확인 → init.js 로드)
+      │  ├─ init.js         인증 라우팅·실시간 구독·하단 탭 전환
+      │  ├─ views.js        화면(로딩/로그인/대기/본화면) 전환
+      │  ├─ state.js        공유 상태 (로그인 세션·데이터·화면 상태)
+      │  ├─ auth.js         로그인·가입신청·비밀번호 찾기·내 정보
+      │  ├─ home.js         홈 대시보드
+      │  ├─ events.js       일정·출석 현황·기록 보기(마일리지)·랭킹
+      │  ├─ news.js         소식 (공지 + 투표)
+      │  └─ members.js      멤버 목록·승인 관리
+      └─ admin/
+         └─ main.js         페이지 관리 동작 (콘텐츠 저장, 사진 압축 업로드)
+
+firebase.json               Hosting 배포 설정 (no-cache 헤더, SPA rewrite)
+firestore.rules             DB 보안 규칙
+firestore.indexes.json      Firestore 인덱스 (현재 기본값)
+.github/workflows/          master 푸시 → 자동 배포 / PR → 미리보기 배포
+PROJECT.md · CHANGE.md      프로젝트 설명서 · 변경 이력
 ```
+
+- 빌드 도구 없이 브라우저 ES 모듈(`import`)로 동작합니다 — 배포 방식은 그대로.
+- 새 기능은 해당 `pages/` 파일에 먼저 넣고, 두 화면 이상에서 쓰게 되면 `lib`/`components` 로 승격하세요.
 
 ## 처음 설정 (최초 1회, 약 15분)
 

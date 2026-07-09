@@ -1,0 +1,204 @@
+/* ============================================================
+   base.css — 디자인 토큰 · 리셋 · 타이포 · 버튼 · 헤더
+   모든 페이지(index/app/admin)가 가장 먼저 불러오는 공통 기반
+   ============================================================ */
+
+/* ============================================================
+   당근러닝크루 (C.R.C) 스타일시트 — 공통 기본 디자인
+   ============================================================ */
+
+:root {
+  --carrot: #ff6b2b;
+  --carrot-deep: #e5511a;
+  --carrot-soft: #ffe3d3;
+  --leaf: #3e7c4f;
+  --ink: #1d1712;
+  --ink-soft: #4c4239;
+  --cream: #fbf7f0;
+  --white: #ffffff;
+  --line: #eadfd2;
+  --radius: 18px;
+  --shadow: 0 10px 30px rgba(29, 23, 18, 0.08);
+  --font: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
+    "Segoe UI", "Malgun Gothic", sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+}
+
+body {
+  font-family: var(--font);
+  color: var(--ink);
+  background: var(--cream);
+  line-height: 1.65;
+  word-break: keep-all;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.container {
+  width: min(1080px, 92%);
+  margin: 0 auto;
+}
+
+/* ---------- 버튼 ---------- */
+.btn {
+  display: inline-block;
+  padding: 0.9em 1.9em;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font);
+}
+
+.btn-primary {
+  background: var(--carrot);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(255, 107, 43, 0.35);
+}
+
+.btn-primary:hover {
+  background: var(--carrot-deep);
+  transform: translateY(-2px);
+}
+
+.btn-ghost {
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  color: #fff;
+}
+
+.btn-ghost:hover {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* ---------- 헤더 ---------- */
+.site-header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 100;
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.site-header.scrolled {
+  background: rgba(29, 23, 18, 0.85);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.25);
+}
+
+.header-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.15rem;
+  letter-spacing: 0.02em;
+}
+
+.logo-mark {
+  font-size: 1.4rem;
+}
+
+.logo-text small {
+  font-size: 0.72rem;
+  font-weight: 600;
+  opacity: 0.75;
+  margin-left: 0.35rem;
+}
+
+.main-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.main-nav a:hover {
+  color: #fff;
+}
+
+.nav-cta {
+  background: var(--carrot);
+  color: #fff !important;
+  padding: 0.45em 1.2em;
+  border-radius: 999px;
+}
+
+.nav-cta:hover {
+  background: var(--carrot-deep);
+}
+
+.nav-insta {
+  opacity: 0.8;
+}
+
+.nav-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.nav-toggle span {
+  width: 24px;
+  height: 2.5px;
+  background: #fff;
+  border-radius: 2px;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.nav-toggle.open span:nth-child(1) {
+  transform: translateY(7.5px) rotate(45deg);
+}
+
+.nav-toggle.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-toggle.open span:nth-child(3) {
+  transform: translateY(-7.5px) rotate(-45deg);
+}
+
+
+/* hidden 속성이 어떤 display 규칙보다 우선하도록 */
+[hidden] {
+  display: none !important;
+}

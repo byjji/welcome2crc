@@ -10,6 +10,8 @@
    — 가입 신청은 폼 없이 인스타그램 DM 으로만 받습니다.
    ============================================================ */
 
+import { esc, escMultiline } from "../../lib/format.js";
+
 /* 현재 화면에 그릴 콘텐츠 (기본값: site-data.js → Firestore 로 덮어씀) */
 const content = {
   site: { ...SITE },
@@ -40,16 +42,6 @@ document.addEventListener("DOMContentLoaded", () => {
   loadRemoteContent(); // Firestore 에 저장된 내용이 있으면 자동 반영
 });
 
-/* ---------- HTML 이스케이프 (운영진 입력값 안전 처리) ---------- */
-function esc(s) {
-  return String(s ?? "").replace(/[&<>"']/g, (c) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
-}
-
-function escMultiline(s) {
-  return esc(s).replace(/\n/g, "<br />");
-}
-
 /* ============================================================
    Firestore 원격 콘텐츠 로드
    ============================================================ */
@@ -57,13 +49,9 @@ async function loadRemoteContent() {
   if (!window.FIREBASE_READY) return;
 
   try {
-    const { initializeApp, getApps } = await import(`${window.FIREBASE_SDK}/firebase-app.js`);
-    const { getFirestore, doc, getDoc, collection, getDocs } = await import(
-      `${window.FIREBASE_SDK}/firebase-firestore.js`
-    );
-
-    const app = getApps().length ? getApps()[0] : initializeApp(window.FIREBASE_CONFIG);
-    db = getFirestore(app);
+    const fb = await import("../../lib/firebase.js");
+    const { doc, getDoc, collection, getDocs } = fb;
+    db = fb.db;
 
     const [siteSnap, recordSnap, gallerySnap] = await Promise.all([
       getDoc(doc(db, "site", "content")).catch(() => null),
@@ -386,9 +374,7 @@ function setupGalleryViewer() {
 
 async function loadAlbumPhotos(albumId) {
   if (albumPhotoCache[albumId]) return albumPhotoCache[albumId];
-  const { collection, getDocs, query, orderBy } = await import(
-    `${window.FIREBASE_SDK}/firebase-firestore.js`
-  );
+  const { collection, getDocs, query, orderBy } = await import("../../lib/firebase.js");
   const qs = await getDocs(
     query(collection(db, "gallery", albumId, "photos"), orderBy("createdAt", "asc"))
   );

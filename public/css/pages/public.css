@@ -1,196 +1,7 @@
 /* ============================================================
-   당근러닝크루 (C.R.C) 스타일시트 — 공통 기본 디자인
+   pages/public.css — 소개 페이지(index.html) 전용
+   히어로 · 소개 섹션 · 정기런 · 공식 기록 · 갤러리 · 가입 안내 · 푸터
    ============================================================ */
-
-:root {
-  --carrot: #ff6b2b;
-  --carrot-deep: #e5511a;
-  --carrot-soft: #ffe3d3;
-  --leaf: #3e7c4f;
-  --ink: #1d1712;
-  --ink-soft: #4c4239;
-  --cream: #fbf7f0;
-  --white: #ffffff;
-  --line: #eadfd2;
-  --radius: 18px;
-  --shadow: 0 10px 30px rgba(29, 23, 18, 0.08);
-  --font: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", "Malgun Gothic", sans-serif;
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
-
-html {
-  scroll-behavior: smooth;
-  scroll-padding-top: 80px;
-}
-
-body {
-  font-family: var(--font);
-  color: var(--ink);
-  background: var(--cream);
-  line-height: 1.65;
-  word-break: keep-all;
-}
-
-img {
-  max-width: 100%;
-  display: block;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.container {
-  width: min(1080px, 92%);
-  margin: 0 auto;
-}
-
-/* ---------- 버튼 ---------- */
-.btn {
-  display: inline-block;
-  padding: 0.9em 1.9em;
-  border-radius: 999px;
-  font-weight: 700;
-  font-size: 1rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-  border: none;
-  cursor: pointer;
-  font-family: var(--font);
-}
-
-.btn-primary {
-  background: var(--carrot);
-  color: #fff;
-  box-shadow: 0 8px 24px rgba(255, 107, 43, 0.35);
-}
-
-.btn-primary:hover {
-  background: var(--carrot-deep);
-  transform: translateY(-2px);
-}
-
-.btn-ghost {
-  border: 1.5px solid rgba(255, 255, 255, 0.5);
-  color: #fff;
-}
-
-.btn-ghost:hover {
-  border-color: #fff;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.btn-block {
-  width: 100%;
-}
-
-/* ---------- 헤더 ---------- */
-.site-header {
-  position: fixed;
-  inset: 0 0 auto 0;
-  z-index: 100;
-  transition: background 0.3s ease, box-shadow 0.3s ease;
-}
-
-.site-header.scrolled {
-  background: rgba(29, 23, 18, 0.85);
-  backdrop-filter: blur(12px);
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.25);
-}
-
-.header-inner {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 68px;
-}
-
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #fff;
-  font-weight: 800;
-  font-size: 1.15rem;
-  letter-spacing: 0.02em;
-}
-
-.logo-mark {
-  font-size: 1.4rem;
-}
-
-.logo-text small {
-  font-size: 0.72rem;
-  font-weight: 600;
-  opacity: 0.75;
-  margin-left: 0.35rem;
-}
-
-.main-nav {
-  display: flex;
-  align-items: center;
-  gap: 1.6rem;
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 600;
-  font-size: 0.95rem;
-}
-
-.main-nav a:hover {
-  color: #fff;
-}
-
-.nav-cta {
-  background: var(--carrot);
-  color: #fff !important;
-  padding: 0.45em 1.2em;
-  border-radius: 999px;
-}
-
-.nav-cta:hover {
-  background: var(--carrot-deep);
-}
-
-.nav-insta {
-  opacity: 0.8;
-}
-
-.nav-toggle {
-  display: none;
-  flex-direction: column;
-  gap: 5px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 8px;
-}
-
-.nav-toggle span {
-  width: 24px;
-  height: 2.5px;
-  background: #fff;
-  border-radius: 2px;
-  transition: transform 0.25s ease, opacity 0.25s ease;
-}
-
-.nav-toggle.open span:nth-child(1) {
-  transform: translateY(7.5px) rotate(45deg);
-}
-
-.nav-toggle.open span:nth-child(2) {
-  opacity: 0;
-}
-
-.nav-toggle.open span:nth-child(3) {
-  transform: translateY(-7.5px) rotate(-45deg);
-}
 
 /* ---------- 히어로 ---------- */
 .hero {
@@ -652,15 +463,6 @@ a {
   text-align: center;
 }
 
-.form-row {
-  margin-bottom: 1.2rem;
-}
-
-.form-row-half {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
 
 .join-form label {
   display: block;
@@ -853,3 +655,179 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+/* ============================================================
+   공개 페이지: 공식 기록 — 종목(거리) 탭
+   ============================================================ */
+.event-tabs {
+  display: flex;
+  gap: 0.45rem;
+  padding: 0.9rem 1.6rem 0;
+  flex-wrap: wrap;
+}
+
+.event-tab {
+  font-family: var(--font);
+  font-size: 0.88rem;
+  font-weight: 800;
+  padding: 0.4em 1.1em;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  background: var(--white);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.event-tab:hover {
+  border-color: var(--carrot);
+  color: var(--carrot-deep);
+}
+
+.event-tab.active {
+  background: var(--carrot-soft);
+  border-color: var(--carrot);
+  color: var(--carrot-deep);
+}
+
+.event-cnt {
+  font-size: 0.78em;
+  opacity: 0.75;
+}
+
+.event-panel {
+  display: none;
+}
+
+.event-panel.active {
+  display: block;
+}
+
+/* 종목 탭 안의 표는 좁아도 OK (이름/기록 2열) */
+.record-table.slim {
+  min-width: 0;
+}
+
+.record-table .rank {
+  width: 2.2em;
+  color: var(--ink-soft);
+  opacity: 0.6;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.race-empty {
+  padding: 1.2rem 1.6rem;
+}
+
+/* ============================================================
+   공개 페이지: 갤러리 앨범 + 뷰어
+   ============================================================ */
+.album-card {
+  font-family: var(--font);
+  border: 1px solid var(--line);
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.album-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 34px rgba(29, 23, 18, 0.13);
+}
+
+.album-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.8rem 1.1rem;
+  font-size: 0.88rem;
+}
+
+.album-name {
+  font-weight: 700;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.album-count {
+  flex: 0 0 auto;
+  background: var(--carrot-soft);
+  color: var(--carrot-deep);
+  font-weight: 800;
+  font-size: 0.75rem;
+  padding: 0.15em 0.7em;
+  border-radius: 999px;
+}
+
+/* ----- 앨범 사진 뷰어 (전체 화면 오버레이) ----- */
+.album-viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: rgba(20, 15, 11, 0.96);
+  display: flex;
+  flex-direction: column;
+}
+
+.viewer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1.2rem;
+  color: #fff;
+}
+
+.viewer-title {
+  font-size: 1.02rem;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.viewer-close {
+  flex: 0 0 auto;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.viewer-close:hover {
+  background: var(--carrot);
+}
+
+.viewer-body {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 0.8rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+.viewer-body img {
+  width: 100%;
+  max-width: 720px;
+  border-radius: 12px;
+}
+
+.viewer-loading {
+  color: rgba(255, 255, 255, 0.75);
+  padding: 3rem 1rem;
+  text-align: center;
+}
+

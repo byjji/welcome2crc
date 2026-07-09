@@ -1,11 +1,19 @@
 /* ============================================================
-   버전2 추가 스타일 — 크루 공간(app.html) + 공개 페이지 폼 메시지
+   components.css — 공용 컴포넌트
+   두 페이지 이상에서 쓰는 것만: 폼 행, 앱 레이아웃, 로그인 카드, 탭, 작성 폼, 카드, 모달
    ============================================================ */
 
-/* hidden 속성이 display:flex 등에 덮이지 않도록 보장 */
-[hidden] {
-  display: none !important;
+/* ---------- 폼 행 (가입/작성 폼 공통) ---------- */
+.form-row {
+  margin-bottom: 1.2rem;
 }
+
+.form-row-half {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
 
 /* ---------- 공개 페이지: 폼 결과 메시지 ---------- */
 .form-msg {
@@ -115,6 +123,7 @@
   font-weight: 500;
   font-size: 0.88em;
 }
+
 
 /* ---------- 중앙 카드 (로딩/대기/설정) ---------- */
 .center-card {
@@ -308,6 +317,7 @@
   color: var(--carrot-deep);
 }
 
+
 /* ---------- 앱 탭 ---------- */
 .app-tabs {
   display: flex;
@@ -427,6 +437,7 @@
   accent-color: var(--carrot);
 }
 
+
 /* ---------- 카드 목록 공통 ---------- */
 .card-list {
   display: grid;
@@ -486,286 +497,11 @@
   vertical-align: 2px;
 }
 
-/* ---------- 일정 카드 ---------- */
-.event-card {
-  display: flex;
-  gap: 1.3rem;
-}
 
-.event-date-box {
-  flex: 0 0 76px;
-  background: linear-gradient(160deg, var(--carrot), var(--carrot-deep));
-  color: #fff;
-  border-radius: 14px;
-  text-align: center;
-  padding: 0.8rem 0.4rem;
-  align-self: flex-start;
-}
-
-.event-date-box .d-month {
-  font-size: 0.75rem;
-  font-weight: 700;
-  opacity: 0.9;
-}
-
-.event-date-box .d-day {
-  font-size: 1.7rem;
-  font-weight: 900;
-  line-height: 1.1;
-}
-
-.event-date-box .d-dow {
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-
-.event-main {
-  flex: 1;
-  min-width: 0;
-}
-
-.event-info {
-  font-size: 0.9rem;
-  color: var(--ink-soft);
-  margin-top: 0.2rem;
-}
-
-.rsvp-row {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.9rem;
-  flex-wrap: wrap;
-}
-
-.rsvp-btn {
-  font-family: var(--font);
-  font-size: 0.9rem;
-  font-weight: 700;
-  padding: 0.45em 1.2em;
-  border-radius: 999px;
-  border: 1.5px solid var(--line);
-  background: var(--white);
-  color: var(--ink-soft);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.rsvp-btn:hover {
-  border-color: var(--carrot);
-}
-
-.rsvp-btn.on-yes {
-  background: var(--leaf);
-  border-color: var(--leaf);
-  color: #fff;
-}
-
-.rsvp-btn.on-no {
-  background: #8d8478;
-  border-color: #8d8478;
-  color: #fff;
-}
-
-.attend-names {
-  margin-top: 0.7rem;
-  font-size: 0.86rem;
-  color: var(--ink-soft);
-  line-height: 1.8;
-}
-
-.attend-names .leaf {
-  color: var(--leaf);
-  font-weight: 800;
-}
-
-.past-events {
-  margin-top: 2rem;
-}
-
-.past-events summary {
-  cursor: pointer;
-  font-weight: 800;
-  color: var(--ink-soft);
-  padding: 0.6rem 0.2rem;
-}
-
-.past-events .card-list {
-  margin-top: 1rem;
-}
-
-.event-card.past {
-  opacity: 0.75;
-}
-
-.event-card.past .event-date-box {
-  background: #b7ac9d;
-}
-
-/* ---------- 투표 카드 ---------- */
-.poll-status {
-  display: inline-block;
-  font-size: 0.75rem;
-  font-weight: 800;
-  padding: 0.18em 0.8em;
-  border-radius: 999px;
-}
-
-.poll-status.open {
-  background: #e8f4ea;
-  color: var(--leaf);
-}
-
-.poll-status.closed {
-  background: #eee7dc;
-  color: var(--ink-soft);
-}
-
-.poll-options {
-  margin-top: 1rem;
-  display: grid;
-  gap: 0.55rem;
-}
-
-.poll-option {
-  position: relative;
-  display: block;
-  width: 100%;
-  text-align: left;
-  font-family: var(--font);
-  font-size: 0.95rem;
-  font-weight: 600;
-  padding: 0.7em 1.1em;
-  border-radius: 12px;
-  border: 1.5px solid var(--line);
-  background: var(--cream);
-  color: var(--ink);
-  cursor: pointer;
-  overflow: hidden;
-  transition: border-color 0.15s ease;
-}
-
-.poll-option:hover:not(:disabled) {
-  border-color: var(--carrot);
-}
-
-.poll-option:disabled {
-  cursor: default;
-}
-
-.poll-option .bar {
-  position: absolute;
-  inset: 0 auto 0 0;
-  background: rgba(255, 107, 43, 0.16);
-  transition: width 0.4s ease;
-}
-
-.poll-option .opt-label {
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-  gap: 0.8rem;
-}
-
-.poll-option .opt-count {
-  font-weight: 800;
-  color: var(--carrot-deep);
-  white-space: nowrap;
-}
-
-.poll-option.mine {
-  border-color: var(--carrot);
-  background: #fff;
-}
-
-.poll-option.mine .opt-label::before {
-  content: "✓ ";
-  color: var(--carrot-deep);
-  font-weight: 900;
-}
-
-.poll-total {
-  margin-top: 0.7rem;
-  font-size: 0.84rem;
-  color: var(--ink-soft);
-}
-
-/* ---------- 멤버 ---------- */
-.member-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 0.9rem;
-}
-
-.member-card {
-  background: var(--white);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 1rem 1.2rem;
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-}
-
-.member-avatar {
-  flex: 0 0 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: linear-gradient(160deg, var(--carrot-soft), #ffd0b3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 900;
-  color: var(--carrot-deep);
-}
-
-.member-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.member-name {
-  font-weight: 800;
-  font-size: 0.97rem;
-}
-
-.member-since {
-  font-size: 0.78rem;
-  color: var(--ink-soft);
-  opacity: 0.8;
-}
-
-.role-badge {
-  font-size: 0.72rem;
-  font-weight: 800;
-  padding: 0.15em 0.7em;
-  border-radius: 999px;
-  background: var(--carrot-soft);
-  color: var(--carrot-deep);
-  white-space: nowrap;
-}
-
-.role-badge.admin {
-  background: var(--ink);
-  color: #ffb38a;
-}
-
-.member-admin-actions {
-  display: flex;
-  gap: 0.35rem;
-  flex-wrap: wrap;
-  margin-top: 0.4rem;
-}
-
-/* ---------- 반응형 ---------- */
+/* ---------- 반응형 (앱/관리자 공용) ---------- */
 @media (max-width: 880px) {
   .app-main {
     padding: 6rem 0 3rem;
-  }
-
-  .event-card {
-    flex-direction: row;
-    gap: 1rem;
   }
 
   .auth-card {
@@ -780,3 +516,125 @@
     padding: 1.2rem 1.2rem;
   }
 }
+
+/* ============================================================
+   모달 (비밀번호 재설정 · 내 정보 수정)
+   ============================================================ */
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 600;
+  background: rgba(20, 15, 11, 0.62);
+  backdrop-filter: blur(3px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.2rem;
+}
+
+.modal-card {
+  background: var(--white);
+  border-radius: calc(var(--radius) + 4px);
+  box-shadow: 0 24px 60px rgba(20, 15, 11, 0.35);
+  width: 100%;
+  max-width: 420px;
+  max-height: 88vh;
+  overflow-y: auto;
+  padding: 1.8rem 1.6rem;
+}
+
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.modal-head h3 {
+  font-size: 1.15rem;
+  font-weight: 900;
+}
+
+.modal-close {
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--cream);
+  color: var(--ink-soft);
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.modal-close:hover {
+  background: var(--carrot-soft);
+  color: var(--carrot-deep);
+}
+
+.modal-desc {
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+  margin-bottom: 1.2rem;
+}
+
+.modal .auth-form .btn {
+  margin-top: 0.4rem;
+}
+
+.modal .auth-form textarea {
+  width: 100%;
+  font-family: var(--font);
+  font-size: 1rem;
+  padding: 0.7em 1em;
+  border: 1.5px solid var(--line);
+  border-radius: 12px;
+  background: var(--cream);
+  resize: vertical;
+}
+
+.modal .auth-form textarea:focus {
+  outline: none;
+  border-color: var(--carrot);
+  background: #fff;
+}
+
+.modal .modal-desc {
+  font-size: 0.85rem;
+  background: var(--carrot-soft);
+  color: var(--carrot-deep);
+  padding: 0.7em 1em;
+  border-radius: 10px;
+  margin: 0.9rem 0;
+}
+
+/* ============================================================
+   헤더 (앱/관리자 공통)
+   ============================================================ */
+/* 아이콘 전용 버튼 (⚙️ 페이지 관리, 🔑 크루 공간) */
+.icon-btn {
+  display: inline-block;
+  padding: 0.35em 0.55em;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+/* 상단 이름 → 내 정보 수정 열기 (app.html 에서는 button) */
+button.app-user-name {
+  background: none;
+  border: none;
+  padding: 0;
+  color: #fff;
+  font-family: var(--font);
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+button.app-user-name:hover {
+  color: var(--carrot);
+}
+

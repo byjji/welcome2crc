@@ -2,6 +2,19 @@
 
 > 최근 변경 사항을 날짜별로 정리합니다. (최신이 위)
 
+## 2026-07-10
+
+### 폴더 구조 개편 (동작 변화 없음)
+- 기준: **공통(두 화면 이상) ↔ 화면 전용(pages/)** — 빌드 도구 없이 브라우저 ES 모듈로 동작
+- CSS: 버전별 파일(style/v2/v3)을 역할별로 재배치
+  → `base.css`(토큰·리셋·버튼·헤더) + `components.css`(공용 컴포넌트) + `pages/{public,app,admin}.css`
+- JS 공통 모듈 `js/lib/` 신설: `firebase.js`(초기화) · `account.js`(계정 변환+힌트 암호화, app/admin 중복 제거)
+  · `format.js`(이스케이프·날짜·페이스·카테고리 색) · `ui.js`(모달·폼 메시지)
+- `public.js`/`admin.js`/`site-data.js` → `js/pages/public/`, `js/pages/admin/` 으로 이동
+- 1,900줄 `app.js` 를 화면별 모듈로 분리 → `js/pages/app/`
+  (`main` 진입점 · `init` 라우팅/구독/탭 · `state` 공유 상태 · `auth` · `home` · `events` · `news` · `members`)
+- 검증: CSS 규칙 보존 자동 비교(누락 0), 페이지 3종 로드·기능 테스트 47건 전부 통과
+
 ## 2026-07-09
 
 ### '기록 보기'(마일리지 보드)로 개편 + 출첵 표 개선
