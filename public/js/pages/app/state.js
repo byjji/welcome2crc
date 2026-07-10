@@ -31,12 +31,12 @@ export const state = {
   attendance: {},   // eventId → { uid: {name, status, dist?, sec?} }
   votes: {},        // pollId → { uid: {name, option} }
   eventCats: [...DEFAULT_EVENT_CATS],  // 일정 카테고리 (site/eventCategories)
-  mileage: {},      // uid → { name, note(각오), goal(목표km), km(현재km) }
+  mileage: {},      // uid → { name, goal(목표km), months: { "2026-07": 누적km } }
 };
 
 /* ---------- 화면 상태 ---------- */
 export let eventCatFilter = "all";   // 일정 목록 카테고리 필터
-export let statMonth = null;         // 출석 현황·랭킹에서 보고 있는 달 ("2026-07")
+export let statMonth = null;         // 출석 현황·이달의 기록에서 보고 있는 달 ("2026-07")
 export let monthAtt = {};            // eventId → 출석 맵 (지난 일정 캐시)
 export const monthLoaded = new Set(); // 출석 데이터를 받아온 달
 export let attDayId = null;          // '출석 현황'에서 칩으로 선택한 정기런

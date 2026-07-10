@@ -25,15 +25,15 @@
 }
 
 .form-msg.ok {
-  background: #e8f4ea;
-  color: #2c5e3a;
-  border: 1px solid #bcd9c4;
+  background: var(--leaf-soft);
+  color: var(--leaf-deep);
+  border: 1px solid var(--leaf-line);
 }
 
 .form-msg.error {
-  background: #fdecec;
-  color: #a33030;
-  border: 1px solid #f0c4c4;
+  background: var(--danger-soft);
+  color: var(--danger-deep);
+  border: 1px solid var(--danger-line);
 }
 
 /* ---------- 앱 공통 레이아웃 ---------- */
@@ -82,7 +82,7 @@
   border-radius: 999px;
   border: none;
   cursor: pointer;
-  background: var(--carrot);
+  background: var(--carrot-vivid);
   color: #fff;
   transition: background 0.2s ease;
 }
@@ -106,11 +106,11 @@
 }
 
 .btn-mini.danger {
-  background: #c0392b;
+  background: var(--danger);
 }
 
 .btn-mini.danger:hover {
-  background: #a93226;
+  background: var(--danger-deep);
 }
 
 .btn-mini.leaf {
@@ -219,7 +219,7 @@
 
 .btn-google:hover {
   border-color: var(--carrot);
-  background: #fffaf6;
+  background: var(--surface-tint);
   transform: none;
 }
 
@@ -263,7 +263,7 @@
 }
 
 .auth-mode.active {
-  background: var(--carrot);
+  background: var(--carrot-vivid);
   color: #fff;
 }
 
@@ -294,9 +294,9 @@
   margin-top: 1rem;
   padding: 0.8em 1.1em;
   border-radius: 12px;
-  background: #fdecec;
-  color: #a33030;
-  border: 1px solid #f0c4c4;
+  background: var(--danger-soft);
+  color: var(--danger-deep);
+  border: 1px solid var(--danger-line);
   font-size: 0.9rem;
   font-weight: 600;
 }
@@ -347,7 +347,7 @@
 }
 
 .app-tab.active {
-  background: var(--carrot);
+  background: var(--carrot-vivid);
   border-color: var(--carrot);
   color: #fff;
 }
@@ -448,7 +448,7 @@
   background: var(--white);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
   padding: 1.4rem 1.6rem;
 }
 
@@ -463,6 +463,11 @@
 .app-card-head h4 {
   font-size: 1.08rem;
   font-weight: 800;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 .app-card-meta {

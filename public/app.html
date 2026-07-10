@@ -26,7 +26,6 @@
       </a>
       <div class="app-user" id="appUser" hidden>
         <button class="app-user-name" id="userName" title="내 정보 수정"></button>
-        <a href="admin.html" class="btn-mini dark icon-btn" id="adminPageLink" hidden title="페이지 관리" aria-label="페이지 관리">⚙️</a>
         <button class="btn-mini ghost" id="btnLogout">로그아웃</button>
       </div>
     </div>
@@ -193,8 +192,7 @@
           <div class="sub-tabs" id="eventSubTabs">
             <button class="sub-tab active" data-subtab="ev-list">📅 일정</button>
             <button class="sub-tab" data-subtab="ev-att">🥕 출석 현황</button>
-            <button class="sub-tab" data-subtab="ev-rec">⏱️ 기록 보기</button>
-            <button class="sub-tab" data-subtab="ev-rank">🏆 이달의 랭킹</button>
+            <button class="sub-tab" data-subtab="ev-rec">🏆 이달의 기록</button>
           </div>
 
           <!-- 서브탭 1: 일정 -->
@@ -242,25 +240,19 @@
             </div>
             <div class="sum-chips" id="attSummary"></div>
             <div id="attMatrix"><p class="empty-note">출석 현황을 불러오는 중...</p></div>
-            <p class="mtx-cap">🥕 = 참석 · <strong>정기런</strong> 일정만 출석으로 집계돼요 · 표를 좌우로 밀면 다른 일정도 보여요</p>
+            <p class="mtx-cap">🥕 = 참석 · <strong>정기런</strong> 일정만 출석으로 집계돼요</p>
           </div>
 
-          <!-- 서브탭 3: 기록 보기 (마일리지) -->
+          <!-- 서브탭 3: 이달의 기록 (마일리지 + 월별 랭킹) -->
           <div class="sub-panel" id="ev-rec">
             <div id="myRecordBox"></div>
-            <h3 class="panel-subtitle">기록 보기</h3>
-            <div id="recTable"><p class="empty-note">기록을 불러오는 중...</p></div>
-          </div>
-
-          <!-- 서브탭 4: 이달의 랭킹 -->
-          <div class="sub-panel" id="ev-rank">
             <div class="month-nav">
               <button type="button" data-mnav="-1" aria-label="이전 달">‹</button>
               <span class="m stat-month-label"></span>
               <button type="button" data-mnav="1" aria-label="다음 달">›</button>
             </div>
-            <div id="rankTable"><p class="empty-note">랭킹을 불러오는 중...</p></div>
-            <p class="mtx-cap">🏆 이달 총 거리 기준 정렬 · 같은 거리면 출석 횟수 순</p>
+            <div id="recTable"><p class="empty-note">기록을 불러오는 중...</p></div>
+            <p class="mtx-cap">🥇🥈🥉 = 출석 많은 순, 같으면 누적(km) 많은 순 · 출석은 <strong>정기런</strong> 기준</p>
           </div>
         </div>
 
@@ -333,6 +325,7 @@
             <button class="app-tab" data-tab="events"><span class="ic">🥕</span>일정·출첵</button>
             <button class="app-tab" data-tab="news"><span class="ic">📢</span>소식</button>
             <button class="app-tab" data-tab="members"><span class="ic">👥</span>멤버</button>
+            <a class="app-tab" id="adminPageLink" href="admin.html" hidden title="페이지 관리"><span class="ic">⚙️</span>페이지 관리</a>
           </div>
         </nav>
 
@@ -525,17 +518,13 @@
       </div>
       <p class="modal-desc" id="mileageWho"></p>
       <form id="mileageForm" class="auth-form">
-        <div class="form-row">
-          <label for="mileNote">각오</label>
-          <input type="text" id="mileNote" maxlength="30" placeholder="예) 이번 시즌 100km 도전!" />
-        </div>
         <div class="form-row form-row-datetime">
           <div>
             <label for="mileGoal">목표 마일리지 (km)</label>
             <input type="text" id="mileGoal" inputmode="decimal" placeholder="100" />
           </div>
           <div>
-            <label for="mileKm">현재 마일리지 (km)</label>
+            <label for="mileKm">누적 마일리지 (km)</label>
             <input type="text" id="mileKm" inputmode="decimal" placeholder="0" />
           </div>
         </div>

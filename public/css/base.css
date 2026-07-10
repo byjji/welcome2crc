@@ -8,17 +8,50 @@
    ============================================================ */
 
 :root {
-  --carrot: #ff6b2b;
-  --carrot-deep: #e5511a;
-  --carrot-soft: #ffe3d3;
-  --leaf: #3e7c4f;
-  --ink: #1d1712;
-  --ink-soft: #4c4239;
-  --cream: #fbf7f0;
-  --white: #ffffff;
-  --line: #eadfd2;
+  /* ── 브랜드 (로고 추출색: 당근 #ce6d2a · 잎 #3a7e31 · 크림 #f7f7e7) ── */
+  --carrot: #ce6d2a;        /* 로고 원색 = 브랜드 앵커 (로고, 도장, 강조) */
+  --carrot-vivid: #e07a2c;  /* 버튼·활성 탭 등 '누를 수 있는 것' */
+  --carrot-deep: #a8531a;   /* pressed 상태, 밝은 배경 위 주황 텍스트 */
+  --carrot-soft: #f6ddc2;   /* 파스텔 강조면 (배너 등) */
+  --carrot-pale: #fbeedd;   /* 옅은 틴트 (선택 행, 내 기록 행) */
+  --carrot-line: #ecc59e;   /* 주황 계열 테두리 */
+
+  --leaf: #3a7e31;          /* 로고 잎색 = success 겸용 (참석, 저장 완료) */
+  --leaf-deep: #2f6428;
+  --leaf-soft: #e4f0e0;
+  --leaf-line: #c5dcc0;
+
+  /* ── 뉴트럴 (크림을 로고 아이보리 톤으로) ── */
+  --ink: #241c14;           /* 본문 (테라코타와 어울리는 웜 블랙) */
+  --ink-soft: #55483c;      /* 보조 텍스트 */
+  --ink-mute: #8d8478;      /* 비활성 */
+  --ink-faint: #cbc0b0;     /* 미입력·플레이스홀더 */
+  --cream: #f9f6ea;         /* 페이지 배경 */
+  --white: #ffffff;         /* 카드 */
+  --surface-tint: #fbf3e6;  /* 카드 안 강조 행·푸터 */
+  --line: #e8e0cf;
+
+  /* ── 상태 ── */
+  --danger: #c0392b;        /* 삭제·거절·일요일 */
+  --danger-deep: #a33030;
+  --danger-soft: #fdecec;
+  --danger-line: #f0c4c4;
+  --info: #2563eb;          /* 토요일, 정보성 */
+
   --radius: 18px;
-  --shadow: 0 10px 30px rgba(29, 23, 18, 0.08);
+  --shadow: 0 10px 30px rgba(36, 28, 20, 0.08);      /* 히어로·모달 등 주인공 요소 전용 */
+  --shadow-sm: 0 2px 10px rgba(36, 28, 20, 0.06);    /* 일반 카드·리스트 (기본값) */
+  --shadow-glow: 0 8px 24px rgba(206, 109, 42, 0.3); /* primary 버튼 전용 */
+
+  /* ── 타이포 스케일 (신규 작성분부터 이 6단계만 사용) ── */
+  --fs-xs: 0.75rem;   /* 메타·캡션 */
+  --fs-sm: 0.85rem;   /* 리스트 보조 */
+  --fs-md: 0.95rem;   /* 본문 */
+  --fs-lg: 1.1rem;    /* 카드 제목 */
+  --fs-xl: 1.35rem;   /* 섹션 히어로 */
+  --fs-num: 1.9rem;   /* D-day·통계 숫자 (tabular-nums와 함께) */
+  --lh-tight: 1.35;   /* 리스트·테이블 (본문은 1.65 유지) */
+
   --font: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,
     "Segoe UI", "Malgun Gothic", sans-serif;
 }
@@ -73,9 +106,9 @@ a {
 }
 
 .btn-primary {
-  background: var(--carrot);
+  background: var(--carrot-vivid);
   color: #fff;
-  box-shadow: 0 8px 24px rgba(255, 107, 43, 0.35);
+  box-shadow: var(--shadow-glow);
 }
 
 .btn-primary:hover {
@@ -106,7 +139,7 @@ a {
 }
 
 .site-header.scrolled {
-  background: rgba(29, 23, 18, 0.85);
+  background: rgba(36, 28, 20, 0.85);
   backdrop-filter: blur(12px);
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.25);
 }
@@ -153,7 +186,7 @@ a {
 }
 
 .nav-cta {
-  background: var(--carrot);
+  background: var(--carrot-vivid);
   color: #fff !important;
   padding: 0.45em 1.2em;
   border-radius: 999px;
@@ -201,4 +234,25 @@ a {
 /* hidden 속성이 어떤 display 규칙보다 우선하도록 */
 [hidden] {
   display: none !important;
+}
+
+/* ---------- 눌림 피드백 (모던·액티브 마이크로 인터랙션) ---------- */
+.btn:active,
+.btn-mini:active,
+.app-tab:active,
+.sub-tab:active,
+.rsvp-btn:active,
+.ev-chip:active {
+  transform: scale(0.96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn:active,
+  .btn-mini:active,
+  .app-tab:active,
+  .sub-tab:active,
+  .rsvp-btn:active,
+  .ev-chip:active {
+    transform: none;
+  }
 }

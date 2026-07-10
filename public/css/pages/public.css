@@ -6,7 +6,7 @@
 /* ---------- 히어로 ---------- */
 .hero {
   position: relative;
-  background: linear-gradient(160deg, #241c15 0%, #1d1712 55%, #2a1c10 100%);
+  background: linear-gradient(160deg, var(--ink) 0%, var(--ink) 55%, #241c14 100%);
   color: #fff;
   padding: 11rem 0 5rem;
   overflow: hidden;
@@ -26,7 +26,7 @@
   right: -160px;
   top: -160px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 107, 43, 0.28), transparent 65%);
+  background: radial-gradient(circle, rgba(206, 109, 42, 0.28), transparent 65%);
 }
 
 .hero-bg::after {
@@ -278,7 +278,7 @@
 }
 
 .record-tab.active {
-  background: var(--carrot);
+  background: var(--carrot-vivid);
   border-color: var(--carrot);
   color: #fff;
 }
@@ -306,7 +306,7 @@
   justify-content: space-between;
   gap: 1rem;
   padding: 1.3rem 1.6rem;
-  background: linear-gradient(120deg, #fff4ec, #fffdfa);
+  background: linear-gradient(120deg, var(--surface-tint), var(--white));
   border-bottom: 1px solid var(--line);
 }
 
@@ -347,7 +347,7 @@
 }
 
 .record-table tbody tr + tr td {
-  border-top: 1px solid #f3ece2;
+  border-top: 1px solid var(--surface-tint);
 }
 
 .event-badge {
@@ -394,10 +394,10 @@
   font-size: 2.4rem;
 }
 
-.gallery-placeholder.p1 { background: linear-gradient(135deg, #ffd9c2, #ffb38a); }
-.gallery-placeholder.p2 { background: linear-gradient(135deg, #d9ecd9, #a8cfae); }
-.gallery-placeholder.p3 { background: linear-gradient(135deg, #ffe9cf, #ffc98f); }
-.gallery-placeholder.p4 { background: linear-gradient(135deg, #e8e0d3, #cbbfa8); }
+.gallery-placeholder.p1 { background: linear-gradient(135deg, var(--carrot-soft), var(--carrot-line)); }
+.gallery-placeholder.p2 { background: linear-gradient(135deg, var(--leaf-soft), var(--leaf-line)); }
+.gallery-placeholder.p3 { background: linear-gradient(135deg, var(--carrot-pale), var(--carrot-soft)); }
+.gallery-placeholder.p4 { background: linear-gradient(135deg, var(--line), var(--ink-faint)); }
 
 .gallery-item figcaption {
   padding: 0.8rem 1.1rem;
@@ -408,7 +408,7 @@
 
 /* ---------- 가입 ---------- */
 .join-section {
-  background: linear-gradient(180deg, var(--cream) 0%, #fff0e5 100%);
+  background: linear-gradient(180deg, var(--cream) 0%, var(--carrot-pale) 100%);
 }
 
 .join-steps {
@@ -805,7 +805,7 @@
 }
 
 .viewer-close:hover {
-  background: var(--carrot);
+  background: var(--carrot-vivid);
 }
 
 .viewer-body {

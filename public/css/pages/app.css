@@ -1,6 +1,6 @@
 /* ============================================================
    pages/app.css — 크루 공간(app.html) 전용
-   일정·출첵 · 공지·투표(소식) · 멤버 · 가입신청 폼 · 하단 탭 · 홈 · 출석/마일리지/랭킹
+   일정·출첵 · 공지·투표(소식) · 멤버 · 가입신청 폼 · 하단 탭 · 홈 · 출석/이달의 기록
    ============================================================ */
 
 /* ---------- 일정 카드 ---------- */
@@ -79,8 +79,8 @@
 }
 
 .rsvp-btn.on-no {
-  background: #8d8478;
-  border-color: #8d8478;
+  background: var(--ink-mute);
+  border-color: var(--ink-mute);
   color: #fff;
 }
 
@@ -116,7 +116,7 @@
 }
 
 .event-card.past .event-date-box {
-  background: #b7ac9d;
+  background: var(--ink-mute);
 }
 
 /* ---------- 투표 카드 ---------- */
@@ -129,12 +129,12 @@
 }
 
 .poll-status.open {
-  background: #e8f4ea;
+  background: var(--leaf-soft);
   color: var(--leaf);
 }
 
 .poll-status.closed {
-  background: #eee7dc;
+  background: var(--line);
   color: var(--ink-soft);
 }
 
@@ -173,7 +173,7 @@
 .poll-option .bar {
   position: absolute;
   inset: 0 auto 0 0;
-  background: rgba(255, 107, 43, 0.16);
+  background: rgba(206, 109, 42, 0.16);
   transition: width 0.4s ease;
 }
 
@@ -228,7 +228,7 @@
   flex: 0 0 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(160deg, var(--carrot-soft), #ffd0b3);
+  background: linear-gradient(160deg, var(--carrot-soft), var(--carrot-soft));
   display: flex;
   align-items: center;
   justify-content: center;
@@ -264,7 +264,7 @@
 
 .role-badge.admin {
   background: var(--ink);
-  color: #ffb38a;
+  color: var(--carrot-line);
 }
 
 .member-admin-actions {
@@ -389,7 +389,7 @@ details.notice-row[open] .notice-arrow {
 }
 
 .sub-tab.active {
-  background: var(--carrot);
+  background: var(--carrot-vivid);
   border-color: var(--carrot);
   color: #fff;
 }
@@ -412,6 +412,20 @@ details.notice-row[open] .notice-arrow {
   display: none;
 }
 
+/* 일정·출첵 서브탭: 화면 폭과 무관하게 3개가 한 줄에 들어가도록 */
+#eventSubTabs {
+  flex-wrap: nowrap;
+}
+
+#eventSubTabs .sub-tab {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0.5em 0.2em;
+  text-align: center;
+  white-space: nowrap;
+  font-size: clamp(0.72rem, 3.2vw, 0.92rem);
+}
+
 .sub-panel.active {
   display: block;
 }
@@ -422,7 +436,7 @@ details.notice-row[open] .notice-arrow {
 
 .rejected-badge {
   display: inline-block;
-  background: #eee7dc;
+  background: var(--line);
   color: var(--ink-soft);
   font-weight: 800;
   font-size: 0.72rem;
@@ -689,7 +703,7 @@ details.notice-row[open] .notice-arrow {
   z-index: 100;
   background: var(--white);
   border-top: 1.5px solid var(--line);
-  box-shadow: 0 -6px 24px rgba(29, 23, 18, 0.07);
+  box-shadow: 0 -6px 24px rgba(36, 28, 20, 0.07);
 }
 
 .bottom-nav .nav-inner {
@@ -713,6 +727,7 @@ details.notice-row[open] .notice-arrow {
   color: var(--ink-soft);
   opacity: 0.75;
   white-space: nowrap;
+  text-decoration: none; /* ⚙️ 페이지 관리는 a 태그 */
 }
 
 .bottom-nav .app-tab .ic {
@@ -760,15 +775,28 @@ details.notice-row[open] .notice-arrow {
 }
 
 /* 카테고리별 D-day 카드 (가로 배치) */
+/* 홈 D-day: 주인공 1장 크게 + 나머지 가로 스와이프 (scroll-snap) */
 .dday-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
-  gap: 0.6rem;
+  display: flex;
+  gap: 0.7rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 2px 2px 10px;
+  margin: 0 -2px;
+  scrollbar-width: none;
+}
+
+.dday-row::-webkit-scrollbar {
+  display: none;
 }
 
 .dday-card {
+  flex: 0 0 44%;
+  max-width: 190px;
+  scroll-snap-align: start;
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
   padding: 0.9rem 0.85rem;
   color: #fff;
   position: relative;
@@ -781,6 +809,7 @@ details.notice-row[open] .notice-arrow {
   text-align: left;
 }
 
+/* 첫 카드 = 가장 가까운 일정 (주인공) */
 .dday-card .cat-name {
   font-size: 0.72rem;
   font-weight: 800;
@@ -817,7 +846,7 @@ details.notice-row[open] .notice-arrow {
   opacity: 0.93;
   margin-top: auto;
   padding-top: 0.5rem;
-  line-height: 1.5;
+  line-height: var(--lh-tight);
 }
 
 /* 고정 공지 배너 */
@@ -873,6 +902,7 @@ details.notice-row[open] .notice-arrow {
   align-items: center;
   gap: 0.75rem;
   padding: 0.8rem 0;
+  line-height: var(--lh-tight);
 }
 
 .sched-row + .sched-row {
@@ -897,8 +927,8 @@ details.notice-row[open] .notice-arrow {
   font-weight: 700;
 }
 
-.sched-date .w.sat { color: #2563eb; }
-.sched-date .w.sun { color: #c0504d; }
+.sched-date .w.sat { color: var(--info); }
+.sched-date .w.sun { color: var(--danger); }
 
 .sched-body {
   flex: 1;
@@ -936,7 +966,7 @@ details.notice-row[open] .notice-arrow {
 }
 
 /* ============================================================
-   출석 현황 · 일정별 기록 · 이달의 랭킹
+   출석 현황 · 이달의 기록
    ============================================================ */
 .month-nav {
   display: flex;
@@ -967,24 +997,24 @@ details.notice-row[open] .notice-arrow {
   font-weight: 900;
 }
 
-/* 요약 칩 */
+/* 요약 칩 — 화면 폭을 균등하게 나눠서 배치 */
 .sum-chips {
   display: flex;
   gap: 0.4rem;
-  overflow-x: auto;
-  padding-bottom: 0.3rem;
   margin-bottom: 0.9rem;
 }
 
 .sum-chip {
-  flex-shrink: 0;
-  font-size: 0.8rem;
+  flex: 1 1 0;
+  min-width: 0;
+  text-align: center;
+  font-size: clamp(0.68rem, 3vw, 0.8rem);
   font-weight: 600;
   color: var(--ink-soft);
   background: var(--white);
   border: 1.5px solid var(--line);
   border-radius: 999px;
-  padding: 0.45em 1em;
+  padding: 0.45em 0.2em;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -1000,7 +1030,7 @@ details.notice-row[open] .notice-arrow {
   border-radius: var(--radius);
   border: 1px solid var(--line);
   background: var(--white);
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
 }
 
 table.mtx {
@@ -1068,7 +1098,7 @@ table.mtx .stamp {
 }
 
 table.mtx .miss {
-  color: #d8cfc4;
+  color: var(--ink-faint);
   font-size: 0.85rem;
 }
 
@@ -1077,7 +1107,7 @@ table.mtx th.sum {
   font-weight: 800;
   color: var(--carrot-deep);
   font-variant-numeric: tabular-nums;
-  background: #fff7f1;
+  background: var(--surface-tint);
 }
 
 .mtx-cap {
@@ -1116,7 +1146,7 @@ table.mtx th.sum {
 }
 
 .ev-chip.active {
-  background: var(--carrot);
+  background: var(--carrot-vivid);
   border-color: var(--carrot);
   color: #fff;
 }
@@ -1182,7 +1212,7 @@ table.rec tr:last-child td {
 }
 
 table.rec td.none {
-  color: #c9beb2;
+  color: var(--ink-faint);
   font-weight: 400;
 }
 
@@ -1197,10 +1227,10 @@ table.rec td.none {
 }
 
 .st-yes { background: var(--leaf); }
-.st-no { background: #d8cfc4; }
+.st-no { background: var(--ink-faint); }
 
 tr.me-row td {
-  background: #fff7f1;
+  background: var(--surface-tint);
 }
 
 .rec-foot {
@@ -1273,7 +1303,7 @@ tr.me-row td {
   padding: 0.55em 1.3em;
   border-radius: 999px;
   border: none;
-  background: var(--carrot);
+  background: var(--carrot-vivid);
   color: #fff;
   cursor: pointer;
 }
@@ -1292,7 +1322,7 @@ tr.me-row td {
   color: var(--leaf);
 }
 
-/* 랭킹 메달 + 운영진 대신 입력 버튼 */
+/* 이달의 기록: 메달 + ✏️ 수정 버튼 */
 .rank-medal {
   font-size: 0.95rem;
   margin-right: 3px;
@@ -1332,7 +1362,7 @@ tr.me-row td {
   background: var(--white);
   border: 1px solid var(--line);
   border-radius: 14px;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-sm);
   padding: 0.65rem 0.9rem;
 }
 
@@ -1485,24 +1515,25 @@ details.att-manage[open] > summary .notice-arrow {
 
 /* 일정 카드: 삭제 버튼 - 카드와 같은 배경에 빨간 X */
 .btn-mini.btn-x {
-  color: #c0392b;
+  color: var(--danger);
   font-weight: 800;
 }
 
 .btn-mini.btn-x:hover {
-  border-color: #c0392b;
+  border-color: var(--danger);
 }
 
-/* 기록 보기(마일리지) 표: 각오는 왼쪽 정렬 + 말줄임 */
-table.rec.mileage td.mile-note {
-  text-align: left;
-  max-width: 8.5em;
-  overflow: hidden;
-  text-overflow: ellipsis;
+/* 참석·✏️/✕ 버튼 — 일정 카드 우측 상단 구석의 독립된 줄에 작게
+   (음수 마진으로 카드 여백 안쪽까지 당기고, 제목은 아래에서 전체 폭 사용) */
+.event-card .card-actions {
+  justify-content: flex-end;
+  flex-wrap: nowrap;
+  gap: 0.3rem;
+  margin: -0.7rem -0.9rem 0.15rem 0;
+}
+
+.event-card .card-actions .btn-mini {
+  font-size: 0.68rem;
+  padding: 0.34em 0.55em;
   white-space: nowrap;
-  font-weight: 400;
-}
-
-table.rec.mileage th:nth-child(2) {
-  text-align: left;
 }

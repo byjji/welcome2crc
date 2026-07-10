@@ -1,7 +1,98 @@
 /* ============================================================
    pages/admin.css — 페이지 관리(admin.html) 전용
-   관리 힌트 · 편집 블록 · 동적 행 · 공식 기록/갤러리 관리
+   관리 힌트 · 미리보기 프레임 · 편집 블록 · 동적 행 · 공식 기록/갤러리 관리
    ============================================================ */
+
+/* ============================================================
+   한 화면 편집 — 소개 페이지 순서대로 섹션(미리보기 + 폼) 나열
+   ============================================================ */
+.edit-sec {
+  margin-bottom: 1.6rem;
+}
+
+.edit-sec + .edit-sec {
+  border-top: 2px dashed var(--line);
+  padding-top: 1.6rem;
+}
+
+.sec-label {
+  font-size: 1.18rem;
+  font-weight: 900;
+  margin-bottom: 0.8rem;
+}
+
+.sec-label .muted {
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
+/* ============================================================
+   미리보기 프레임 — 소개 페이지의 실제 모습(public.css)을 그대로,
+   관리 화면 폭에 맞게 여백만 줄여서 표시
+   ============================================================ */
+.pv-frame {
+  position: relative;
+  border: 2px dashed var(--carrot-line);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 1.6rem;
+  background: var(--white);
+}
+
+.pv-tag {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--carrot-vivid);
+  padding: 0.3em 0.9em;
+  border-radius: 0 0 10px 0;
+}
+
+.pv-empty {
+  padding: 1.8rem 1.2rem;
+  font-size: 0.86rem;
+  color: var(--ink-mute);
+  text-align: center;
+}
+
+/* 소개 페이지 섹션 여백 축소 (모습은 그대로) */
+.pv-frame .hero {
+  padding: 2.8rem 0 2.2rem;
+}
+
+.pv-frame .section {
+  padding: 2.4rem 0 2rem;
+}
+
+.pv-frame .hero-eyebrow {
+  margin-bottom: 0.7rem;
+  font-size: 0.72rem;
+}
+
+.pv-frame .hero-title {
+  font-size: clamp(1.5rem, 6vw, 2.2rem);
+}
+
+.pv-frame .hero-sub {
+  margin-top: 0.8rem;
+  font-size: 0.92rem;
+}
+
+.pv-frame .section-title {
+  font-size: clamp(1.25rem, 4.5vw, 1.7rem);
+}
+
+.pv-frame .section-desc {
+  margin-bottom: 1.4rem;
+}
+
+.pv-frame .stats {
+  margin-top: 0;
+}
 
 /* ============================================================
    관리자 페이지 (admin.html)
@@ -95,7 +186,7 @@
   padding: 0.8rem;
   border: 1px dashed var(--line);
   border-radius: 12px;
-  background: #fffdfa;
+  background: var(--white);
 }
 
 .stat-row {
@@ -140,15 +231,15 @@
   height: 32px;
   border-radius: 50%;
   border: none;
-  background: #f3e8dd;
-  color: #a06a4a;
+  background: var(--surface-tint);
+  color: var(--carrot-deep);
   font-weight: 800;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
 }
 
 .row-del:hover {
-  background: #c0392b;
+  background: var(--danger);
   color: #fff;
 }
 
@@ -304,6 +395,6 @@
 }
 
 .photo-del:hover {
-  background: #c0392b;
+  background: var(--danger);
 }
 

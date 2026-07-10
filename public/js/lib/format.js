@@ -90,9 +90,10 @@ export function fmtPace(secPerKm) {
 
 /* ---------- 일정 카테고리 색 ---------- */
 /* 기본 카테고리는 고정 색, 새로 만든 카테고리는 이름 기반 자동 배정
-   (러닝·이벤트는 예전 기본값으로 만든 일정을 위해 색만 유지) */
-export const CAT_COLORS = { "대회": "#d94f2b", "정기런": "#e8871e", "모임": "#2f9e6e", "러닝": "#e8871e", "이벤트": "#7c5cd6" };
-const CAT_FALLBACK_COLORS = ["#3a7bd5", "#c4527a", "#5f8f3e", "#b8860b", "#5e6ad2"];
+   (러닝·이벤트는 예전 기본값으로 만든 일정을 위해 색만 유지)
+   → 로고 팔레트(차분한 테라코타·잎색)에 맞춘 뮤트 톤 */
+export const CAT_COLORS = { "대회": "#bf4b2b", "정기런": "#cd7a24", "모임": "#3a7e31", "러닝": "#cd7a24", "이벤트": "#6b5bb5" };
+const CAT_FALLBACK_COLORS = ["#3e6fae", "#b04f74", "#5f8f3e", "#a67c1b", "#5a63b8"];
 
 export function catColor(cat) {
   if (CAT_COLORS[cat]) return CAT_COLORS[cat];
@@ -108,4 +109,17 @@ export function shadeColor(hex, f) {
   const g = Math.round(((n >> 8) & 255) * f);
   const b = Math.round((n & 255) * f);
   return `rgb(${r}, ${g}, ${b})`;
+}
+
+/* 파스텔 배지용: 색을 흰색과 혼합해 밝게 (f=0~1, 클수록 밝음) */
+export function tintColor(hex, f) {
+  const n = parseInt(hex.slice(1), 16);
+  const mix = (v) => Math.round(v + (255 - v) * f);
+  return `rgb(${mix((n >> 16) & 255)}, ${mix((n >> 8) & 255)}, ${mix(n & 255)})`;
+}
+
+/* 카테고리 배지 인라인 스타일: 파스텔 배경 + 진한 글자 (대비 확보 원칙) */
+export function catBadgeStyle(cat) {
+  const c = catColor(cat);
+  return `background:${tintColor(c, 0.84)};color:${shadeColor(c, 0.62)}`;
 }

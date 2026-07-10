@@ -3,13 +3,12 @@
    ------------------------------------------------------------
    서브탭 1 일정: 목록·카테고리·참석(출석체크)·참석자 관리
    서브탭 2 출석 현황: 정기런 날짜 칩 + 월별 매트릭스
-   서브탭 3 기록 보기: 마일리지 보드
-   서브탭 4 이달의 랭킹
+   서브탭 3 이달의 기록: 월별 마일리지 보드 + 메달 랭킹
    ============================================================ */
 import { $, openModal, closeModal, showFormMsg } from "../../lib/ui.js";
 import {
-  esc, todayStr, parseDateParts, catColor,
-  thisMonthKey, shiftMonth, monthLabel, fmtPace,
+  esc, todayStr, parseDateParts, catColor, catBadgeStyle,
+  thisMonthKey, shiftMonth, monthLabel,
 } from "../../lib/format.js";
 import {
   db, collection, doc, getDocs, setDoc, addDoc, updateDoc, deleteDoc,
@@ -134,7 +133,7 @@ function eventCardHtml(ev, isPast, openAtt) {
     const yes = entries.filter(([, v]) => v.status === "yes");
     const mine = att && me && att[me.uid] ? att[me.uid].status : null;
 
-    // 참석 버튼: 카드 우측 상단, 수정·삭제와 같은 모양 (다시 누르면 취소)
+    // 참석 버튼: 수정·삭제 아이콘과 같은 크기로 우측 상단 구석에 (다시 누르면 취소)
     actionsHtml = `<button class="btn-mini ${mine === "yes" ? "leaf" : "dark"}" data-action="rsvp" data-id="${ev.id}" data-status="yes">🙋 참석 ${yes.length}</button>`;
     attendHtml = yes.length
       ? `<p class="attend-names"><span class="leaf">참석</span> ${attNamesShort(yes)}</p>`
@@ -165,9 +164,9 @@ function eventCardHtml(ev, isPast, openAtt) {
         <div class="d-dow">${dp.dow}</div>
       </div>
       <div class="event-main">
+        ${actionsHtml ? `<div class="card-actions">${actionsHtml}</div>` : ""}
         <div class="app-card-head">
-          <h4>${ev.category ? `<span class="event-cat" style="background:${catColor(ev.category)}">${esc(ev.category)}</span>` : ""}${esc(ev.title)}</h4>
-          ${actionsHtml ? `<div class="card-actions">${actionsHtml}</div>` : ""}
+          <h4>${ev.category ? `<span class="event-cat" style="${catBadgeStyle(ev.category)}">${esc(ev.category)}</span>` : ""}${esc(ev.title)}</h4>
         </div>
         <p class="event-info">🕖 ${esc(ev.time)} · 📍 ${esc(ev.place)}${ev.note ? ` · ${esc(ev.note)}` : ""}${ev.updatedAt ? ` <span class="muted">(수정됨)</span>` : ""}</p>
         ${attendHtml}
@@ -356,7 +355,7 @@ $("editEventForm").addEventListener("submit", async (e) => {
 });
 
 /* ============================================================
-   출석 데이터 공통 (출석 현황 · 랭킹)
+   출석 데이터 공통 (출석 현황 · 이달의 기록)
    ------------------------------------------------------------
    기록은 events/{id}/attendance/{uid} 문서에 저장.
    다가오는 일정은 실시간 구독(state.attendance), 지난 일정은
@@ -379,10 +378,10 @@ function crewMembers() {
 export function renderStatsIfLoaded() {
   if (!statMonth || !monthLoaded.has(statMonth)) return;
   renderAttMatrix();
-  renderRanking();
+  renderMileage();
 }
 
-/* 보고 있는 달의 출석 데이터 확보 후 매트릭스·랭킹 렌더 */
+/* 보고 있는 달의 출석 데이터 확보 후 매트릭스·기록 렌더 */
 export async function ensureMonthData() {
   if (!statMonth) setStatMonth(thisMonthKey());
   document.querySelectorAll(".stat-month-label").forEach((el) =>
@@ -405,10 +404,10 @@ export async function ensureMonthData() {
   }
   monthLoaded.add(statMonth);
   renderAttMatrix();
-  renderRanking();
+  renderMileage();
 }
 
-/* 출석 현황·랭킹 공용 월 이동 */
+/* 출석 현황·이달의 기록 공용 월 이동 */
 $("tab-events").addEventListener("click", (e) => {
   const btn = e.target.closest("[data-mnav]");
   if (!btn) return;
@@ -430,7 +429,7 @@ function renderAttChips() {
     const yes = Object.values(attOf(ev.id)).filter((a) => a.status === "yes").length;
     const [, m, d] = ev.date.split("-").map(Number);
     const dp = parseDateParts(ev.date);
-    return `<button type="button" class="ev-chip${ev.id === attDayId ? " active" : ""}" data-attday="${ev.id}">${m}/${d}(${dp.dow.charAt(0)}) 🥕${yes}</button>`;
+    return `<button type="button" class="ev-chip${ev.id === attDayId ? " active" : ""}" data-attday="${ev.id}">${m}/${d}(${dp.dow.charAt(0)}) : ${yes}</button>`;
   }).join("");
 
   renderAttDayPanel();
@@ -483,15 +482,11 @@ function renderAttMatrix() {
   }
 
   let totalYes = 0;
-  let totalDist = 0;
   const rows = members.map((m) => {
     const cells = evs.map((ev) => {
       const a = attOf(ev.id)[m.id];
       const yes = !!(a && a.status === "yes");
-      if (yes) {
-        totalYes++;
-        if (a.dist) totalDist += a.dist;
-      }
+      if (yes) totalYes++;
       return yes;
     });
     return { m, cells, sum: cells.filter(Boolean).length };
@@ -500,8 +495,7 @@ function renderAttMatrix() {
   const rate = Math.round((totalYes / (members.length * evs.length)) * 100);
   $("attSummary").innerHTML = `
     <span class="sum-chip">정기런 <b>${evs.length}회</b></span>
-    <span class="sum-chip">참석 연인원 <b>${totalYes}명</b></span>
-    <span class="sum-chip">총 거리 <b>${totalDist ? totalDist.toFixed(1) : 0}km</b></span>
+    <span class="sum-chip">총 참석수 <b>${totalYes}명</b></span>
     <span class="sum-chip">평균 출석률 <b>${rate}%</b></span>`;
 
   box.innerHTML = `
@@ -529,72 +523,25 @@ function renderAttMatrix() {
 }
 
 /* ============================================================
-   서브탭 4: 이달의 랭킹
+   서브탭 3: 이달의 기록 (월별 마일리지 보드 + 메달 랭킹)
+   ------------------------------------------------------------
+   각자 '오늘의 마일리지'를 저장하면 그 달의 누적에 더해짐.
+   목표·누적 마일리지는 본인(운영진은 모두) 수정 가능.
+   메달은 출석(정기런) 많은 순, 같으면 누적 km 많은 순.
+   데이터: mileage/{uid} = { name, goal(목표km), months: { "2026-07": km } }
    ============================================================ */
-function renderRanking() {
-  const key = statMonth || thisMonthKey();
-  const evs = monthEvents(key);
-  const box = $("rankTable");
-
-  if (!evs.length) {
-    box.innerHTML = `<p class="empty-note">${monthLabel(key)}에는 일정이 없습니다.</p>`;
-    return;
-  }
-
-  const crew = new Map(crewMembers().map((m) => [m.id, m]));
-  const agg = new Map(); // uid → { name, att, dist, sec }
-  evs.forEach((ev) => {
-    Object.entries(attOf(ev.id)).forEach(([uid, a]) => {
-      if (a.status !== "yes") return;
-      if (!agg.has(uid)) {
-        agg.set(uid, { name: crew.get(uid)?.name || a.name || "?", att: 0, dist: 0, sec: 0 });
-      }
-      const r = agg.get(uid);
-      r.att++;
-      if (a.dist && a.sec) {
-        r.dist += a.dist;
-        r.sec += a.sec;
-      }
-    });
-  });
-
-  const list = [...agg.entries()].sort(([, a], [, b]) => b.dist - a.dist || b.att - a.att);
-  if (!list.length) {
-    box.innerHTML = `<p class="empty-note">아직 출석 기록이 없어요.</p>`;
-    return;
-  }
-
-  const medals = ["🥇", "🥈", "🥉"];
-  box.innerHTML = `
-  <article class="app-card rec-card">
-    <table class="rec">
-      <thead><tr><th>이름</th><th>출석</th><th>총 거리</th><th>평균 페이스</th></tr></thead>
-      <tbody>
-        ${list.map(([uid, r], i) => `
-        <tr${me && uid === me.uid ? ' class="me-row"' : ""}>
-          <td>${medals[i] ? `<span class="rank-medal">${medals[i]}</span>` : ""}${esc(r.name)}${me && uid === me.uid ? ' <span class="muted">(나)</span>' : ""}</td>
-          <td>${r.att}회</td>
-          ${r.dist > 0
-            ? `<td>${r.dist.toFixed(1)} km</td><td>${r.sec > 0 ? fmtPace(r.sec / r.dist) : "–"}</td>`
-            : `<td class="none">미입력</td><td class="none">–</td>`}
-        </tr>`).join("")}
-      </tbody>
-    </table>
-  </article>`;
+/* 해당 달의 정기런 출석 횟수 (출석 현황과 같은 기준) */
+function monthAttCount(key, uid) {
+  return monthEvents(key)
+    .filter((ev) => ev.category === ATT_CAT)
+    .filter((ev) => attOf(ev.id)[uid]?.status === "yes").length;
 }
 
-/* ============================================================
-   서브탭 3: 기록 보기 (마일리지 보드)
-   ------------------------------------------------------------
-   각자 '오늘의 마일리지'를 저장하면 현재 마일리지에 누적.
-   목표·각오·현재 마일리지는 본인(운영진은 모두) 수정 가능.
-   데이터: mileage/{uid} = { name, note(각오), goal(목표km), km(현재km) }
-   ============================================================ */
 export function renderMileage() {
   // 입력 중일 때는 실시간 갱신으로 입력값이 지워지지 않도록 잠시 보류
   if (document.activeElement && document.activeElement.id === "myRecDist") return;
 
-  // 오늘의 마일리지 입력 박스
+  // 오늘의 마일리지 입력 박스 (보고 있는 달과 무관하게 오늘 날짜의 달에 누적)
   const t = new Date();
   $("myRecordBox").innerHTML = `
   <div class="my-record">
@@ -606,29 +553,35 @@ export function renderMileage() {
     <p class="mr-pace">저장하면 마일리지가 누적되어요!</p>
   </div>`;
 
-  // 기록 보기 표: 이름 | 각오 | 목표 | 현재 (현재 마일리지 많은 순)
+  // 월별 표: 이름 | 출석 | 목표 | 누적 — 출석 많은 순, 같으면 누적 많은 순
+  const key = statMonth || thisMonthKey();
   const rows = crewMembers()
-    .map((m) => ({ m, r: state.mileage[m.id] || {} }))
-    .sort((a, b) => (b.r.km || 0) - (a.r.km || 0));
+    .map((m) => {
+      const r = state.mileage[m.id] || {};
+      return { m, goal: r.goal || 0, km: (r.months && r.months[key]) || 0, att: monthAttCount(key, m.id) };
+    })
+    .sort((a, b) => b.att - a.att || b.km - a.km);
 
   if (!rows.length) {
     $("recTable").innerHTML = `<p class="empty-note">아직 크루원이 없습니다.</p>`;
     return;
   }
 
+  const medals = ["🥇", "🥈", "🥉"];
   $("recTable").innerHTML = `
   <article class="app-card rec-card">
     <table class="rec mileage">
-      <thead><tr><th>이름</th><th>각오</th><th>목표 (km)</th><th>현재 (km)</th></tr></thead>
+      <thead><tr><th>이름</th><th>출석</th><th>목표 (km)</th><th>누적 (km)</th></tr></thead>
       <tbody>
-        ${rows.map(({ m, r }) => {
+        ${rows.map(({ m, goal, km, att }, i) => {
           const canEdit = isAdmin || (me && m.id === me.uid);
+          const medal = medals[i] && (att > 0 || km > 0) ? `<span class="rank-medal">${medals[i]}</span>` : "";
           return `
           <tr${me && m.id === me.uid ? ' class="me-row"' : ""}>
-            <td>${esc(m.name)}${canEdit ? ` <button type="button" class="btn-edit-rec" data-mileedit="${m.id}" title="목표·각오·마일리지 수정">✏️</button>` : ""}</td>
-            <td class="mile-note">${r.note ? esc(r.note) : '<span class="none">–</span>'}</td>
-            <td>${r.goal ? Math.round(r.goal * 10) / 10 : '<span class="none">–</span>'}</td>
-            <td><b>${r.km ? Math.round(r.km * 10) / 10 : 0}</b></td>
+            <td>${medal}${esc(m.name)}${canEdit ? ` <button type="button" class="btn-edit-rec" data-mileedit="${m.id}" title="목표·누적 마일리지 수정">✏️</button>` : ""}</td>
+            <td>${att ? `${att}회` : '<span class="none">–</span>'}</td>
+            <td>${goal ? Math.round(goal * 10) / 10 : '<span class="none">–</span>'}</td>
+            <td><b>${km ? Math.round(km * 10) / 10 : 0}</b></td>
           </tr>`;
         }).join("")}
       </tbody>
@@ -645,7 +598,7 @@ $("ev-rec").addEventListener("click", async (e) => {
     try {
       await setDoc(doc(db, "mileage", me.uid), {
         name: myProfile.name,
-        km: increment(dist),
+        months: { [thisMonthKey()]: increment(dist) },
         updatedAt: serverTimestamp(),
       }, { merge: true });
       $("myRecDist").value = "";
@@ -665,11 +618,12 @@ function openMileageModal(uid) {
   const m = state.members.find((x) => x.id === uid);
   if (!m) return;
   mileageUid = uid;
+  const key = statMonth || thisMonthKey();
   const r = state.mileage[uid] || {};
-  $("mileageWho").textContent = `${m.name}님의 각오 · 목표 · 현재 마일리지를 수정합니다.`;
-  $("mileNote").value = r.note || "";
+  const km = (r.months && r.months[key]) || 0;
+  $("mileageWho").textContent = `${m.name}님의 목표 · ${monthLabel(key)} 누적 마일리지를 수정합니다.`;
   $("mileGoal").value = r.goal ? Math.round(r.goal * 10) / 10 : "";
-  $("mileKm").value = r.km ? Math.round(r.km * 10) / 10 : "";
+  $("mileKm").value = km ? Math.round(km * 10) / 10 : "";
   $("mileageMsg").hidden = true;
   openModal("mileageModal");
 }
@@ -681,13 +635,12 @@ $("mileageForm").addEventListener("submit", async (e) => {
   const goal = $("mileGoal").value.trim() === "" ? 0 : parseFloat($("mileGoal").value);
   const km = $("mileKm").value.trim() === "" ? 0 : parseFloat($("mileKm").value);
   if (!(goal >= 0) || goal > 10000) return showFormMsg("mileageMsg", "목표 마일리지(km)를 확인해 주세요.", "error");
-  if (!(km >= 0) || km > 10000) return showFormMsg("mileageMsg", "현재 마일리지(km)를 확인해 주세요.", "error");
+  if (!(km >= 0) || km > 10000) return showFormMsg("mileageMsg", "누적 마일리지(km)를 확인해 주세요.", "error");
   try {
     await setDoc(doc(db, "mileage", mileageUid), {
       name: m ? m.name : "?",
-      note: $("mileNote").value.trim(),
       goal: Math.round(goal * 10) / 10,
-      km: Math.round(km * 10) / 10,
+      months: { [statMonth || thisMonthKey()]: Math.round(km * 10) / 10 },
       updatedAt: serverTimestamp(),
     }, { merge: true });
     closeModal("mileageModal");

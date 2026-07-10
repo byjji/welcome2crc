@@ -7,7 +7,7 @@
    ============================================================ */
 
 import { $ } from "../../lib/ui.js";
-import { esc } from "../../lib/format.js";
+import { esc, escMultiline } from "../../lib/format.js";
 import { toAuthEmail, displayAccount } from "../../lib/account.js";
 
 /* ---------- 화면 요소 ---------- */
@@ -137,19 +137,9 @@ function startAdmin() {
 }
 
 /* ============================================================
-   2. 탭 전환
-   ============================================================ */
-$("adminTabs").addEventListener("click", (e) => {
-  const btn = e.target.closest(".app-tab");
-  if (!btn) return;
-  document.querySelectorAll("#adminTabs .app-tab").forEach((t) =>
-    t.classList.toggle("active", t === btn));
-  document.querySelectorAll("#viewAdmin .tab-panel").forEach((p) =>
-    p.classList.toggle("active", p.id === `tab-${btn.dataset.tab}`));
-});
-
-/* ============================================================
-   3. 소개 문구 (site/content 문서)
+   2. 소개 문구 (site/content 문서)
+   ------------------------------------------------------------
+   한 화면에 소개 페이지 순서대로 섹션(미리보기 + 폼)을 나열
    ============================================================ */
 const contentRef = doc(db, "site", "content");
 
@@ -192,7 +182,175 @@ function fillContentForms() {
   $("scheduleRows").innerHTML = scheduleData.map(scheduleRowHtml).join("");
   $("joinRows").innerHTML = joinData.map(joinRowHtml).join("");
   $("joinContactInput").value = contactData;
+  renderPreviews();
 }
+
+/* ----- 폼의 현재 값 읽기 (저장 · 미리보기 공용) ----- */
+function readSite() {
+  return {
+    crewName: $("siteCrewName").value.trim(),
+    slogan: $("siteSlogan").value.trim(),
+    subSlogan: $("siteSubSlogan").value.trim(),
+    aboutDesc: $("siteAboutDesc").value.trim(),
+    instagram: $("siteInstagram").value.trim().replace(/^@/, ""),
+  };
+}
+
+function readStats() {
+  return [...$("statRows").querySelectorAll(".dyn-row")]
+    .map((row) => ({
+      value: row.querySelector(".f-value").value.trim(),
+      label: row.querySelector(".f-label").value.trim(),
+    }))
+    .filter((s) => s.value && s.label);
+}
+
+function readValues() {
+  return [...$("valueRows").querySelectorAll(".dyn-row")]
+    .map((row) => ({
+      icon: row.querySelector(".f-icon").value.trim() || "🥕",
+      title: row.querySelector(".f-title").value.trim(),
+      desc: row.querySelector(".f-desc").value.trim(),
+    }))
+    .filter((v) => v.title);
+}
+
+function readSchedule() {
+  return [...$("scheduleRows").querySelectorAll(".dyn-row")]
+    .map((row) => ({
+      day: row.querySelector(".f-day").value.trim(),
+      time: row.querySelector(".f-time").value.trim(),
+      place: row.querySelector(".f-place").value.trim(),
+      course: row.querySelector(".f-course").value.trim(),
+      note: row.querySelector(".f-note").value.trim(),
+    }))
+    .filter((s) => s.day && s.time);
+}
+
+function readJoin() {
+  return [...$("joinRows").querySelectorAll(".dyn-row")]
+    .map((row) => ({
+      title: row.querySelector(".f-title").value.trim(),
+      desc: row.querySelector(".f-desc").value.trim(),
+    }))
+    .filter((s) => s.title);
+}
+
+/* ============================================================
+   미리보기 — 소개 페이지(index.html)와 같은 마크업·스타일로 렌더
+   (입력할 때마다 다시 그려서, 저장하기 전에 실제 모습을 확인)
+   ============================================================ */
+const pvEmpty = (msg) => `<p class="pv-empty">${msg}</p>`;
+
+function renderPvBasic() {
+  const s = readSite();
+  $("pvBasic").innerHTML = `
+  <section class="hero">
+    <div class="container hero-inner">
+      <p class="hero-eyebrow">ULSAN · CARROT RUNNING CREW</p>
+      <h1 class="hero-title"><span>${escMultiline(s.slogan) || "메인 슬로건"}</span></h1>
+      <p class="hero-sub">${escMultiline(s.subSlogan)}</p>
+    </div>
+  </section>
+  <section class="section">
+    <div class="container">
+      <p class="section-eyebrow">ABOUT US</p>
+      <h2 class="section-title">${esc(s.crewName || "당근러닝크루")}를 소개합니다</h2>
+      <p class="section-desc">${escMultiline(s.aboutDesc)}</p>
+      <p class="section-note">Instagram → <span class="inline-link">@${esc(s.instagram)}</span></p>
+    </div>
+  </section>`;
+}
+
+function renderPvStats() {
+  const stats = readStats();
+  $("pvStats").innerHTML = stats.length
+    ? `<section class="hero"><div class="container">
+        <ul class="stats">${stats.map((st) =>
+          `<li><strong>${esc(st.value)}</strong><span>${esc(st.label)}</span></li>`).join("")}</ul>
+      </div></section>`
+    : pvEmpty("항목이 없어요 — 소개 페이지에서 이 통계가 숨겨져요.");
+}
+
+function renderPvValues() {
+  const values = readValues();
+  $("pvValues").innerHTML = values.length
+    ? `<section class="section"><div class="container">
+        <p class="section-eyebrow">ABOUT US</p>
+        <h2 class="section-title">당근러닝크루를 소개합니다</h2>
+        <div class="value-grid">${values.map((v) => `
+          <article class="value-card">
+            <div class="value-icon">${esc(v.icon)}</div>
+            <h3>${esc(v.title)}</h3>
+            <p>${esc(v.desc)}</p>
+          </article>`).join("")}</div>
+      </div></section>`
+    : pvEmpty("카드가 없어요 — 소개 페이지에서 핵심 가치가 숨겨져요.");
+}
+
+function renderPvSchedule() {
+  const schedule = readSchedule();
+  $("pvSchedule").innerHTML = schedule.length
+    ? `<section class="section section-alt"><div class="container">
+        <p class="section-eyebrow">WEEKLY RUN</p>
+        <h2 class="section-title">정기런 일정</h2>
+        <div class="schedule-grid">${schedule.map((s) => `
+          <article class="schedule-card">
+            <div class="schedule-day">${esc(s.day)}</div>
+            <div class="schedule-time">${esc(s.time)}</div>
+            <dl class="schedule-info">
+              <div><dt>집결</dt><dd>${esc(s.place)}</dd></div>
+              <div><dt>코스</dt><dd>${esc(s.course)}</dd></div>
+            </dl>
+            <p class="schedule-note">${esc(s.note)}</p>
+          </article>`).join("")}</div>
+      </div></section>`
+    : pvEmpty("일정이 없어요 — 소개 페이지에서 정기런 섹션이 숨겨져요.");
+}
+
+function renderPvJoin() {
+  const steps = readJoin();
+  const contact = $("joinContactInput").value.trim();
+  const joinHtml = steps.length
+    ? `<section class="section join-section"><div class="container">
+        <p class="section-eyebrow">JOIN US</p>
+        <h2 class="section-title">크루 가입 안내</h2>
+        <div class="join-steps">${steps.map((s, i) => `
+          <article class="join-step">
+            <span class="join-step-num">${String(i + 1).padStart(2, "0")}</span>
+            <h3>${esc(s.title)}</h3>
+            <p>${escMultiline(s.desc)}</p>
+          </article>`).join("")}</div>
+      </div></section>`
+    : pvEmpty("절차가 없어요 — 소개 페이지에서 가입 안내(JOIN US)가 숨겨져요.");
+  const contactHtml = contact
+    ? `<section class="section"><div class="container">
+        <p class="section-eyebrow">CONTACT</p>
+        <h2 class="section-title">가입 문의</h2>
+        <p class="section-desc">${escMultiline(contact)}</p>
+      </div></section>`
+    : pvEmpty("문구가 없어요 — 소개 페이지에서 가입 문의가 숨겨져요.");
+  $("pvJoin").innerHTML = joinHtml + contactHtml;
+}
+
+const PV_BY_SEC = {
+  "sec-basic": renderPvBasic,
+  "sec-stats": renderPvStats,
+  "sec-values": renderPvValues,
+  "sec-schedule": renderPvSchedule,
+  "sec-join": renderPvJoin,
+};
+
+function renderPreviews() {
+  Object.values(PV_BY_SEC).forEach((fn) => fn());
+}
+
+/* 입력하는 즉시 해당 섹션의 미리보기 갱신 */
+$("viewAdmin").addEventListener("input", (e) => {
+  const sec = e.target.closest(".edit-sec");
+  const fn = sec && PV_BY_SEC[sec.id];
+  if (fn) fn();
+});
 
 /* ----- 동적 행 템플릿 ----- */
 function statRowHtml(s = {}) {
@@ -235,32 +393,31 @@ function joinRowHtml(s = {}) {
   </div>`;
 }
 
-/* ----- 행 추가 / 삭제 ----- */
+/* ----- 행 추가 / 삭제 (변경 즉시 미리보기 갱신) ----- */
 document.querySelectorAll("[data-add]").forEach((btn) => {
   btn.addEventListener("click", () => {
     const kind = btn.dataset.add;
     const target = { stat: "statRows", value: "valueRows", schedule: "scheduleRows", join: "joinRows" }[kind];
     const html = { stat: statRowHtml, value: valueRowHtml, schedule: scheduleRowHtml, join: joinRowHtml }[kind]();
     $(target).insertAdjacentHTML("beforeend", html);
+    const fn = PV_BY_SEC[btn.closest(".edit-sec")?.id];
+    if (fn) fn();
   });
 });
 
-$("tab-content").addEventListener("click", (e) => {
+$("viewAdmin").addEventListener("click", (e) => {
   const del = e.target.closest(".row-del");
-  if (del) del.closest(".dyn-row").remove();
+  if (!del || !del.closest(".dyn-row")) return; // 공식 기록 섹션의 ✕는 raceList 핸들러가 처리
+  const sec = del.closest(".edit-sec");
+  del.closest(".dyn-row").remove();
+  const fn = sec && PV_BY_SEC[sec.id];
+  if (fn) fn();
 });
 
 /* ----- 저장 ----- */
 $("formSite").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const site = {
-    ...siteData,
-    crewName: $("siteCrewName").value.trim(),
-    slogan: $("siteSlogan").value.trim(),
-    subSlogan: $("siteSubSlogan").value.trim(),
-    aboutDesc: $("siteAboutDesc").value.trim(),
-    instagram: $("siteInstagram").value.trim().replace(/^@/, ""),
-  };
+  const site = { ...siteData, ...readSite() };
   try {
     await setDoc(contentRef, { site, updatedAt: serverTimestamp() }, { merge: true });
     siteData = site;
@@ -272,12 +429,7 @@ $("formSite").addEventListener("submit", async (e) => {
 
 $("formStats").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const stats = [...$("statRows").querySelectorAll(".dyn-row")]
-    .map((row) => ({
-      value: row.querySelector(".f-value").value.trim(),
-      label: row.querySelector(".f-label").value.trim(),
-    }))
-    .filter((s) => s.value && s.label);
+  const stats = readStats();
   try {
     await setDoc(contentRef, { stats, updatedAt: serverTimestamp() }, { merge: true });
     statsData = stats;
@@ -289,13 +441,7 @@ $("formStats").addEventListener("submit", async (e) => {
 
 $("formValues").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const values = [...$("valueRows").querySelectorAll(".dyn-row")]
-    .map((row) => ({
-      icon: row.querySelector(".f-icon").value.trim() || "🥕",
-      title: row.querySelector(".f-title").value.trim(),
-      desc: row.querySelector(".f-desc").value.trim(),
-    }))
-    .filter((v) => v.title);
+  const values = readValues();
   try {
     await setDoc(contentRef, { values, updatedAt: serverTimestamp() }, { merge: true });
     valuesData = values;
@@ -307,15 +453,7 @@ $("formValues").addEventListener("submit", async (e) => {
 
 $("formSchedule").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const schedule = [...$("scheduleRows").querySelectorAll(".dyn-row")]
-    .map((row) => ({
-      day: row.querySelector(".f-day").value.trim(),
-      time: row.querySelector(".f-time").value.trim(),
-      place: row.querySelector(".f-place").value.trim(),
-      course: row.querySelector(".f-course").value.trim(),
-      note: row.querySelector(".f-note").value.trim(),
-    }))
-    .filter((s) => s.day && s.time);
+  const schedule = readSchedule();
   try {
     await setDoc(contentRef, { schedule, updatedAt: serverTimestamp() }, { merge: true });
     scheduleData = schedule;
@@ -327,12 +465,7 @@ $("formSchedule").addEventListener("submit", async (e) => {
 
 $("formJoin").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const joinSteps = [...$("joinRows").querySelectorAll(".dyn-row")]
-    .map((row) => ({
-      title: row.querySelector(".f-title").value.trim(),
-      desc: row.querySelector(".f-desc").value.trim(),
-    }))
-    .filter((s) => s.title);
+  const joinSteps = readJoin();
   try {
     await setDoc(contentRef, { joinSteps, updatedAt: serverTimestamp() }, { merge: true });
     joinData = joinSteps;
@@ -355,7 +488,7 @@ $("formContact").addEventListener("submit", async (e) => {
 });
 
 /* ============================================================
-   4. 크루 공식 기록 (records 컬렉션)
+   3. 크루 공식 기록 (records 컬렉션)
    ============================================================ */
 let races = [];
 
@@ -519,7 +652,7 @@ $("raceList").addEventListener("click", async (e) => {
 });
 
 /* ============================================================
-   5. 갤러리 (gallery 컬렉션 + photos 하위 컬렉션)
+   4. 갤러리 (gallery 컬렉션 + photos 하위 컬렉션)
    ============================================================ */
 let albums = [];
 const photosCache = {};      // albumId → [{id, data}]
@@ -755,7 +888,7 @@ $("albumList").addEventListener("change", async (e) => {
 });
 
 /* ============================================================
-   6. 이미지 압축 (Firestore 문서 1MB 제한에 맞춤)
+   5. 이미지 압축 (Firestore 문서 1MB 제한에 맞춤)
    ============================================================ */
 async function loadBitmap(file) {
   try {

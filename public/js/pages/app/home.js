@@ -5,7 +5,7 @@
    (각 항목의 data-goto 클릭 이동은 init.js 의 위임 핸들러가 처리)
    ============================================================ */
 import { $ } from "../../lib/ui.js";
-import { esc, DOW, todayStr, dday, addDaysStr, parseDateParts, catColor, shadeColor } from "../../lib/format.js";
+import { esc, DOW, todayStr, dday, addDaysStr, parseDateParts, catColor, catBadgeStyle, shadeColor } from "../../lib/format.js";
 import { state, myProfile } from "./state.js";
 
 export function renderHome() {
@@ -15,20 +15,20 @@ export function renderHome() {
 
   const today = todayStr();
 
-  // 카테고리별 가장 가까운 예정 일정 → D-day 카드 (최대 3장)
+  // 카테고리별 가장 가까운 예정 일정 → D-day 카드 (최대 4장, 같은 크기)
   const nearest = new Map();
   state.events.filter((ev) => ev.date >= today).forEach((ev) => {
     const cat = ev.category || "일정";
     if (!nearest.has(cat)) nearest.set(cat, ev); // 날짜 오름차순 구독이라 첫 번째가 가장 가까움
   });
-  const cards = [...nearest.values()].slice(0, 3);
+  const cards = [...nearest.values()].slice(0, 4);
   $("ddayRow").innerHTML = cards.length ? cards.map((ev) => {
     const cat = ev.category || "일정";
     const c = catColor(cat);
     const d = dday(ev.date);
     const dp = parseDateParts(ev.date);
     return `
-    <article class="dday-card" data-goto="events" style="background:linear-gradient(150deg, ${c}, ${shadeColor(c, 0.8)})">
+    <article class="dday-card" data-goto="events" style="background:linear-gradient(150deg, ${shadeColor(c, 0.95)}, ${shadeColor(c, 0.7)})">
       <span class="cat-name">${esc(cat)}</span>
       <div class="dday-num">${d <= 0 ? "D-DAY" : `D-${d}`}</div>
       <div class="dday-title">${esc(ev.title)}</div>
@@ -53,7 +53,7 @@ export function renderHome() {
     <div class="sched-row">
       <div class="sched-date"><div class="d">${m}/${d}</div><div class="w ${dowCls}">${DOW[dowIdx]}</div></div>
       <div class="sched-body">
-        <div class="t">${ev.category ? `<span class="event-cat" style="background:${catColor(ev.category)}">${esc(ev.category)}</span>` : ""}${esc(ev.title)}</div>
+        <div class="t">${ev.category ? `<span class="event-cat" style="${catBadgeStyle(ev.category)}">${esc(ev.category)}</span>` : ""}${esc(ev.title)}</div>
         <div class="m">🕖 ${esc(ev.time)} · 📍 ${esc(ev.place)}</div>
       </div>
     </div>`;

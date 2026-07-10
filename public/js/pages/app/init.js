@@ -283,7 +283,7 @@ function switchTab(name) {
 
 $("appTabs").addEventListener("click", (e) => {
   const btn = e.target.closest(".app-tab");
-  if (btn) switchTab(btn.dataset.tab);
+  if (btn && btn.dataset.tab) switchTab(btn.dataset.tab); // ⚙️(admin.html 링크)는 그대로 이동
 });
 
 /* 홈 화면의 바로가기 (D-day 카드, 공지 배너, '전체 보기' 등) */
@@ -292,7 +292,7 @@ document.addEventListener("click", (e) => {
   if (go) switchTab(go.dataset.goto);
 });
 
-/* 일정·출첵 서브탭: 일정 / 출석 현황 / 기록 보기 / 이달의 랭킹 */
+/* 일정·출첵 서브탭: 일정 / 출석 현황 / 이달의 기록 */
 $("eventSubTabs").addEventListener("click", (e) => {
   const btn = e.target.closest(".sub-tab");
   if (!btn) return;
@@ -300,6 +300,6 @@ $("eventSubTabs").addEventListener("click", (e) => {
     t.classList.toggle("active", t === btn));
   document.querySelectorAll("#tab-events > .sub-panel").forEach((p) =>
     p.classList.toggle("active", p.id === btn.dataset.subtab));
-  if (btn.dataset.subtab === "ev-att" || btn.dataset.subtab === "ev-rank") ensureMonthData();
-  if (btn.dataset.subtab === "ev-rec") renderMileage();
+  // 출석 현황·이달의 기록 모두 그 달의 출석 데이터가 필요
+  if (btn.dataset.subtab === "ev-att" || btn.dataset.subtab === "ev-rec") ensureMonthData();
 });
