@@ -61,38 +61,11 @@ export function monthLabel(key) {
   return `${y}년 ${m}월`;
 }
 
-/* ---------- 러닝 시간 · 페이스 ---------- */
-/* "30:00" 또는 "1:05:30" → 초 (형식이 틀리면 null) */
-export function parseTimeStr(s) {
-  const m = String(s || "").trim().match(/^(\d{1,2}):(\d{2})(?::(\d{2}))?$/);
-  if (!m) return null;
-  const sec = m[3] !== undefined
-    ? Number(m[1]) * 3600 + Number(m[2]) * 60 + Number(m[3])
-    : Number(m[1]) * 60 + Number(m[2]);
-  return sec > 0 ? sec : null;
-}
-
-export function fmtDur(sec) {
-  const h = Math.floor(sec / 3600);
-  const m = Math.floor((sec % 3600) / 60);
-  const s = Math.round(sec % 60);
-  return h
-    ? `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`
-    : `${m}:${String(s).padStart(2, "0")}`;
-}
-
-export function fmtPace(secPerKm) {
-  let m = Math.floor(secPerKm / 60);
-  let s = Math.round(secPerKm % 60);
-  if (s === 60) { m++; s = 0; }
-  return `${m}'${String(s).padStart(2, "0")}"`;
-}
-
 /* ---------- 일정 카테고리 색 ---------- */
 /* 기본 카테고리는 고정 색, 새로 만든 카테고리는 이름 기반 자동 배정
    (러닝·이벤트는 예전 기본값으로 만든 일정을 위해 색만 유지)
    → 로고 팔레트(차분한 테라코타·잎색)에 맞춘 뮤트 톤 */
-export const CAT_COLORS = { "대회": "#bf4b2b", "정기런": "#cd7a24", "모임": "#3a7e31", "러닝": "#cd7a24", "이벤트": "#6b5bb5" };
+const CAT_COLORS = { "대회": "#bf4b2b", "정기런": "#cd7a24", "모임": "#3a7e31", "러닝": "#cd7a24", "이벤트": "#6b5bb5" };
 const CAT_FALLBACK_COLORS = ["#3e6fae", "#b04f74", "#5f8f3e", "#a67c1b", "#5a63b8"];
 
 export function catColor(cat) {
@@ -112,7 +85,7 @@ export function shadeColor(hex, f) {
 }
 
 /* 파스텔 배지용: 색을 흰색과 혼합해 밝게 (f=0~1, 클수록 밝음) */
-export function tintColor(hex, f) {
+function tintColor(hex, f) {
   const n = parseInt(hex.slice(1), 16);
   const mix = (v) => Math.round(v + (255 - v) * f);
   return `rgb(${mix((n >> 16) & 255)}, ${mix((n >> 8) & 255)}, ${mix(n & 255)})`;

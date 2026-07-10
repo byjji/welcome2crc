@@ -28,7 +28,7 @@ export const state = {
   events: [],
   polls: [],
   members: [],
-  attendance: {},   // eventId → { uid: {name, status, dist?, sec?} }
+  attendance: {},   // eventId → { uid: {name, status} } (옛 문서엔 dist·sec이 남아 있을 수 있음)
   votes: {},        // pollId → { uid: {name, option} }
   eventCats: [...DEFAULT_EVENT_CATS],  // 일정 카테고리 (site/eventCategories)
   mileage: {},      // uid → { name, goal(목표km), months: { "2026-07": 누적km } }

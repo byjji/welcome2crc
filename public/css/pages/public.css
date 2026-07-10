@@ -445,73 +445,6 @@
   color: var(--ink-soft);
 }
 
-/* ---------- 가입 폼 ---------- */
-.join-form-wrap {
-  background: var(--white);
-  border: 1px solid var(--line);
-  border-radius: calc(var(--radius) + 4px);
-  box-shadow: var(--shadow);
-  padding: 2.6rem;
-  max-width: 640px;
-  margin: 0 auto;
-}
-
-.join-form-title {
-  font-size: 1.3rem;
-  font-weight: 900;
-  margin-bottom: 1.6rem;
-  text-align: center;
-}
-
-
-.join-form label {
-  display: block;
-  font-weight: 700;
-  font-size: 0.9rem;
-  margin-bottom: 0.4rem;
-}
-
-.req {
-  color: var(--carrot-deep);
-}
-
-.join-form input,
-.join-form select,
-.join-form textarea {
-  width: 100%;
-  font-family: var(--font);
-  font-size: 1rem;
-  padding: 0.75em 1em;
-  border: 1.5px solid var(--line);
-  border-radius: 12px;
-  background: var(--cream);
-  color: var(--ink);
-  transition: border-color 0.2s ease;
-}
-
-.join-form input:focus,
-.join-form select:focus,
-.join-form textarea:focus {
-  outline: none;
-  border-color: var(--carrot);
-  background: #fff;
-}
-
-.join-form textarea {
-  resize: vertical;
-}
-
-.hidden-field {
-  display: none;
-}
-
-.join-alt {
-  margin-top: 1.4rem;
-  text-align: center;
-  font-size: 0.9rem;
-  color: var(--ink-soft);
-}
-
 /* ---------- 푸터 ---------- */
 .site-footer {
   background: var(--ink);
@@ -639,14 +572,6 @@
 
   .section {
     padding: 4.2rem 0;
-  }
-
-  .join-form-wrap {
-    padding: 1.8rem 1.4rem;
-  }
-
-  .form-row-half {
-    grid-template-columns: 1fr;
   }
 }
 

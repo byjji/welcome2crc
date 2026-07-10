@@ -8,13 +8,6 @@
   margin-bottom: 1.2rem;
 }
 
-.form-row-half {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-}
-
-
 /* ---------- 공개 페이지: 폼 결과 메시지 ---------- */
 .form-msg {
   margin-top: 1rem;
@@ -204,25 +197,6 @@
   font-size: 0.92rem;
 }
 
-.btn-google {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
-  width: 100%;
-  background: #fff;
-  border: 1.5px solid var(--line);
-  color: var(--ink);
-  font-weight: 700;
-  box-shadow: none;
-}
-
-.btn-google:hover {
-  border-color: var(--carrot);
-  background: var(--surface-tint);
-  transform: none;
-}
-
 .auth-divider {
   display: flex;
   align-items: center;
@@ -318,15 +292,7 @@
 }
 
 
-/* ---------- 앱 탭 ---------- */
-.app-tabs {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.8rem;
-  overflow-x: auto;
-  padding-bottom: 0.3rem;
-}
-
+/* ---------- 앱 탭 (하단 고정 탭의 베이스) ---------- */
 .app-tab {
   font-family: var(--font);
   font-size: 0.98rem;
@@ -489,19 +455,6 @@
   gap: 0.45rem;
   flex-wrap: wrap;
 }
-
-.pin-badge {
-  display: inline-block;
-  background: var(--carrot-soft);
-  color: var(--carrot-deep);
-  font-weight: 800;
-  font-size: 0.75rem;
-  padding: 0.15em 0.7em;
-  border-radius: 999px;
-  margin-right: 0.4rem;
-  vertical-align: 2px;
-}
-
 
 /* ---------- 반응형 (앱/관리자 공용) ---------- */
 @media (max-width: 880px) {

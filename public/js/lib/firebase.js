@@ -12,7 +12,7 @@ const appMod = await import(`${SDK}/firebase-app.js`);
 const authMod = await import(`${SDK}/firebase-auth.js`);
 const fsMod = await import(`${SDK}/firebase-firestore.js`);
 
-export const firebaseApp = appMod.getApps().length
+const firebaseApp = appMod.getApps().length
   ? appMod.getApps()[0]
   : appMod.initializeApp(window.FIREBASE_CONFIG);
 

@@ -241,7 +241,6 @@ a {
 .btn-mini:active,
 .app-tab:active,
 .sub-tab:active,
-.rsvp-btn:active,
 .ev-chip:active {
   transform: scale(0.96);
 }
@@ -251,7 +250,6 @@ a {
   .btn-mini:active,
   .app-tab:active,
   .sub-tab:active,
-  .rsvp-btn:active,
   .ev-chip:active {
     transform: none;
   }
