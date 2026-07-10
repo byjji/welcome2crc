@@ -18,29 +18,38 @@
   gap: 0.4rem;
 }
 
+/* 날짜 박스: 마라톤 배번호(bib) 스타일 — 주황 띠 + 흰 판 + 굵은 숫자 */
 .event-date-box {
-  background: linear-gradient(160deg, var(--carrot), var(--carrot-deep));
-  color: #fff;
-  border-radius: 12px;
+  background: var(--white);
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  overflow: hidden;
   text-align: center;
-  padding: 0.6rem 0.3rem;
 }
 
 .event-date-box .d-month {
-  font-size: 0.8rem;
-  font-weight: 700;
-  opacity: 0.9;
+  display: block;
+  background: var(--carrot-vivid);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 0.2em 0;
 }
 
 .event-date-box .d-day {
   font-size: 1.6rem;
   font-weight: 900;
-  line-height: 1.1;
+  line-height: 1.15;
+  padding-top: 0.08em;
+  font-variant-numeric: tabular-nums;
 }
 
 .event-date-box .d-dow {
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   font-weight: 700;
+  color: var(--ink-soft);
+  padding-bottom: 0.45em;
 }
 
 /* 참석 버튼: 날짜 박스 아래, 날짜보다 작게 */
@@ -105,6 +114,10 @@
 }
 
 .event-card.past .event-date-box {
+  border-color: var(--ink-mute);
+}
+
+.event-card.past .event-date-box .d-month {
   background: var(--ink-mute);
 }
 
@@ -650,8 +663,20 @@ details.notice-row[open] .notice-arrow {
   bottom: 0;
   z-index: 100;
   background: var(--white);
-  border-top: 1.5px solid var(--line);
+  border-top: none;
   box-shadow: 0 -6px 24px rgba(36, 28, 20, 0.07);
+}
+
+/* 하단 탭 위 트랙 연석 라인 */
+.bottom-nav::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--kerb);
+  opacity: 0.9;
 }
 
 .bottom-nav .nav-inner {
@@ -769,13 +794,24 @@ details.notice-row[open] .notice-arrow {
   white-space: nowrap;
 }
 
+/* 스피드 라인: 카드 위를 비스듬히 지나는 옅은 흰 줄 (트랙 레인) */
+.dday-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(100deg, transparent 0 36px, rgba(255, 255, 255, 0.08) 36px 42px);
+  pointer-events: none;
+}
+
 .dday-card .dday-num {
   font-size: 1.55rem;
   font-weight: 900;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   line-height: 1.15;
   margin-top: 0.4rem;
   font-variant-numeric: tabular-nums;
+  transform: skewX(-8deg); /* 스피드감 있는 기울임 */
+  transform-origin: left bottom;
 }
 
 .dday-card .dday-title {

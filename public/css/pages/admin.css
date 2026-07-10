@@ -21,6 +21,17 @@
   margin-bottom: 0.8rem;
 }
 
+/* 섹션 제목 앞 스피드 마크(//) — 트랙 모티프 */
+.sec-label::before {
+  content: "";
+  display: inline-block;
+  width: 15px;
+  height: 11px;
+  margin-right: 7px;
+  background: var(--speed-marks);
+  transform: skewX(-12deg);
+}
+
 .sec-label .muted {
   font-size: 0.82rem;
   font-weight: 600;

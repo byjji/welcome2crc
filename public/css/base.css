@@ -38,10 +38,16 @@
   --danger-line: #f0c4c4;
   --info: #2563eb;          /* 토요일, 정보성 */
 
-  --radius: 18px;
+  --radius: 12px;           /* 스포티: 모서리를 전보다 각지게 */
   --shadow: 0 10px 30px rgba(36, 28, 20, 0.08);      /* 히어로·모달 등 주인공 요소 전용 */
   --shadow-sm: 0 2px 10px rgba(36, 28, 20, 0.06);    /* 일반 카드·리스트 (기본값) */
   --shadow-glow: 0 8px 24px rgba(206, 109, 42, 0.3); /* primary 버튼 전용 */
+
+  /* ── 트랙 모티프 (레이스 데이 컨셉) ── */
+  /* 연석(kerb) 무늬: 육상 트랙 가장자리의 주황·흰색 반복 블록 */
+  --kerb: repeating-linear-gradient(90deg, var(--carrot) 0 18px, #fff 18px 28px);
+  /* 스피드 마크(//): 제목 앞에 붙는 기울어진 줄무늬 */
+  --speed-marks: repeating-linear-gradient(100deg, var(--carrot-vivid) 0 5px, transparent 5px 9px);
 
   /* ── 타이포 스케일 (신규 작성분부터 이 6단계만 사용) ── */
   --fs-xs: 0.75rem;   /* 메타·캡션 */
@@ -96,8 +102,8 @@ a {
 .btn {
   display: inline-block;
   padding: 0.9em 1.9em;
-  border-radius: 999px;
-  font-weight: 700;
+  border-radius: var(--radius);
+  font-weight: 800;
   font-size: 1rem;
   transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
   border: none;
@@ -106,7 +112,8 @@ a {
 }
 
 .btn-primary {
-  background: var(--carrot-vivid);
+  /* 유니폼 슬래시: 끝부분이 사선으로 한 톤 어두워지는 투톤 */
+  background: linear-gradient(100deg, var(--carrot-vivid) 0 68%, var(--carrot) 68%);
   color: #fff;
   box-shadow: var(--shadow-glow);
 }
@@ -142,6 +149,15 @@ a {
   background: rgba(36, 28, 20, 0.85);
   backdrop-filter: blur(12px);
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* 헤더 아래 트랙 연석 라인 */
+.site-header.scrolled::after {
+  content: "";
+  display: block;
+  height: 4px;
+  background: var(--kerb);
+  opacity: 0.9;
 }
 
 .header-inner {

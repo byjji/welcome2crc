@@ -12,6 +12,17 @@
   overflow: hidden;
 }
 
+/* 히어로 하단 트랙 연석(kerb) 라인 */
+.hero::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 6px;
+  background: var(--kerb);
+}
+
 .hero-bg {
   position: absolute;
   inset: 0;
@@ -111,6 +122,8 @@
   font-size: clamp(1.4rem, 3vw, 2rem);
   font-weight: 900;
   color: var(--carrot);
+  font-variant-numeric: tabular-nums;
+  transform: skewX(-6deg); /* 스피드감 있는 기울임 */
 }
 
 .stats span {
@@ -132,6 +145,17 @@
   font-weight: 800;
   letter-spacing: 0.2em;
   font-size: 0.8rem;
+}
+
+/* 눈썹 텍스트 앞 스피드 마크(//) — 트랙 모티프 */
+.section-eyebrow::before {
+  content: "";
+  display: inline-block;
+  width: 15px;
+  height: 10px;
+  margin-right: 7px;
+  background: var(--speed-marks);
+  transform: skewX(-12deg);
 }
 
 .section-title {
