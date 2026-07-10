@@ -387,6 +387,25 @@ details.notice-row[open] .notice-arrow {
   font-size: clamp(0.72rem, 3.2vw, 0.92rem);
 }
 
+/* 멤버 서브탭(승인 대기·거절·내보내기): 조금 작게 줄여 한 줄 유지 */
+#memberSubTabs {
+  flex-wrap: nowrap;
+}
+
+#memberSubTabs .sub-tab {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0.45em 0.15em;
+  text-align: center;
+  white-space: nowrap;
+  font-size: clamp(0.68rem, 3vw, 0.85rem);
+}
+
+#memberSubTabs .sub-cnt {
+  min-width: 1.4em;
+  padding: 0 0.3em;
+}
+
 .sub-panel.active {
   display: block;
 }
