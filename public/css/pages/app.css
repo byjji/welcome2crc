@@ -9,31 +9,49 @@
   gap: 1.3rem;
 }
 
+/* 왼쪽 열: 날짜 박스 + (다가오는 일정) 참석 버튼 */
+.event-left {
+  flex: 0 0 64px;
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
 .event-date-box {
-  flex: 0 0 76px;
   background: linear-gradient(160deg, var(--carrot), var(--carrot-deep));
   color: #fff;
-  border-radius: 14px;
+  border-radius: 12px;
   text-align: center;
-  padding: 0.8rem 0.4rem;
-  align-self: flex-start;
+  padding: 0.6rem 0.3rem;
 }
 
 .event-date-box .d-month {
-  font-size: 0.75rem;
+  font-size: 0.8rem;
   font-weight: 700;
   opacity: 0.9;
 }
 
 .event-date-box .d-day {
-  font-size: 1.7rem;
+  font-size: 1.6rem;
   font-weight: 900;
   line-height: 1.1;
 }
 
 .event-date-box .d-dow {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 700;
+}
+
+/* 참석 버튼: 날짜 박스 아래, 날짜보다 작게 */
+.event-left .btn-mini {
+  width: 100%;
+  font-size: 0.8rem;
+  font-weight: 800;
+  padding: 1.2em 0.1em;
+  text-align: center;
+  white-space: nowrap;
+  border-radius: 8px;
 }
 
 .event-main {
@@ -833,6 +851,7 @@ details.notice-row[open] .notice-arrow {
   gap: 0.75rem;
   padding: 0.8rem 0;
   line-height: var(--lh-tight);
+  cursor: pointer; /* 누르면 일정·출첵의 '일정' 서브탭으로 이동 */
 }
 
 .sched-row + .sched-row {

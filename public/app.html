@@ -160,13 +160,13 @@
         </div>
       </section>
 
-      <!-- ===== 가입 거절됨 ===== -->
+      <!-- ===== 가입 거절됨 / 내보내기됨 ===== -->
       <section class="app-view" id="viewRejected" hidden>
         <div class="center-card">
           <div class="big-emoji">🚫</div>
-          <h2>가입이 승인되지 않았어요</h2>
+          <h2 id="rejectedTitle">가입이 승인되지 않았어요</h2>
           <p>
-            <strong id="rejectedName"></strong>님, 아쉽지만 이번 가입 신청은 승인되지 않았어요.<br />
+            <strong id="rejectedName"></strong>님, <span id="rejectedDesc">아쉽지만 이번 가입 신청은 승인되지 않았어요.</span><br />
             궁금한 점이 있다면 운영진에게 문의해 주세요.
           </p>
           <button class="btn btn-primary" id="btnLogoutRejected">로그아웃</button>
@@ -180,10 +180,10 @@
         <div class="tab-panel active" id="tab-home">
           <p class="dash-hello" id="dashHello"></p>
           <div class="dday-row" id="ddayRow"></div>
-          <button type="button" class="dash-notice" id="dashNotice" data-goto="news" hidden></button>
+          <button type="button" class="dash-notice" id="dashNotice" data-goto="news:notice" hidden></button>
           <h3 class="panel-subtitle">다가오는 일정 <span class="muted">(오늘~2주)</span><button type="button" class="link-more" data-goto="events">전체 보기 ›</button></h3>
           <article class="app-card sched-card" id="dashSched"><p class="empty-note">불러오는 중...</p></article>
-          <h3 class="panel-subtitle">진행 중인 투표<button type="button" class="link-more" data-goto="news">더 보기 ›</button></h3>
+          <h3 class="panel-subtitle">진행 중인 투표<button type="button" class="link-more" data-goto="news:poll">더 보기 ›</button></h3>
           <div id="dashPoll"><p class="empty-note">불러오는 중...</p></div>
         </div>
 
@@ -306,12 +306,16 @@
             <div class="sub-tabs" id="memberSubTabs">
               <button class="sub-tab active" data-subtab="pending">🕐 승인 대기 <span class="sub-cnt" id="pendingCount">0</span></button>
               <button class="sub-tab" data-subtab="rejected">🚫 거절 <span class="sub-cnt" id="rejectedCount">0</span></button>
+              <button class="sub-tab" data-subtab="removed">👋 내보내기 <span class="sub-cnt" id="removedCount">0</span></button>
             </div>
             <div class="sub-panel active" id="subtab-pending">
               <div class="card-list" id="pendingList"><p class="empty-note">대기 중인 멤버가 없습니다.</p></div>
             </div>
             <div class="sub-panel" id="subtab-rejected">
               <div class="card-list" id="rejectedList"><p class="empty-note">거절 기록이 없습니다.</p></div>
+            </div>
+            <div class="sub-panel" id="subtab-removed">
+              <div class="card-list" id="removedList"><p class="empty-note">내보내기 기록이 없습니다.</p></div>
             </div>
           </div>
           <h3 class="panel-subtitle">크루 멤버 <span id="memberCount" class="muted"></span></h3>

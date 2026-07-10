@@ -50,7 +50,7 @@ export function renderHome() {
     const dowIdx = new Date(y, m - 1, d).getDay();
     const dowCls = dowIdx === 6 ? "sat" : dowIdx === 0 ? "sun" : "";
     return `
-    <div class="sched-row">
+    <div class="sched-row" data-goto="events" role="button">
       <div class="sched-date"><div class="d">${m}/${d}</div><div class="w ${dowCls}">${DOW[dowIdx]}</div></div>
       <div class="sched-body">
         <div class="t">${ev.category ? `<span class="event-cat" style="${catBadgeStyle(ev.category)}">${esc(ev.category)}</span>` : ""}${esc(ev.title)}</div>
@@ -64,7 +64,7 @@ export function renderHome() {
   if (open) {
     const total = Object.keys(state.votes[open.id] || {}).length;
     $("dashPoll").innerHTML = `
-    <article class="app-card dash-poll" data-goto="news" role="button">
+    <article class="app-card dash-poll" data-goto="news:poll" role="button">
       <p class="poll-q">🗳️ ${esc(open.question)}</p>
       <p class="poll-meta">지금까지 ${total}명 참여 · 눌러서 참여하기 ›</p>
     </article>`;

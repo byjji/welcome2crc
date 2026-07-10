@@ -125,7 +125,7 @@ function attCheckListHtml(evId) {
 function eventCardHtml(ev, isPast, openAtt) {
   const dp = parseDateParts(ev.date);
   const att = state.attendance[ev.id] || null;
-  let actionsHtml = "";
+  let rsvpHtml = "";
   let attendHtml = "";
 
   if (!isPast) {
@@ -133,8 +133,8 @@ function eventCardHtml(ev, isPast, openAtt) {
     const yes = entries.filter(([, v]) => v.status === "yes");
     const mine = att && me && att[me.uid] ? att[me.uid].status : null;
 
-    // 참석 버튼: 수정·삭제 아이콘과 같은 크기로 우측 상단 구석에 (다시 누르면 취소)
-    actionsHtml = `<button class="btn-mini ${mine === "yes" ? "leaf" : "dark"}" data-action="rsvp" data-id="${ev.id}" data-status="yes">🙋 참석 ${yes.length}</button>`;
+    // 참석 버튼: 날짜 박스 아래, 날짜보다 작게 (다시 누르면 취소)
+    rsvpHtml = `<button class="btn-mini ${mine === "yes" ? "leaf" : "dark"}" data-action="rsvp" data-id="${ev.id}" data-status="yes">🙋 참석 ${yes.length}</button>`;
     attendHtml = yes.length
       ? `<p class="attend-names"><span class="leaf">참석</span> ${attNamesShort(yes)}</p>`
       : "";
@@ -142,12 +142,10 @@ function eventCardHtml(ev, isPast, openAtt) {
     attendHtml = `<div class="rsvp-row"><button class="btn-mini dark" data-action="load-past-att" data-id="${ev.id}">참석 명단 보기</button><span class="attend-names" id="pastAtt-${ev.id}"></span></div>`;
   }
 
-  if (isAdmin) {
-    // 배경은 카드(일정)와 같은 흰색, 삭제 ✕만 빨간 글자
-    actionsHtml += `
+  // 운영진 ✏️/✕: 카드 우측 상단 구석 (배경은 카드와 같은 흰색, ✕만 빨간 글자)
+  const toolsHtml = isAdmin ? `
       <button class="btn-mini btn-icon" data-action="edit-event" data-id="${ev.id}" title="수정" aria-label="수정">✏️</button>
-      <button class="btn-mini btn-icon btn-x" data-action="del-event" data-id="${ev.id}" title="삭제" aria-label="삭제">✕</button>`;
-  }
+      <button class="btn-mini btn-icon btn-x" data-action="del-event" data-id="${ev.id}" title="삭제" aria-label="삭제">✕</button>` : "";
 
   // 운영진: 모든 카테고리 일정의 참석자를 체크박스로 수정
   const manageHtml = isAdmin ? `
@@ -158,13 +156,16 @@ function eventCardHtml(ev, isPast, openAtt) {
 
   return `
     <article class="app-card event-card ${isPast ? "past" : ""}">
-      <div class="event-date-box">
-        <div class="d-month">${dp.month}</div>
-        <div class="d-day">${dp.day}</div>
-        <div class="d-dow">${dp.dow}</div>
+      <div class="event-left">
+        <div class="event-date-box">
+          <div class="d-month">${dp.month}</div>
+          <div class="d-day">${dp.day}</div>
+          <div class="d-dow">${dp.dow}</div>
+        </div>
+        ${rsvpHtml}
       </div>
       <div class="event-main">
-        ${actionsHtml ? `<div class="card-actions">${actionsHtml}</div>` : ""}
+        ${toolsHtml ? `<div class="card-actions">${toolsHtml}</div>` : ""}
         <div class="app-card-head">
           <h4>${ev.category ? `<span class="event-cat" style="${catBadgeStyle(ev.category)}">${esc(ev.category)}</span>` : ""}${esc(ev.title)}</h4>
         </div>

@@ -71,7 +71,7 @@ onAuthStateChanged(auth, async (user) => {
   // 내 문서를 실시간 구독 → 운영진이 승인하면 자동으로 화면 전환
   profileUnsub = onSnapshot(myRef, (snap) => {
     if (!snap.exists()) {
-      // 내보내기된 경우 → 다시 대기 상태로
+      // 운영진이 기록까지 삭제한 경우 → 다시 대기 상태로
       setMyProfile(null);
       setIsAdmin(false);
       showView("pending");
@@ -88,8 +88,14 @@ onAuthStateChanged(auth, async (user) => {
     if (myProfile.role === "pending") {
       $("pendingName").textContent = myProfile.name;
       showView("pending");
-    } else if (myProfile.role === "rejected") {
+    } else if (myProfile.role === "rejected" || myProfile.role === "removed") {
+      // 거절/내보내기 공용 안내 화면 (문구만 다르게)
+      const removed = myProfile.role === "removed";
       $("rejectedName").textContent = myProfile.name;
+      $("rejectedTitle").textContent = removed ? "크루에서 나가게 되었어요" : "가입이 승인되지 않았어요";
+      $("rejectedDesc").textContent = removed
+        ? "운영진에 의해 크루에서 나가게 되었어요."
+        : "아쉽지만 이번 가입 신청은 승인되지 않았어요.";
       showView("rejected");
     } else {
       enterApp();
@@ -286,10 +292,21 @@ $("appTabs").addEventListener("click", (e) => {
   if (btn && btn.dataset.tab) switchTab(btn.dataset.tab); // ⚙️(admin.html 링크)는 그대로 이동
 });
 
-/* 홈 화면의 바로가기 (D-day 카드, 공지 배너, '전체 보기' 등) */
+/* 홈 화면의 바로가기 (D-day 카드, 공지 배너, 일정 행, 투표 등)
+   data-goto="탭" 또는 "탭:하위" — 예) "events", "news:poll", "news:notice" */
 document.addEventListener("click", (e) => {
   const go = e.target.closest("[data-goto]");
-  if (go) switchTab(go.dataset.goto);
+  if (!go) return;
+  const [tab, sub] = go.dataset.goto.split(":");
+  switchTab(tab);
+  // 일정·출첵 바로가기는 항상 '일정' 서브탭부터 보여줌
+  if (tab === "events") {
+    $("eventSubTabs").querySelector('[data-subtab="ev-list"]').click();
+  }
+  // 소식 바로가기: 공지/투표 필터 지정 (지정 없으면 전체)
+  if (tab === "news") {
+    $("newsFilter").querySelector(`[data-news="${sub || "all"}"]`)?.click();
+  }
 });
 
 /* 일정·출첵 서브탭: 일정 / 출석 현황 / 이달의 기록 */
