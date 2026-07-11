@@ -220,7 +220,10 @@
                   <input type="text" id="eventTitle" required maxlength="80" placeholder="일정 이름 (예: 화요 트랙런)" />
                 </div>
                 <div class="form-row">
-                  <label>카테고리</label>
+                  <div class="cat-label-row">
+                    <label>카테고리</label>
+                    <button type="button" class="cat-edit-btn" id="catEditBtn" title="카테고리 수정" aria-label="카테고리 수정"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="m4.5 19.5 1-4 10-10 3 3-10 10-4 1z"/><path d="m13.5 7.5 3 3"/></svg></button>
+                  </div>
                   <div class="cat-row" id="eventCatRow"></div>
                 </div>
                 <div class="form-row form-row-datetime">
@@ -344,8 +347,8 @@
             <button class="app-tab active" data-tab="home"><span class="ic"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 11.5 12 4.5l8 7"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-5.5h4V20"/></svg></span>홈</button>
             <button class="app-tab" data-tab="events"><span class="ic"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><rect x="4.5" y="6.5" width="15" height="13.5"/><path d="M4.5 10.5h15M8.5 3.5V7M15.5 3.5V7"/></svg></span>일정·출첵</button>
             <button class="app-tab" data-tab="news"><span class="ic"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 10v4h4.5l10 5.5v-15L8.5 10H4z"/><path d="M7.2 14.5 8.5 20"/></svg></span>소식</button>
-            <button class="app-tab" data-tab="members"><span class="ic"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><circle cx="9" cy="7.8" r="3.3"/><path d="M3.5 19.5v-.4c0-3 2.4-4.8 5.5-4.8s5.5 1.8 5.5 4.8v.4"/><path d="M15.6 4.9a3.3 3.3 0 0 1 0 5.8M17.4 14.8c2 .7 3.1 2.2 3.1 4.3v.4"/></svg></span>멤버</button>
-            <a class="app-tab" id="adminPageLink" href="admin.html" hidden title="페이지 관리"><span class="ic"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 8h8.7M17.3 8H20"/><rect x="12.7" y="5.7" width="4.6" height="4.6"/><path d="M4 16h2.7M11.3 16H20"/><rect x="6.7" y="13.7" width="4.6" height="4.6"/></svg></span>페이지 관리</a>
+            <button class="app-tab" data-tab="members"><span class="ic"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><circle cx="9" cy="7.8" r="3.3"/><path d="M3.5 19.5v-.4c0-3 2.4-4.8 5.5-4.8s5.5 1.8 5.5 4.8v.4"/><path d="M15.6 4.9a3.3 3.3 0 0 1 0 5.8M17.4 14.8c2 .7 3.1 2.2 3.1 4.3v.4"/></svg><span class="tab-badge" id="memberTabBadge" hidden></span></span>멤버</button>
+            <a class="app-tab" id="adminPageLink" href="admin.html" hidden title="관리"><span class="ic"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 8h8.7M17.3 8H20"/><rect x="12.7" y="5.7" width="4.6" height="4.6"/><path d="M4 16h2.7M11.3 16H20"/><rect x="6.7" y="13.7" width="4.6" height="4.6"/></svg></span>관리</a>
           </div>
         </nav>
 
@@ -525,6 +528,74 @@
         </div>
         <button type="submit" class="btn btn-primary btn-block">수정 저장</button>
         <p class="form-msg" id="editEventMsg" hidden></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== 카테고리 추가 모달 (운영진) — 이름 + 색상 선택 ===== -->
+  <div class="modal" id="catCreateModal" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>카테고리 추가</h3>
+        <button type="button" class="modal-close" data-close="catCreateModal" aria-label="닫기">✕</button>
+      </div>
+      <form id="catCreateForm" class="auth-form">
+        <div class="form-row">
+          <label for="catCreateName">카테고리 이름</label>
+          <input type="text" id="catCreateName" required maxlength="12" placeholder="예: 번개런" autocomplete="off" />
+        </div>
+        <div class="form-row">
+          <label>색상 선택</label>
+          <div class="color-picker">
+            <canvas id="catColorWheel" class="color-wheel" width="180" height="180" aria-label="색상환"></canvas>
+            <div class="cp-controls">
+              <div class="cp-preview"><span id="catColorPreview"></span><code id="catColorHex"></code></div>
+              <label class="cp-bright">명도
+                <input type="range" id="catColorBright" min="0" max="100" value="100" />
+              </label>
+            </div>
+          </div>
+          <div class="color-swatches" id="catColorSwatches"></div>
+          <input type="hidden" id="catCreateColor" value="#d4502f" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">카테고리 추가</button>
+        <p class="form-msg" id="catCreateMsg" hidden></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===== 카테고리 수정 모달 (운영진) — 카테고리 선택 → 이름·색상 변경 ===== -->
+  <div class="modal" id="catEditModal" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>카테고리 수정</h3>
+        <button type="button" class="modal-close" data-close="catEditModal" aria-label="닫기">✕</button>
+      </div>
+      <form id="catEditForm" class="auth-form">
+        <div class="form-row">
+          <label>수정할 카테고리</label>
+          <div class="cat-row" id="catEditPicker"></div>
+        </div>
+        <div class="form-row">
+          <label for="catEditName">이름</label>
+          <input type="text" id="catEditName" required maxlength="12" autocomplete="off" />
+        </div>
+        <div class="form-row">
+          <label>색상 선택</label>
+          <div class="color-picker">
+            <canvas id="catEditWheel" class="color-wheel" width="180" height="180" aria-label="색상환"></canvas>
+            <div class="cp-controls">
+              <div class="cp-preview"><span id="catEditPreview"></span><code id="catEditHex"></code></div>
+              <label class="cp-bright">명도
+                <input type="range" id="catEditBright" min="0" max="100" value="100" />
+              </label>
+            </div>
+          </div>
+          <div class="color-swatches" id="catEditSwatches"></div>
+          <input type="hidden" id="catEditColor" value="#d4502f" />
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">수정 저장</button>
+        <p class="form-msg" id="catEditMsg" hidden></p>
       </form>
     </div>
   </div>

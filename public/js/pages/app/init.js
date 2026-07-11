@@ -6,7 +6,7 @@
    ============================================================ */
 import { $, closeModal, initModals } from "../../lib/ui.js";
 import { ic } from "../../lib/icons.js";
-import { esc, todayStr } from "../../lib/format.js";
+import { esc, todayStr, setCatColors } from "../../lib/format.js";
 import {
   auth, db, onAuthStateChanged, signOut,
   collection, doc, getDoc, setDoc, onSnapshot, query, orderBy, serverTimestamp,
@@ -113,7 +113,7 @@ function enterApp() {
   $("adminSection").hidden = !isAdmin;
   showView("app");
 
-  // 페이지 관리의 하단 탭에서 넘어온 경우: #tab=events 같은 해시로 해당 탭 열기
+  // 관리 화면의 하단 탭에서 넘어온 경우: #tab=events 같은 해시로 해당 탭 열기
   const wanted = location.hash.match(/^#tab=(events|news|members)$/);
   if (wanted) {
     switchTab(wanted[1]);
@@ -175,9 +175,14 @@ function startListeners() {
   unsubs.push(onSnapshot(
     doc(db, "site", "eventCategories"),
     (snap) => {
-      const list = snap.exists() ? snap.data().list : null;
+      const data = snap.exists() ? snap.data() : {};
+      const list = data.list;
       state.eventCats = Array.isArray(list) && list.length ? list : [...DEFAULT_EVENT_CATS];
+      state.eventCatColors = data.colors || {};
+      setCatColors(state.eventCatColors); // 카테고리 색을 format.js 에 반영 (배지·D-day 등 전역)
       renderEventCatRow();
+      renderEvents();  // 색 바뀐 걸 일정 카드에도 반영
+      renderHome();
     },
     (e) => console.error("일정 카테고리 구독 오류:", e)
   ));
@@ -298,7 +303,7 @@ function switchTab(name) {
 
 $("appTabs").addEventListener("click", (e) => {
   const btn = e.target.closest(".app-tab");
-  if (btn && btn.dataset.tab) switchTab(btn.dataset.tab); // 페이지 관리(admin.html 링크)는 그대로 이동
+  if (btn && btn.dataset.tab) switchTab(btn.dataset.tab); // 관리(admin.html 링크)는 그대로 이동
 });
 
 /* 홈 화면의 바로가기 (D-day 카드, 공지 배너, 일정 행, 투표 등)

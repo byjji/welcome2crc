@@ -22,6 +22,14 @@ export function renderMembers() {
 
   $("memberCount").textContent = `${approved.length}명`;
 
+  // 하단 '멤버' 탭의 승인 대기 알림 배지 (운영진 + 대기자 있을 때만)
+  const tabBadge = $("memberTabBadge");
+  if (tabBadge) {
+    const showBadge = isAdmin && pending.length > 0;
+    tabBadge.hidden = !showBadge;
+    tabBadge.textContent = showBadge ? (pending.length > 99 ? "99+" : String(pending.length)) : "";
+  }
+
   // 한 줄 목록 — 이름 | 합류날짜, 운영진에게만 왕관 배지 (멤버는 배지 없음)
   $("memberList").innerHTML = approved.length ? approved.map((m) => `
     <div class="member-row">

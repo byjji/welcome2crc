@@ -68,9 +68,14 @@ export function monthLabel(key) {
 const CAT_COLORS = { "대회": "#39bdff", "정기런": "#d4502f", "모임": "#44b135", "번개런": "#dcd32a", "이벤트": "#6b5bb5" };
 const CAT_FALLBACK_COLORS = ["#d7a47d", "#e5e5e5", "#004f3b", "#00c0c0", "#5a63b8"];
 
+/* 운영진이 카테고리 만들 때 고른 색 (site/eventCategories 의 colors 맵) — init.js 가 주입 */
+let customCatColors = {};
+export function setCatColors(map) { customCatColors = map || {}; }
+
 export function catColor(cat) {
-  if (CAT_COLORS[cat]) return CAT_COLORS[cat];
-  let h = 0;
+  if (customCatColors[cat]) return customCatColors[cat]; // 사용자가 고른 색이 최우선
+  if (CAT_COLORS[cat]) return CAT_COLORS[cat];           // 기본 카테고리 고정색
+  let h = 0;                                             // 그 외엔 이름 기반 자동 배정
   for (const ch of String(cat)) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
   return CAT_FALLBACK_COLORS[h % CAT_FALLBACK_COLORS.length];
 }

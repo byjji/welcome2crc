@@ -1,5 +1,5 @@
 /* ============================================================
-   pages/app/events.js — 일정·출첵 탭
+   pages/app/events.js — 일정 탭
    ------------------------------------------------------------
    서브탭 1 일정: 목록·카테고리·참석(출석체크)·참석자 관리
    서브탭 2 출석 현황: 정기런 날짜 칩 + 월별 매트릭스
@@ -7,8 +7,9 @@
    ============================================================ */
 import { $, openModal, closeModal, showFormMsg } from "../../lib/ui.js";
 import { ic } from "../../lib/icons.js";
+import { createColorWheel } from "../../lib/colorpicker.js";
 import {
-  esc, todayStr, parseDateParts, catColor, catBadgeStyle,
+  esc, todayStr, parseDateParts, catColor, catBadgeStyle, setCatColors,
   thisMonthKey, shiftMonth, monthLabel,
 } from "../../lib/format.js";
 import {
@@ -24,17 +25,28 @@ import {
 
 /* ============================================================
    일정 카테고리 (site/eventCategories 문서에 저장)
+   문서 구조: { list: ["대회", ...], colors: { "번개런": "#3e6fae", ... } }
    ============================================================ */
+/* 카테고리 만들 때 고를 수 있는 색 팔레트 */
+const CAT_PALETTE = [
+  "#d4502f", "#e07a2c", "#dcd32a", "#44b135", "#00a8a8",
+  "#39bdff", "#3e6fae", "#6b5bb5", "#c04f9e", "#6b7078",
+];
+
 function catPillsHtml(name, selected) {
   // 이미 지운 카테고리로 등록된 일정을 수정할 때도 선택 상태가 보이도록 목록에 포함
   const list = selected && !state.eventCats.includes(selected)
     ? [...state.eventCats, selected]
     : state.eventCats;
-  return list.map((c) => `
-    <label class="radio-pill">
+  return list.map((c) => {
+    const cc = catColor(c);
+    // 배경은 카테고리 색(파스텔 틴트), 테두리는 원색 → 어떤 색인지 한눈에
+    return `
+    <label class="radio-pill cat-pill" style="${catBadgeStyle(c)};border-color:${cc};--cat:${cc}">
       <input type="radio" name="${name}" value="${esc(c)}" required${c === selected ? " checked" : ""} />
       <span>${esc(c)}</span>
-    </label>`).join("");
+    </label>`;
+  }).join("");
 }
 
 export function renderEventCatRow() {
@@ -46,10 +58,12 @@ export function renderEventCatRow() {
     <button type="button" class="cat-manage" data-cat-manage="del" title="선택한 카테고리 삭제">－</button>`;
 }
 
-async function saveEventCats(list, selectAfter) {
+async function saveEventCats(list, colors, selectAfter) {
   try {
-    await setDoc(doc(db, "site", "eventCategories"), { list }, { merge: true });
+    await setDoc(doc(db, "site", "eventCategories"), { list, colors }, { merge: true });
     state.eventCats = list;
+    state.eventCatColors = colors;
+    setCatColors(colors); // 저장 즉시 색 반영 (구독 갱신을 기다리지 않고)
     renderEventCatRow();
     if (selectAfter) {
       const input = $("eventCatRow").querySelector(`input[value="${CSS.escape(selectAfter)}"]`);
@@ -63,21 +77,137 @@ async function saveEventCats(list, selectAfter) {
 $("eventCatRow").addEventListener("click", async (e) => {
   const btn = e.target.closest("[data-cat-manage]");
   if (!btn) return;
-  const list = [...state.eventCats];
 
   if (btn.dataset.catManage === "add") {
-    const name = (prompt("추가할 카테고리 이름을 입력해 주세요. (예: 번개런)") || "").trim();
-    if (!name) return;
-    if (name.length > 12) return alert("카테고리 이름은 12자 이내로 해주세요.");
-    if (list.includes(name)) return alert("이미 있는 카테고리예요.");
-    await saveEventCats([...list, name], name);
+    openCatCreateModal();
   } else {
+    const list = [...state.eventCats];
     const sel = $("eventCatRow").querySelector("input:checked")?.value;
     if (!sel) return alert("삭제할 카테고리를 먼저 선택해 주세요.");
     if (list.length <= 1) return alert("카테고리는 1개 이상 있어야 해요.");
     if (!confirm(`'${sel}' 카테고리를 삭제할까요?\n(이미 등록된 일정에는 그대로 남아 있어요)`)) return;
-    await saveEventCats(list.filter((c) => c !== sel));
+    const colors = { ...state.eventCatColors };
+    delete colors[sel];
+    await saveEventCats(list.filter((c) => c !== sel), colors);
   }
+});
+
+/* ---------- 색상 선택 위젯 (추가·수정 모달 공용) ----------
+   프리셋 · 원형 색상환 · 명도 슬라이더가 하나의 최종색(hidden 입력)으로 동기화 */
+function makeColorPicker(ids) {
+  let wheel = null;
+  function apply(hex) {
+    $(ids.hidden).value = hex;
+    $(ids.preview).style.background = hex;
+    $(ids.hex).textContent = hex.toUpperCase();
+    $(ids.swatches).querySelectorAll(".color-swatch").forEach((b) =>
+      b.classList.toggle("active", (b.dataset.color || "").toLowerCase() === hex.toLowerCase()));
+  }
+  $(ids.swatches).innerHTML = CAT_PALETTE.map((c) =>
+    `<button type="button" class="color-swatch" data-color="${c}" style="--sw:${c}" aria-label="색상 ${c}"><span></span></button>`).join("");
+  $(ids.swatches).addEventListener("click", (e) => {
+    const btn = e.target.closest(".color-swatch");
+    if (btn && wheel) wheel.setFromHex(btn.dataset.color); // 프리셋 → 색상환·미리보기 동기화
+  });
+  return {
+    set(hex) {
+      if (!wheel) wheel = createColorWheel($(ids.wheel), $(ids.bright), apply); // 최초 1회 생성(리스너 중복 방지)
+      wheel.setFromHex(hex);
+    },
+    get() { return $(ids.hidden).value; },
+  };
+}
+
+const catCreatePicker = makeColorPicker({
+  wheel: "catColorWheel", bright: "catColorBright", swatches: "catColorSwatches",
+  preview: "catColorPreview", hex: "catColorHex", hidden: "catCreateColor",
+});
+const catEditPicker = makeColorPicker({
+  wheel: "catEditWheel", bright: "catEditBright", swatches: "catEditSwatches",
+  preview: "catEditPreview", hex: "catEditHex", hidden: "catEditColor",
+});
+
+/* ---------- 카테고리 추가 모달 ---------- */
+function openCatCreateModal() {
+  $("catCreateName").value = "";
+  $("catCreateMsg").hidden = true;
+  openModal("catCreateModal");
+  catCreatePicker.set(CAT_PALETTE[0]);
+  setTimeout(() => $("catCreateName").focus(), 60);
+}
+
+$("catCreateForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = $("catCreateName").value.trim();
+  if (!name) return;
+  if (name.length > 12) return showFormMsg("catCreateMsg", "카테고리 이름은 12자 이내로 해주세요.", "error");
+  if (state.eventCats.includes(name)) return showFormMsg("catCreateMsg", "이미 있는 카테고리예요.", "error");
+  const colors = { ...state.eventCatColors, [name]: catCreatePicker.get() };
+  await saveEventCats([...state.eventCats, name], colors, name);
+  closeModal("catCreateModal");
+});
+
+/* ---------- 카테고리 수정 모달 — 등록된 카테고리 선택 → 이름·색 변경 ---------- */
+let catEditTarget = null; // 지금 수정 중인 카테고리의 원래 이름
+
+function renderCatEditPicker(selected) {
+  $("catEditPicker").innerHTML = state.eventCats.map((c) => {
+    const cc = catColor(c);
+    return `
+    <label class="radio-pill cat-pill" style="${catBadgeStyle(c)};border-color:${cc};--cat:${cc}">
+      <input type="radio" name="catEditPick" value="${esc(c)}"${c === selected ? " checked" : ""} />
+      <span>${esc(c)}</span>
+    </label>`;
+  }).join("");
+}
+
+function loadCatIntoEditForm(name) {
+  catEditTarget = name;
+  $("catEditName").value = name;
+  catEditPicker.set(catColor(name));
+}
+
+function openCatEditModal() {
+  $("catEditMsg").hidden = true;
+  const cur = $("eventCatRow").querySelector("input:checked")?.value || state.eventCats[0];
+  renderCatEditPicker(cur);
+  openModal("catEditModal");
+  loadCatIntoEditForm(cur);
+}
+
+$("catEditBtn").addEventListener("click", openCatEditModal);
+
+// 수정할 카테고리를 바꾸면 이름·색을 그 카테고리 값으로 채움
+$("catEditPicker").addEventListener("change", (e) => {
+  const v = e.target.closest("input[name='catEditPick']")?.value;
+  if (v) loadCatIntoEditForm(v);
+});
+
+$("catEditForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const oldName = catEditTarget;
+  const newName = $("catEditName").value.trim();
+  if (!oldName || !newName) return;
+  if (newName.length > 12) return showFormMsg("catEditMsg", "이름은 12자 이내로 해주세요.", "error");
+  if (newName !== oldName && state.eventCats.includes(newName))
+    return showFormMsg("catEditMsg", "이미 있는 카테고리예요.", "error");
+
+  const list = state.eventCats.map((c) => (c === oldName ? newName : c));
+  const colors = { ...state.eventCatColors };
+  delete colors[oldName];
+  colors[newName] = catEditPicker.get();
+
+  // 이름이 바뀌면 그 카테고리로 등록된 일정도 새 이름으로 옮겨 연결 유지
+  if (newName !== oldName) {
+    try {
+      const affected = state.events.filter((ev) => ev.category === oldName);
+      await Promise.all(affected.map((ev) => updateDoc(doc(db, "events", ev.id), { category: newName })));
+    } catch (err) {
+      return showFormMsg("catEditMsg", "일정 이동에 실패했어요: " + err.message, "error");
+    }
+  }
+  await saveEventCats(list, colors, newName);
+  closeModal("catEditModal");
 });
 
 /* ============================================================

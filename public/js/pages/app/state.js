@@ -30,7 +30,8 @@ export const state = {
   members: [],
   attendance: {},   // eventId → { uid: {name, status} } (옛 문서엔 dist·sec이 남아 있을 수 있음)
   votes: {},        // pollId → { uid: {name, option} }
-  eventCats: [...DEFAULT_EVENT_CATS],  // 일정 카테고리 (site/eventCategories)
+  eventCats: [...DEFAULT_EVENT_CATS],  // 일정 카테고리 (site/eventCategories 의 list)
+  eventCatColors: {},                  // 카테고리 → 색 (site/eventCategories 의 colors)
   mileage: {},      // uid → { name, goal(목표km), months: { "2026-07": 누적km } }
 };
 
@@ -54,6 +55,7 @@ export function resetData() {
   state.attendance = {};
   state.votes = {};
   state.eventCats = [...DEFAULT_EVENT_CATS];
+  state.eventCatColors = {};
   state.mileage = {};
   eventCatFilter = "all";
   statMonth = null;
