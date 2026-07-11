@@ -730,6 +730,67 @@ details.notice-row[open] .notice-arrow {
 /* ============================================================
    홈 (대시보드)
    ============================================================ */
+/* 홈 화면 설치 안내 배너 (PWA) */
+.install-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 1.1rem;
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius);
+  background: var(--carrot-pale);
+  border: 1.5px solid var(--carrot-line);
+}
+
+.install-banner .ib-mark {
+  flex: none;
+  width: 2.1rem;
+  height: 2.1rem;
+}
+
+.install-banner .ib-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.install-banner .ib-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  line-height: 1.3;
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+}
+
+.install-banner .ib-text strong {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--ink);
+}
+
+.install-banner .btn-mini {
+  flex: none;
+}
+
+.install-banner .ib-close {
+  flex: none;
+  width: 1.7rem;
+  height: 1.7rem;
+  border: none;
+  background: none;
+  color: var(--ink-mute);
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.install-banner .ib-close:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--ink);
+}
+
 .dash-hello {
   font-size: 1.15rem;
   font-weight: 800;

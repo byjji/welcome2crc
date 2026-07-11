@@ -702,3 +702,87 @@ button.app-user-name:hover {
   color: var(--carrot);
 }
 
+
+/* ============================================================
+   PWA 업데이트 알림 토스트 (js/lib/pwa.js 가 동적으로 삽입)
+   ============================================================ */
+.pwa-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.2rem;
+  transform: translateX(-50%) translateY(160%);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  width: max-content;
+  max-width: min(92%, 460px);
+  padding: 0.7rem 0.7rem 0.7rem 1.1rem;
+  border-radius: 12px;
+  background: var(--ink);
+  color: #fff;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.pwa-toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}
+
+.pwa-toast-text {
+  flex: 1;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.pwa-toast-actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.pwa-toast-btn {
+  font-family: var(--font);
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 0.5em 1.1em;
+  border: none;
+  border-radius: 8px;
+  background: var(--carrot-vivid);
+  color: #fff;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.pwa-toast-btn:hover {
+  background: var(--carrot);
+}
+
+.pwa-toast-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.pwa-toast-close {
+  width: 1.9rem;
+  height: 1.9rem;
+  border: none;
+  background: none;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.9rem;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.pwa-toast-close:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+/* 하단 탭이 있는 크루 공간·관리 페이지에서는 탭 위로 띄움 */
+body.app-page .pwa-toast {
+  bottom: calc(80px + env(safe-area-inset-bottom));
+}

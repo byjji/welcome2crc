@@ -1,0 +1,19 @@
+{
+  "name": "당근러닝크루 C.R.C",
+  "short_name": "C.R.C",
+  "description": "울산 당근러닝크루 크루원 공간 — 공지·일정·출석체크·투표를 한곳에서.",
+  "lang": "ko",
+  "dir": "ltr",
+  "start_url": "app.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#241c14",
+  "background_color": "#f9f6ea",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

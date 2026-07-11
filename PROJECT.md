@@ -150,8 +150,11 @@ public/                     ← Firebase Hosting 으로 배포되는 폴더
 ├─ index.html               공개 소개 페이지
 ├─ app.html                 크루 공간 (하단 4탭: 홈/일정·출첵/소식/멤버)
 ├─ admin.html               페이지 관리 (운영진 전용)
+├─ manifest.webmanifest     PWA 매니페스트 (설치 시 app.html 로 시작)
+├─ sw.js                    서비스 워커 (앱 셸 오프라인 캐시 — 네트워크 우선) · ★배포 시 VERSION ↑
 ├─ img/
-│  └─ logo.png              ★ 크루 로고 (헤더·스피너·스플래시 공용 — 없으면 SVG 당근 대체)
+│  └─ logo.png              ★ 크루 로고 (헤더·스피너·스플래시·PWA 아이콘 원본 — 없으면 SVG 당근 대체)
+├─ icons/                   PWA 아이콘 (logo.png 에서 생성: 192·512·maskable·apple-touch)
 │
 ├─ css/
 │  ├─ base.css              🎨 디자인 토큰(색·폰트·radius)·리셋·버튼·헤더 (전 페이지)
@@ -168,6 +171,7 @@ public/                     ← Firebase Hosting 으로 배포되는 폴더
    │  ├─ account.js         계정↔이메일 변환, 비밀번호 힌트 암호화
    │  ├─ format.js          esc, 날짜/월/페이스 포맷, 카테고리 색
    │  ├─ icons.js           SVG 라인 아이콘 (ic·carrotMark — 이모지 대신 사용)
+   │  ├─ pwa.js             서비스 워커 등록 + 자동 업데이트 알림 토스트 + 홈 화면 설치 배너
    │  └─ ui.js              $, 모달 열기/닫기, 폼 메시지
    └─ pages/
       ├─ public/
@@ -223,11 +227,15 @@ PROJECT.md · CHANGE.md      프로젝트 설명서 · 변경 이력
 | 무엇을 바꿨나 | 배포 방법 |
 |---|---|
 | `public/` 안의 파일 (HTML/CSS/JS) | `git push` 만 하면 GitHub Actions 가 **자동 배포** |
+| **버그 수정·기능 변경을 배포** | 위와 동일하되, 설치한 사용자에게 '새 버전' 알림을 띄우려면 `public/sw.js` 의 **`VERSION` 값을 올린 뒤** push |
 | `firestore.rules` (보안 규칙) | 자동 배포에 **포함되지 않음** → `firebase deploy --only firestore:rules` 직접 실행 |
 | 소개 페이지 내용 (문구·기록·사진) | 배포 불필요 — 페이지 관리에서 저장하면 즉시 반영 |
 
-- HTML/JS/CSS 에 `no-cache` 헤더가 설정되어 있어 배포 직후 새로고침만 하면 최신 버전이 보입니다.
-  (이전 화면이 보이면 강력 새로고침: PC `Ctrl+F5`, 모바일은 브라우저 캐시 삭제)
+- HTML/JS/CSS 에 `no-cache` 헤더 + 서비스 워커가 **네트워크 우선**이라, 온라인에서 앱을 다시 열면
+  캐시를 지우지 않아도 최신이 반영됩니다. (오프라인일 때만 캐시 사용)
+- 앱을 계속 켜둔 사용자에게도 업데이트를 알리려면 `sw.js` 의 `VERSION` 을 올려 배포하세요.
+  → 다음에 앱을 켜거나 화면에 돌아올 때 "새 버전이 출시되었습니다!" 알림이 뜨고,
+    '업데이트'를 누르면 자동으로 최신으로 새로고침됩니다.
 - PR을 올리면 미리보기 주소로 자동 배포됩니다 (GitHub Actions).
 
 ## 로컬 미리보기
