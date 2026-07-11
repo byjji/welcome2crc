@@ -21,11 +21,29 @@
 </head>
 <body>
 
+  <!-- 첫 방문(저장 콘텐츠 캐시 없음·시크릿 모드) 스플래시:
+       기본값 문구가 잠깐 보이는 대신 로고 + C.R.C 를 먼저 보여주고,
+       Firestore 콘텐츠가 준비되면 main.js 가 걷어냅니다. -->
+  <script>
+    try {
+      if (!localStorage.getItem("crc-site-content-v1")) document.documentElement.classList.add("splash");
+    } catch (e) {
+      document.documentElement.classList.add("splash"); // 시크릿 모드 등 localStorage 불가
+    }
+    // 안전장치: 어떤 이유로든 6초가 지나면 스플래시를 걷어냄
+    setTimeout(function () { document.documentElement.classList.remove("splash"); }, 6000);
+  </script>
+  <div class="boot-splash" aria-hidden="true">
+    <img src="img/logo.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display=''" />
+    <svg style="display:none" viewBox="0 0 24 24" width="72" height="72" fill="none" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path stroke="#7db56c" d="M12 8.5 7.5 3.5M12 8.5V2.8M12 8.5l4.5-5"/><path stroke="var(--carrot-vivid)" d="M8.2 9h7.6L12 21.5 8.2 9zM9.8 13h4.4M10.9 16.8h2.2"/></svg>
+    <strong>C.R.C</strong>
+  </div>
+
   <!-- ===== 헤더 / 내비게이션 ===== -->
   <header class="site-header" id="siteHeader">
     <div class="container header-inner">
       <a href="index.html" class="logo" aria-label="당근러닝크루 홈">
-        <span class="logo-mark"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path class="lf" stroke="var(--leaf)" d="M12 8.5 7.5 3.5M12 8.5V2.8M12 8.5l4.5-5"/><path class="bd" stroke="var(--carrot-vivid)" d="M8.2 9h7.6L12 21.5 8.2 9zM9.8 13h4.4M10.9 16.8h2.2"/></svg></span>
+        <span class="logo-mark"><img src="img/logo.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display=''" /><svg style="display:none" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path class="lf" stroke="var(--leaf)" d="M12 8.5 7.5 3.5M12 8.5V2.8M12 8.5l4.5-5"/><path class="bd" stroke="var(--carrot-vivid)" d="M8.2 9h7.6L12 21.5 8.2 9zM9.8 13h4.4M10.9 16.8h2.2"/></svg></span>
         <span class="logo-text">C.R.C <small data-site="crewName">당근러닝크루</small></span>
       </a>
 
@@ -144,7 +162,7 @@
   <footer class="site-footer">
     <div class="container footer-inner">
       <div class="footer-brand">
-        <span class="logo-mark"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path class="lf" stroke="var(--leaf)" d="M12 8.5 7.5 3.5M12 8.5V2.8M12 8.5l4.5-5"/><path class="bd" stroke="var(--carrot-vivid)" d="M8.2 9h7.6L12 21.5 8.2 9zM9.8 13h4.4M10.9 16.8h2.2"/></svg></span>
+        <span class="logo-mark"><img src="img/logo.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display=''" /><svg style="display:none" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path class="lf" stroke="var(--leaf)" d="M12 8.5 7.5 3.5M12 8.5V2.8M12 8.5l4.5-5"/><path class="bd" stroke="var(--carrot-vivid)" d="M8.2 9h7.6L12 21.5 8.2 9zM9.8 13h4.4M10.9 16.8h2.2"/></svg></span>
         <strong>당근러닝크루 C.R.C</strong>
         <p>울산을 달리는 가장 신선한 방법</p>
       </div>

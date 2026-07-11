@@ -157,9 +157,17 @@
 }
 
 .spinner {
-  font-size: 2.4rem;
+  font-size: 3rem;
   display: inline-block;
   animation: spin 1.6s linear infinite;
+}
+
+/* 스피너 로고 이미지 (img/logo.png — 없으면 SVG 당근으로 자동 대체) */
+.spinner img {
+  width: 1em;
+  height: 1em;
+  object-fit: contain;
+  display: block;
 }
 
 @keyframes spin {
@@ -318,6 +326,91 @@
   background: var(--carrot-vivid);
   border-color: var(--carrot);
   color: #fff;
+}
+
+/* ============================================================
+   하단 고정 탭 (크루 공간·페이지 관리 공용)
+   ============================================================ */
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 100;
+  background: var(--white);
+  border-top: none;
+  box-shadow: 0 -6px 24px rgba(36, 28, 20, 0.07);
+}
+
+/* 하단 탭 위 트랙 연석 라인 */
+.bottom-nav::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--kerb);
+  opacity: 0.9;
+}
+
+.bottom-nav .nav-inner {
+  max-width: 560px;
+  margin: 0 auto;
+  display: flex;
+}
+
+.bottom-nav .app-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 0.5rem 0 calc(0.6rem + env(safe-area-inset-bottom));
+  border: none;
+  border-radius: 0;
+  background: none;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  opacity: 0.75;
+  white-space: nowrap;
+  text-decoration: none; /* 페이지 이동 탭은 a 태그 */
+}
+
+.bottom-nav .app-tab .ic {
+  font-size: 1.25rem;
+  line-height: 1.2;
+  padding: 0.16em 0.7em;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+
+.bottom-nav .app-tab .ic .svg-ic {
+  display: block;
+}
+
+.bottom-nav .app-tab:hover {
+  border: none;
+  background: none;
+  color: var(--carrot-deep);
+}
+
+.bottom-nav .app-tab.active {
+  background: none;
+  border: none;
+  color: var(--carrot-deep);
+  opacity: 1;
+}
+
+.bottom-nav .app-tab.active .ic {
+  background: var(--carrot-soft);
+}
+
+/* 하단 탭에 내용이 가리지 않도록 본문 여백 확보
+   (body.app-page 로 특이도를 올려 아래 모바일 미디어쿼리보다 우선) */
+body.app-page .app-main {
+  padding-bottom: calc(96px + env(safe-area-inset-bottom));
 }
 
 .tab-panel {

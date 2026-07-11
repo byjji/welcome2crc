@@ -416,12 +416,26 @@ $("viewAdmin").addEventListener("click", (e) => {
 });
 
 /* ----- 저장 ----- */
+
+/* 소개 페이지 첫 화면 캐시 갱신 (public/main.js 의 CACHE_KEY 와 동일)
+   — 저장 직후 이 기기에서 소개 페이지를 열어도 이전 값 깜빡임 없이 새 내용이 바로 보이게 */
+const CACHE_KEY = "crc-site-content-v1";
+function updateContentCache(patch) {
+  try {
+    const cur = JSON.parse(localStorage.getItem(CACHE_KEY) || "{}");
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ ...cur, ...patch }));
+  } catch {
+    /* localStorage 불가 환경이면 건너뜀 (소개 페이지가 Firestore 로 갱신함) */
+  }
+}
+
 $("formSite").addEventListener("submit", async (e) => {
   e.preventDefault();
   const site = { ...siteData, ...readSite() };
   try {
     await setDoc(contentRef, { site, updatedAt: serverTimestamp() }, { merge: true });
     siteData = site;
+    updateContentCache({ site });
     flashSaved(e.target);
   } catch (err) {
     alert("저장에 실패했어요: " + err.message);
@@ -434,6 +448,7 @@ $("formStats").addEventListener("submit", async (e) => {
   try {
     await setDoc(contentRef, { stats, updatedAt: serverTimestamp() }, { merge: true });
     statsData = stats;
+    updateContentCache({ stats });
     flashSaved(e.target);
   } catch (err) {
     alert("저장에 실패했어요: " + err.message);
@@ -446,6 +461,7 @@ $("formValues").addEventListener("submit", async (e) => {
   try {
     await setDoc(contentRef, { values, updatedAt: serverTimestamp() }, { merge: true });
     valuesData = values;
+    updateContentCache({ values });
     flashSaved(e.target);
   } catch (err) {
     alert("저장에 실패했어요: " + err.message);
@@ -458,6 +474,7 @@ $("formSchedule").addEventListener("submit", async (e) => {
   try {
     await setDoc(contentRef, { schedule, updatedAt: serverTimestamp() }, { merge: true });
     scheduleData = schedule;
+    updateContentCache({ schedule });
     flashSaved(e.target);
   } catch (err) {
     alert("저장에 실패했어요: " + err.message);
@@ -470,6 +487,7 @@ $("formJoin").addEventListener("submit", async (e) => {
   try {
     await setDoc(contentRef, { joinSteps, updatedAt: serverTimestamp() }, { merge: true });
     joinData = joinSteps;
+    updateContentCache({ joinSteps });
     flashSaved(e.target);
   } catch (err) {
     alert("저장에 실패했어요: " + err.message);
@@ -482,6 +500,7 @@ $("formContact").addEventListener("submit", async (e) => {
   try {
     await setDoc(contentRef, { joinContact, updatedAt: serverTimestamp() }, { merge: true });
     contactData = joinContact;
+    updateContentCache({ joinContact });
     flashSaved(e.target);
   } catch (err) {
     alert("저장에 실패했어요: " + err.message);

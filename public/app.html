@@ -21,7 +21,7 @@
   <header class="site-header scrolled">
     <div class="container header-inner">
       <a href="index.html" class="logo" aria-label="당근러닝크루 홈">
-        <span class="logo-mark"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path class="lf" stroke="var(--leaf)" d="M12 8.5 7.5 3.5M12 8.5V2.8M12 8.5l4.5-5"/><path class="bd" stroke="var(--carrot-vivid)" d="M8.2 9h7.6L12 21.5 8.2 9zM9.8 13h4.4M10.9 16.8h2.2"/></svg></span>
+        <span class="logo-mark"><img src="img/logo.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display=''" /><svg style="display:none" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path class="lf" stroke="var(--leaf)" d="M12 8.5 7.5 3.5M12 8.5V2.8M12 8.5l4.5-5"/><path class="bd" stroke="var(--carrot-vivid)" d="M8.2 9h7.6L12 21.5 8.2 9zM9.8 13h4.4M10.9 16.8h2.2"/></svg></span>
         <span class="logo-text">C.R.C <small>크루공간</small></span>
       </a>
       <div class="app-user" id="appUser" hidden>
@@ -37,7 +37,7 @@
       <!-- ===== 로딩 ===== -->
       <section class="app-view" id="viewLoading">
         <div class="center-card">
-          <div class="spinner"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path stroke="var(--leaf)" d="M12 8.5 7.5 3.5M12 8.5V2.8M12 8.5l4.5-5"/><path stroke="var(--carrot-vivid)" d="M8.2 9h7.6L12 21.5 8.2 9zM9.8 13h4.4M10.9 16.8h2.2"/></svg></div>
+          <div class="spinner"><img src="img/logo.png" alt="" onerror="this.style.display='none';this.nextElementSibling.style.display=''" /><svg style="display:none" class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path stroke="var(--leaf)" d="M12 8.5 7.5 3.5M12 8.5V2.8M12 8.5l4.5-5"/><path stroke="var(--carrot-vivid)" d="M8.2 9h7.6L12 21.5 8.2 9zM9.8 13h4.4M10.9 16.8h2.2"/></svg></div>
           <p>불러오는 중...</p>
         </div>
       </section>
@@ -510,6 +510,19 @@
         <button type="submit" class="btn btn-primary btn-block">수정 저장</button>
         <p class="form-msg" id="editEventMsg" hidden></p>
       </form>
+    </div>
+  </div>
+
+  <!-- ===== 참석자 관리 모달 (운영진) ===== -->
+  <div class="modal" id="attManageModal" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>참석자 관리</h3>
+        <button type="button" class="modal-close" data-close="attManageModal" aria-label="닫기">✕</button>
+      </div>
+      <p class="modal-desc" id="attManageWho"></p>
+      <p class="att-manage-help">이름을 눌러 참석 여부를 바꿀 수 있어요. 바로 저장됩니다.</p>
+      <div class="att-checks" id="attManageList"></div>
     </div>
   </div>
 

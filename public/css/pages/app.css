@@ -9,13 +9,10 @@
   gap: 1.3rem;
 }
 
-/* 왼쪽 열: 날짜 박스 + (다가오는 일정) 참석 버튼 */
+/* 왼쪽 열: 날짜 배지 단독 */
 .event-left {
   flex: 0 0 64px;
   align-self: flex-start;
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
 }
 
 /* 날짜 박스: 마라톤 배번호(bib) 스타일 — 주황 띠 + 흰 판 + 굵은 숫자 */
@@ -52,20 +49,75 @@
   padding-bottom: 0.45em;
 }
 
-/* 참석 버튼: 날짜 박스 아래, 날짜보다 작게 */
-.event-left .btn-mini {
-  width: 100%;
-  font-size: 0.8rem;
+.event-main {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 카드 하단 줄: 왼쪽 참석자 요약 + 오른쪽 참석 여부 버튼 (한 줄) */
+.event-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+}
+
+.event-foot .btn-mini {
+  flex: none;
+  margin-left: auto; /* 왼쪽 요약이 없어도 버튼은 항상 오른쪽 */
+  font-size: 0.82rem;
   font-weight: 800;
-  padding: 1.2em 0.1em;
-  text-align: center;
+  padding: 0.55em 1.4em;
   white-space: nowrap;
   border-radius: 8px;
 }
 
-.event-main {
-  flex: 1;
+/* 운영진 참석자 요약 → 누르면 참석자 관리 모달 */
+.attend-summary {
+  flex: 0 1 auto;
   min-width: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.4em;
+  padding: 0.4em 0.85em;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  background: var(--white);
+  font-family: var(--font);
+  font-size: 0.84rem;
+  color: var(--ink-soft);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.attend-summary:hover {
+  border-color: var(--carrot);
+  background: var(--cream);
+}
+
+.attend-summary .leaf {
+  flex: none;
+  color: var(--leaf);
+  font-weight: 800;
+}
+
+.attend-summary .am-names {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 크루원: 참석자 이름 (요약 버튼 자리) — 한 줄 안에서 잘라 표시 */
+.event-foot .attend-names {
+  flex: 0 1 auto;
+  min-width: 0;
+  margin-top: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .event-info {
@@ -222,7 +274,7 @@
 }
 
 .role-badge {
-  font-size: 0.72rem;
+  font-size: 1.0rem;
   font-weight: 800;
   padding: 0.15em 0.7em;
   border-radius: 4px;
@@ -232,7 +284,7 @@
 }
 
 .role-badge.admin {
-  background: var(--ink);
+  background: var(--white);
   color: #d9a514; /* 왕관 라인 아이콘 */
 }
 
@@ -673,89 +725,7 @@ details.notice-row[open] .notice-arrow {
 }
 
 
-/* ============================================================
-   하단 고정 탭 (홈 / 일정·출첵 / 소식 / 멤버)
-   ============================================================ */
-.bottom-nav {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 100;
-  background: var(--white);
-  border-top: none;
-  box-shadow: 0 -6px 24px rgba(36, 28, 20, 0.07);
-}
-
-/* 하단 탭 위 트랙 연석 라인 */
-.bottom-nav::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: var(--kerb);
-  opacity: 0.9;
-}
-
-.bottom-nav .nav-inner {
-  max-width: 560px;
-  margin: 0 auto;
-  display: flex;
-}
-
-.bottom-nav .app-tab {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 0.5rem 0 calc(0.6rem + env(safe-area-inset-bottom));
-  border: none;
-  border-radius: 0;
-  background: none;
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--ink-soft);
-  opacity: 0.75;
-  white-space: nowrap;
-  text-decoration: none; /* ⚙️ 페이지 관리는 a 태그 */
-}
-
-.bottom-nav .app-tab .ic {
-  font-size: 1.25rem;
-  line-height: 1.2;
-  padding: 0.16em 0.7em;
-  border-radius: 8px;
-  transition: background 0.15s ease;
-}
-
-.bottom-nav .app-tab .ic .svg-ic {
-  display: block;
-}
-
-.bottom-nav .app-tab:hover {
-  border: none;
-  background: none;
-  color: var(--carrot-deep);
-}
-
-.bottom-nav .app-tab.active {
-  background: none;
-  border: none;
-  color: var(--carrot-deep);
-  opacity: 1;
-}
-
-.bottom-nav .app-tab.active .ic {
-  background: var(--carrot-soft);
-}
-
-/* 하단 탭에 내용이 가리지 않도록 본문 여백 확보 */
-.app-main {
-  padding-bottom: calc(96px + env(safe-area-inset-bottom));
-}
+/* 하단 고정 탭 스타일은 components.css (크루 공간·페이지 관리 공용) */
 
 /* ============================================================
    홈 (대시보드)
@@ -1104,7 +1074,16 @@ table.mtx tbody tr:last-child td {
 table.mtx .stamp {
   font-size: 1.05rem;
   line-height: 1;
-  color: var(--carrot-vivid); /* 당근 라인 아이콘 */
+  color: var(--carrot-vivid); /* 당근 라인 아이콘(SVG)일 때 색 */
+}
+
+/* 출석 스탬프를 이미지로 쓸 때: 셀에 맞게 크기 고정 (숫자만 바꾸면 크기 조절) */
+table.mtx .stamp img {
+  width: 1.4rem;
+  height: 1.4rem;
+  object-fit: contain;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 table.mtx .miss {
@@ -1385,29 +1364,11 @@ tr.me-row td {
   border-color: var(--carrot);
 }
 
-/* 참석자 관리 (운영진, 일정 카드 안 펼치기) */
-.event-card details.att-manage {
-  margin-top: 0.8rem;
-}
-
-.event-card details.att-manage > summary {
-  cursor: pointer;
-  list-style: none;
-  user-select: none;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3em;
-  font-size: 0.8rem;
-  font-weight: 800;
-  color: var(--carrot-deep);
-}
-
-details.att-manage > summary::-webkit-details-marker {
-  display: none;
-}
-
-details.att-manage[open] > summary .notice-arrow {
-  transform: rotate(180deg);
+/* 참석자 관리 모달 안내 문구 */
+.att-manage-help {
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  margin: 0.2rem 0 0.9rem;
 }
 
 .att-checks {
@@ -1415,6 +1376,13 @@ details.att-manage[open] > summary .notice-arrow {
   flex-wrap: wrap;
   gap: 0.35rem;
   margin-top: 0.6rem;
+}
+
+/* 모달 안 참석자 목록: 여백·스크롤 확보 */
+#attManageList {
+  margin-top: 0;
+  max-height: 60vh;
+  overflow-y: auto;
 }
 
 .att-check {

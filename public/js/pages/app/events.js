@@ -123,37 +123,36 @@ function attCheckListHtml(evId) {
   }).join("");
 }
 
-function eventCardHtml(ev, isPast, openAtt) {
+function eventCardHtml(ev, isPast) {
   const dp = parseDateParts(ev.date);
   const att = state.attendance[ev.id] || null;
-  let rsvpHtml = "";
-  let attendHtml = "";
+  let footHtml = "";
 
   if (!isPast) {
     const entries = att ? Object.entries(att) : [];
     const yes = entries.filter(([, v]) => v.status === "yes");
     const mine = att && me && att[me.uid] ? att[me.uid].status : null;
 
-    // 참석 버튼: 날짜 박스 아래, 날짜보다 작게 (다시 누르면 취소)
-    rsvpHtml = `<button class="btn-mini ${mine === "yes" ? "leaf" : "dark"}" data-action="rsvp" data-id="${ev.id}" data-status="yes">${ic("flag")} 참석 ${yes.length}</button>`;
-    attendHtml = yes.length
-      ? `<p class="attend-names"><span class="leaf">참석</span> ${attNamesShort(yes)}</p>`
-      : "";
+    // 왼쪽: 참석자 요약(운영진은 관리 모달, 크루원은 이름만) / 오른쪽: 참석 여부 토글 버튼
+    let leftPart = "";
+    if (isAdmin) {
+      leftPart = attendSummaryHtml(ev.id, yes.length ? attNamesShort(yes) : "눌러서 참석자 관리", yes.length);
+    } else if (yes.length) {
+      leftPart = `<p class="attend-names"><span class="leaf">참석</span> ${attNamesShort(yes)}</p>`;
+    }
+    const rsvpBtn = `<button class="btn-mini ${mine === "yes" ? "leaf" : "dark"}" data-action="rsvp" data-id="${ev.id}" data-status="yes">${ic("flag")} 참석 ${yes.length}</button>`;
+    footHtml = `<div class="event-foot">${leftPart}${rsvpBtn}</div>`;
+  } else if (isAdmin) {
+    // 지난 일정도 운영진은 관리 모달로 (모달 열 때 출석을 불러옴)
+    footHtml = `<div class="event-foot">${attendSummaryHtml(ev.id, "눌러서 참석자 관리", null)}</div>`;
   } else {
-    attendHtml = `<div class="rsvp-row"><button class="btn-mini dark" data-action="load-past-att" data-id="${ev.id}">참석 명단 보기</button><span class="attend-names" id="pastAtt-${ev.id}"></span></div>`;
+    footHtml = `<div class="rsvp-row"><button class="btn-mini dark" data-action="load-past-att" data-id="${ev.id}">참석 명단 보기</button><span class="attend-names" id="pastAtt-${ev.id}"></span></div>`;
   }
 
   // 운영진 수정/✕: 카드 우측 상단 구석 (배경은 카드와 같은 흰색, ✕만 빨간 글자)
   const toolsHtml = isAdmin ? `
       <button class="btn-mini btn-icon" data-action="edit-event" data-id="${ev.id}" title="수정" aria-label="수정">${ic("pencil")}</button>
       <button class="btn-mini btn-icon btn-x" data-action="del-event" data-id="${ev.id}" title="삭제" aria-label="삭제">✕</button>` : "";
-
-  // 운영진: 모든 카테고리 일정의 참석자를 체크박스로 수정
-  const manageHtml = isAdmin ? `
-    <details class="att-manage" data-id="${ev.id}"${openAtt && openAtt.has(ev.id) ? " open" : ""}>
-      <summary>참석자 관리 <span class="notice-arrow" aria-hidden="true">▾</span></summary>
-      <div class="att-checks">${attCheckListHtml(ev.id)}</div>
-    </details>` : "";
 
   return `
     <article class="app-card event-card ${isPast ? "past" : ""}">
@@ -163,7 +162,6 @@ function eventCardHtml(ev, isPast, openAtt) {
           <div class="d-day">${dp.day}</div>
           <div class="d-dow">${dp.dow}</div>
         </div>
-        ${rsvpHtml}
       </div>
       <div class="event-main">
         ${toolsHtml ? `<div class="card-actions">${toolsHtml}</div>` : ""}
@@ -171,11 +169,18 @@ function eventCardHtml(ev, isPast, openAtt) {
           <h4>${ev.category ? `<span class="event-cat" style="${catBadgeStyle(ev.category)}">${esc(ev.category)}</span>` : ""}${esc(ev.title)}</h4>
         </div>
         <p class="event-info">${ic("clock")} ${esc(ev.time)} · ${ic("pin")} ${esc(ev.place)}${ev.note ? ` · ${esc(ev.note)}` : ""}${ev.updatedAt ? ` <span class="muted">(수정됨)</span>` : ""}</p>
-        ${attendHtml}
-        ${manageHtml}
+        ${footHtml}
       </div>
     </article>
   `;
+}
+
+/* 운영진 참석자 요약 버튼 → 누르면 참석자 관리 모달 (count=null 이면 인원수 숨김) */
+function attendSummaryHtml(evId, namesText, count) {
+  return `<button type="button" class="attend-summary" data-action="manage-att" data-id="${evId}">
+      <span class="leaf">참석${count === null ? "자" : ` ${count}`}</span>
+      <span class="am-names">${namesText}</span>
+    </button>`;
 }
 
 /* 일정에 실제로 쓰인 카테고리로 필터 칩 표시 */
@@ -214,18 +219,18 @@ export function renderEvents() {
   const upcoming = source.filter((ev) => ev.date >= today);
   const past = source.filter((ev) => ev.date < today).reverse(); // 최근 것부터
 
-  // 재렌더링 후에도 펼쳐둔 '참석자 관리'는 그대로 유지
-  const openAtt = new Set(
-    [...document.querySelectorAll("#ev-list details.att-manage[open]")].map((d) => d.dataset.id)
-  );
-
   $("eventUpcoming").innerHTML = upcoming.length
-    ? upcoming.map((ev) => eventCardHtml(ev, false, openAtt)).join("")
+    ? upcoming.map((ev) => eventCardHtml(ev, false)).join("")
     : `<p class="empty-note">예정된 일정이 없습니다.${isAdmin ? " 위의 '일정 만들기'로 등록해 보세요!" : ""}</p>`;
 
   $("eventPast").innerHTML = past.length
-    ? past.slice(0, 20).map((ev) => eventCardHtml(ev, true, openAtt)).join("")
+    ? past.slice(0, 20).map((ev) => eventCardHtml(ev, true)).join("")
     : `<p class="empty-note">지난 일정이 없습니다.</p>`;
+
+  // 참석자 관리 모달이 열려 있으면 목록도 최신 상태로 갱신
+  if (attManageEvId && !$("attManageModal").hidden) {
+    $("attManageList").innerHTML = attCheckListHtml(attManageEvId);
+  }
 }
 
 async function handleEventClick(e) {
@@ -271,6 +276,8 @@ async function handleEventClick(e) {
           : "출석 기록이 없어요.";
       }
       btn.remove();
+    } else if (action === "manage-att") {
+      await openAttManageModal(id);
     }
   } catch (err) {
     alert("처리에 실패했어요: " + err.message);
@@ -280,10 +287,36 @@ async function handleEventClick(e) {
 $("eventUpcoming").addEventListener("click", handleEventClick);
 $("eventPast").addEventListener("click", handleEventClick);
 
-/* 운영진: 참석자 체크박스로 출석 수정 (일정 카드 + 출석 현황 패널 공용) */
-$("tab-events").addEventListener("change", async (e) => {
-  const cb = e.target.closest("input[data-attuid]");
-  if (!cb || !isAdmin) return;
+/* ---------- 참석자 관리 모달 (운영진) ---------- */
+let attManageEvId = null;
+
+async function openAttManageModal(evId) {
+  const ev = state.events.find((x) => x.id === evId);
+  if (!ev) return;
+  attManageEvId = evId;
+  const dp = parseDateParts(ev.date);
+  $("attManageWho").textContent = `${ev.title} · ${dp.month} ${dp.day}일(${dp.dow.charAt(0)}) ${ev.time || ""}`;
+
+  // 아직 출석을 안 읽어온 일정(주로 지난 일정)은 먼저 불러옴
+  if (!state.attendance[evId] && !monthAtt[evId]) {
+    $("attManageList").innerHTML = `<p class="empty-note">참석자를 불러오는 중...</p>`;
+    openModal("attManageModal");
+    try {
+      const qs = await getDocs(collection(db, "events", evId, "attendance"));
+      const map = {};
+      qs.docs.forEach((d) => (map[d.id] = d.data()));
+      monthAtt[evId] = map;
+    } catch (err) {
+      console.error("출석 데이터 로딩 실패:", err);
+    }
+  } else {
+    openModal("attManageModal");
+  }
+  $("attManageList").innerHTML = attCheckListHtml(evId);
+}
+
+/* 참석자 체크박스 토글 → 출석 문서 저장/삭제 (일정 카드 모달 + 출석 현황 패널 공용) */
+async function toggleAttendance(cb) {
   const evId = cb.dataset.eventid;
   const uid = cb.dataset.attuid;
   const prev = attOf(evId)[uid];
@@ -314,25 +347,16 @@ $("tab-events").addEventListener("change", async (e) => {
     cb.checked = !cb.checked;
     alert("출석 수정에 실패했어요: " + err.message);
   }
-});
+}
 
-/* '참석자 관리' 펼침: 아직 안 읽어온 지난 일정의 출석을 가져와 채움 */
-$("tab-events").addEventListener("click", async (e) => {
-  const sum = e.target.closest("details.att-manage > summary");
-  if (!sum) return;
-  const det = sum.closest("details.att-manage");
-  const evId = det.dataset.id;
-  if (state.attendance[evId] || monthAtt[evId]) return;
-  try {
-    const qs = await getDocs(collection(db, "events", evId, "attendance"));
-    const map = {};
-    qs.docs.forEach((d) => (map[d.id] = d.data()));
-    monthAtt[evId] = map;
-    const box = det.querySelector(".att-checks");
-    if (box) box.innerHTML = attCheckListHtml(evId);
-  } catch (err) {
-    console.error("출석 데이터 로딩 실패:", err);
-  }
+// 출석 현황 패널(#tab-events 내부)과 참석자 관리 모달(#attManageModal, body 직속) 둘 다에서 동작
+$("tab-events").addEventListener("change", (e) => {
+  const cb = e.target.closest("input[data-attuid]");
+  if (cb && isAdmin) toggleAttendance(cb);
+});
+$("attManageModal").addEventListener("change", (e) => {
+  const cb = e.target.closest("input[data-attuid]");
+  if (cb && isAdmin) toggleAttendance(cb);
 });
 
 let editEventId = null;
@@ -516,7 +540,7 @@ function renderAttMatrix() {
         ${rows.map(({ m, cells, sum }) => `
         <tr${me && m.id === me.uid ? ' class="me-row"' : ""}>
           <td class="nm">${esc(m.name)}</td>
-          ${cells.map((y) => `<td>${y ? `<span class="stamp">${ic("carrot")}</span>` : '<span class="miss">–</span>'}</td>`).join("")}
+          ${cells.map((y) => `<td>${y ? `<span class="stamp"><img src="img/run_carrot.png"></span>` : '<span class="miss">–</span>'}</td>`).join("")}
           <td class="sum">${sum}</td>
         </tr>`).join("")}
       </tbody>

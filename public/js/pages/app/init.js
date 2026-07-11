@@ -112,6 +112,14 @@ function enterApp() {
   document.querySelectorAll(".admin-form").forEach((el) => (el.hidden = !isAdmin));
   $("adminSection").hidden = !isAdmin;
   showView("app");
+
+  // 페이지 관리의 하단 탭에서 넘어온 경우: #tab=events 같은 해시로 해당 탭 열기
+  const wanted = location.hash.match(/^#tab=(events|news|members)$/);
+  if (wanted) {
+    switchTab(wanted[1]);
+    history.replaceState(null, "", location.pathname); // 해시 소비 (새로고침하면 홈부터)
+  }
+
   if (appEntered) {
     renderAll();
     return;

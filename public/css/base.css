@@ -190,11 +190,20 @@ a {
 }
 
 .logo-mark {
-  font-size: 1.4rem;
+  font-size: 1.8rem;
 }
 
 .logo-mark svg {
   vertical-align: -0.15em;
+}
+
+/* 로고 이미지 (img/logo.png — 없으면 위 SVG 당근으로 자동 대체) */
+.logo-mark img {
+  width: 1.2em;
+  height: 1.2em;
+  object-fit: contain;
+  display: inline-block;
+  vertical-align: -0.25em;
 }
 
 /* 로고는 어두운 배경(헤더·푸터) 위라 잎을 한 단계 밝게 */

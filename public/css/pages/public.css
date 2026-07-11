@@ -3,6 +3,61 @@
    히어로 · 소개 섹션 · 정기런 · 공식 기록 · 갤러리 · 가입 안내 · 푸터
    ============================================================ */
 
+/* ---------- 첫 방문 스플래시 (html.splash 일 때만 표시) ---------- */
+.boot-splash {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.9rem;
+  background: var(--ink);
+  color: #fff;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+html.splash .boot-splash {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.boot-splash img,
+.boot-splash svg {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  animation: splash-pulse 1.6s ease-in-out infinite;
+}
+
+.boot-splash strong {
+  font-size: 1.7rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+}
+
+/* 하단 트랙 연석 라인 — 레이스 데이 모티프 */
+.boot-splash::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 6px;
+  background: var(--kerb);
+  opacity: 0.9;
+}
+
+@keyframes splash-pulse {
+  50% {
+    transform: scale(1.07);
+    opacity: 0.85;
+  }
+}
+
 /* ---------- 히어로 ---------- */
 .hero {
   position: relative;
