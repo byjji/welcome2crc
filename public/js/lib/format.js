@@ -65,8 +65,8 @@ export function monthLabel(key) {
 /* 기본 카테고리는 고정 색, 새로 만든 카테고리는 이름 기반 자동 배정
    (러닝·이벤트는 예전 기본값으로 만든 일정을 위해 색만 유지)
    → 로고 팔레트(차분한 테라코타·잎색)에 맞춘 뮤트 톤 */
-const CAT_COLORS = { "대회": "#bf4b2b", "정기런": "#cd7a24", "모임": "#3a7e31", "러닝": "#cd7a24", "이벤트": "#6b5bb5" };
-const CAT_FALLBACK_COLORS = ["#3e6fae", "#b04f74", "#5f8f3e", "#a67c1b", "#5a63b8"];
+const CAT_COLORS = { "대회": "#ecd611", "정기런": "#cd7a24", "모임": "#44b135", "번개런": "#cd2424", "이벤트": "#6b5bb5" };
+const CAT_FALLBACK_COLORS = ["#d7a47d", "#e5e5e5", "#004f3b", "#00c0c0", "#5a63b8"];
 
 export function catColor(cat) {
   if (CAT_COLORS[cat]) return CAT_COLORS[cat];
