@@ -8,6 +8,7 @@
 
 import { $ } from "../../lib/ui.js";
 import { ic } from "../../lib/icons.js";
+import { onSwipe } from "../../lib/swipe.js";
 import { esc, escMultiline } from "../../lib/format.js";
 import { toAuthEmail, displayAccount } from "../../lib/account.js";
 
@@ -23,6 +24,12 @@ const views = {
 function showView(name) {
   Object.entries(views).forEach(([k, el]) => (el.hidden = k !== name));
 }
+
+/* 관리 화면에서 오른쪽으로 스와이프 → 크루 공간 '멤버' 탭으로 복귀
+   (크루 공간의 스와이프 순서상 관리 바로 왼쪽이 멤버) */
+onSwipe((dir) => {
+  if (dir === "right") location.href = "app.html#tab=members";
+}, { enabled: () => !$("viewAdmin").hidden });
 
 /* ---------- Firebase 설정 확인 ---------- */
 if (!window.FIREBASE_READY) {

@@ -6,6 +6,7 @@
    ============================================================ */
 import { $, closeModal, initModals } from "../../lib/ui.js";
 import { ic } from "../../lib/icons.js";
+import { onSwipe } from "../../lib/swipe.js";
 import { esc, todayStr, setCatColors } from "../../lib/format.js";
 import {
   auth, db, onAuthStateChanged, signOut,
@@ -323,44 +324,19 @@ $("appTabs").addEventListener("click", (e) => {
   if (btn && btn.dataset.tab) switchTab(btn.dataset.tab); // 관리(admin.html 링크)는 그대로 이동
 });
 
-/* ---------- 좌/우 스와이프로 탭 이동 ---------- */
-const SWIPE_MIN = 55;     // 최소 가로 이동(px)
-const SWIPE_RATIO = 1.5;  // 세로보다 가로가 이만큼 우세할 때만 탭 이동(세로 스크롤 보호)
-let swActive = false, swStartX = 0, swStartY = 0;
-const appView = $("viewApp");
-
-/* 시작 지점이 가로 스크롤 가능한 요소(서브탭·칩·표 등) 안이면 스와이프 무시 */
-function inHScroll(node) {
-  let el = node instanceof Element ? node : node?.parentElement;
-  while (el && el !== appView) {
-    const ox = getComputedStyle(el).overflowX;
-    if ((ox === "auto" || ox === "scroll") && el.scrollWidth > el.clientWidth + 2) return true;
-    el = el.parentElement;
-  }
-  return false;
-}
-
-appView.addEventListener("touchstart", (e) => {
-  if (e.touches.length !== 1 ||
-      document.querySelector(".modal:not([hidden])") || // 모달 열려 있으면 무시
-      inHScroll(e.target)) { swActive = false; return; }
-  swActive = true;
-  swStartX = e.touches[0].clientX;
-  swStartY = e.touches[0].clientY;
-}, { passive: true });
-
-appView.addEventListener("touchend", (e) => {
-  if (!swActive) return;
-  swActive = false;
-  const dx = e.changedTouches[0].clientX - swStartX;
-  const dy = e.changedTouches[0].clientY - swStartY;
-  if (Math.abs(dx) < SWIPE_MIN || Math.abs(dx) < Math.abs(dy) * SWIPE_RATIO) return;
+/* ---------- 좌/우 스와이프로 탭 이동 (크루 공간 본화면일 때만) ---------- */
+onSwipe((dir) => {
   const cur = SWIPE_TABS.indexOf(activeTabName());
   if (cur < 0) return;
-  const next = cur + (dx < 0 ? 1 : -1); // 왼쪽으로 밀면 다음 탭, 오른쪽이면 이전 탭
-  if (next < 0 || next >= SWIPE_TABS.length) return;
+  const next = cur + (dir === "left" ? 1 : -1); // 왼쪽으로 밀면 다음 탭, 오른쪽이면 이전 탭
+  if (next >= SWIPE_TABS.length) {
+    // 마지막(멤버)에서 더 왼쪽으로 밀면 — 운영진만 '관리' 페이지로 이동
+    if (isAdmin) location.href = "admin.html";
+    return;
+  }
+  if (next < 0) return; // 첫 탭(홈)에서 오른쪽으로 더 밀어도 밖으로 나가지 않음
   switchTab(SWIPE_TABS[next]);
-}, { passive: true });
+}, { enabled: () => !$("viewApp").hidden });
 
 /* 홈 화면의 바로가기 (D-day 카드, 공지 배너, 일정 행, 투표 등)
    data-goto="탭" 또는 "탭:하위" — 예) "events", "news:poll", "news:notice" */
