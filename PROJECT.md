@@ -161,6 +161,7 @@ public/                     ← Firebase Hosting 으로 배포되는 폴더
    │  ├─ firebase.js        SDK 초기화, auth·db·Firestore 함수 내보내기
    │  ├─ account.js         계정↔이메일 변환, 비밀번호 힌트 암호화
    │  ├─ format.js          esc, 날짜/월/페이스 포맷, 카테고리 색
+   │  ├─ icons.js           SVG 라인 아이콘 (ic·carrotMark — 이모지 대신 사용)
    │  └─ ui.js              $, 모달 열기/닫기, 폼 메시지
    └─ pages/
       ├─ public/

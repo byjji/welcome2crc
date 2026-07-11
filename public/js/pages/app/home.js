@@ -5,13 +5,14 @@
    (각 항목의 data-goto 클릭 이동은 init.js 의 위임 핸들러가 처리)
    ============================================================ */
 import { $ } from "../../lib/ui.js";
+import { ic } from "../../lib/icons.js";
 import { esc, DOW, todayStr, dday, addDaysStr, parseDateParts, catColor, catBadgeStyle, shadeColor } from "../../lib/format.js";
 import { state, myProfile } from "./state.js";
 
 export function renderHome() {
   if (!myProfile) return;
   $("dashHello").innerHTML =
-    `${esc(myProfile.name)}님, 반가워요! 🥕 <span class="muted">오늘도 가볍게 달려요.</span>`;
+    `${esc(myProfile.name)}님, 반가워요! <span class="muted">오늘도 가볍게 달려요.</span>`;
 
   const today = todayStr();
 
@@ -32,7 +33,7 @@ export function renderHome() {
       <span class="cat-name">${esc(cat)}</span>
       <div class="dday-num">${d <= 0 ? "D-DAY" : `D-${d}`}</div>
       <div class="dday-title">${esc(ev.title)}</div>
-      <div class="dday-meta">📅 ${dp.month} ${dp.day}일(${dp.dow.charAt(0)}) ${esc(ev.time)}<br />📍 ${esc(ev.place)}</div>
+      <div class="dday-meta">${ic("calendar")} ${dp.month} ${dp.day}일(${dp.dow.charAt(0)}) ${esc(ev.time)}<br />${ic("pin")} ${esc(ev.place)}</div>
     </article>`;
   }).join("") : `<p class="empty-note">예정된 일정이 없습니다.</p>`;
 
@@ -40,7 +41,7 @@ export function renderHome() {
   const pinned = state.notices.find((n) => n.pinned);
   const banner = $("dashNotice");
   banner.hidden = !pinned;
-  if (pinned) banner.innerHTML = `📌 <strong>${esc(pinned.title)}</strong><span class="go">›</span>`;
+  if (pinned) banner.innerHTML = `${ic("pushpin")} <strong>${esc(pinned.title)}</strong><span class="go">›</span>`;
 
   // 다가오는 일정 (오늘~2주)
   const limit = addDaysStr(14);
@@ -54,7 +55,7 @@ export function renderHome() {
       <div class="sched-date"><div class="d">${m}/${d}</div><div class="w ${dowCls}">${DOW[dowIdx]}</div></div>
       <div class="sched-body">
         <div class="t">${ev.category ? `<span class="event-cat" style="${catBadgeStyle(ev.category)}">${esc(ev.category)}</span>` : ""}${esc(ev.title)}</div>
-        <div class="m">🕖 ${esc(ev.time)} · 📍 ${esc(ev.place)}</div>
+        <div class="m">${ic("clock")} ${esc(ev.time)} · ${ic("pin")} ${esc(ev.place)}</div>
       </div>
     </div>`;
   }).join("") : `<p class="empty-note">2주 안에 예정된 일정이 없어요.</p>`;
@@ -65,7 +66,7 @@ export function renderHome() {
     const total = Object.keys(state.votes[open.id] || {}).length;
     $("dashPoll").innerHTML = `
     <article class="app-card dash-poll" data-goto="news:poll" role="button">
-      <p class="poll-q">🗳️ ${esc(open.question)}</p>
+      <p class="poll-q">${ic("vote")} ${esc(open.question)}</p>
       <p class="poll-meta">지금까지 ${total}명 참여 · 눌러서 참여하기 ›</p>
     </article>`;
   } else {

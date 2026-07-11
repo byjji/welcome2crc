@@ -51,7 +51,7 @@ function setAuthMode(mode) {
   document.querySelectorAll(".auth-mode").forEach((b) =>
     b.classList.toggle("active", b.dataset.mode === mode));
   $("signupRows").hidden = mode !== "signup";
-  $("btnEmailSubmit").textContent = mode === "signup" ? "가입 신청하기 🥕" : "로그인";
+  $("btnEmailSubmit").textContent = mode === "signup" ? "가입 신청하기" : "로그인";
   $("authPw").setAttribute("autocomplete", mode === "signup" ? "new-password" : "current-password");
   hideAuthError();
 }
@@ -201,7 +201,7 @@ $("newPwForm").addEventListener("submit", async (e) => {
     }
     pendingReset = null;
     closeModal("newPwModal");
-    alert("비밀번호가 변경되었어요! 🥕 그대로 로그인됩니다.");
+    alert("비밀번호가 변경되었어요! 그대로 로그인됩니다.");
   } catch (err) {
     showFormMsg("newPwMsg", authErrorMsg(err), "error");
   }
@@ -228,7 +228,7 @@ $("nameForm").addEventListener("submit", async (e) => {
   try {
     await updateDoc(doc(db, "members", me.uid), { name });
     await updateProfile(me, { displayName: name });
-    showFormMsg("nameMsg", "이름을 변경했어요 ✅", "ok");
+    showFormMsg("nameMsg", "이름을 변경했어요.", "ok");
   } catch (err) {
     showFormMsg("nameMsg", "이름 변경에 실패했어요: " + err.message, "error");
   }
@@ -255,7 +255,7 @@ $("pwForm").addEventListener("submit", async (e) => {
       console.error("비밀번호 힌트 갱신 실패:", err);
     }
     e.target.reset();
-    showFormMsg("pwMsg", "비밀번호를 변경했어요 ✅ 다음 로그인부터 새 비밀번호를 사용하세요.", "ok");
+    showFormMsg("pwMsg", "비밀번호를 변경했어요. 다음 로그인부터 새 비밀번호를 사용하세요.", "ok");
   } catch (err) {
     const map = {
       "auth/invalid-credential": "현재 비밀번호가 올바르지 않아요.",
@@ -282,7 +282,7 @@ $("hintForm").addEventListener("submit", async (e) => {
     await reauthenticateWithCredential(me, cred);
     await savePwHint(me.uid, me.email, pw, question, answer);
     e.target.reset();
-    showFormMsg("hintMsg", "비밀번호 힌트를 저장했어요 ✅ 이제 비밀번호 찾기에서 사용할 수 있어요.", "ok");
+    showFormMsg("hintMsg", "비밀번호 힌트를 저장했어요. 이제 비밀번호 찾기에서 사용할 수 있어요.", "ok");
   } catch (err) {
     const map = {
       "auth/invalid-credential": "현재 비밀번호가 올바르지 않아요.",

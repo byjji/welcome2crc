@@ -6,6 +6,7 @@
    서브탭 3 이달의 기록: 월별 마일리지 보드 + 메달 랭킹
    ============================================================ */
 import { $, openModal, closeModal, showFormMsg } from "../../lib/ui.js";
+import { ic } from "../../lib/icons.js";
 import {
   esc, todayStr, parseDateParts, catColor, catBadgeStyle,
   thisMonthKey, shiftMonth, monthLabel,
@@ -134,7 +135,7 @@ function eventCardHtml(ev, isPast, openAtt) {
     const mine = att && me && att[me.uid] ? att[me.uid].status : null;
 
     // 참석 버튼: 날짜 박스 아래, 날짜보다 작게 (다시 누르면 취소)
-    rsvpHtml = `<button class="btn-mini ${mine === "yes" ? "leaf" : "dark"}" data-action="rsvp" data-id="${ev.id}" data-status="yes">🙋 참석 ${yes.length}</button>`;
+    rsvpHtml = `<button class="btn-mini ${mine === "yes" ? "leaf" : "dark"}" data-action="rsvp" data-id="${ev.id}" data-status="yes">${ic("flag")} 참석 ${yes.length}</button>`;
     attendHtml = yes.length
       ? `<p class="attend-names"><span class="leaf">참석</span> ${attNamesShort(yes)}</p>`
       : "";
@@ -142,15 +143,15 @@ function eventCardHtml(ev, isPast, openAtt) {
     attendHtml = `<div class="rsvp-row"><button class="btn-mini dark" data-action="load-past-att" data-id="${ev.id}">참석 명단 보기</button><span class="attend-names" id="pastAtt-${ev.id}"></span></div>`;
   }
 
-  // 운영진 ✏️/✕: 카드 우측 상단 구석 (배경은 카드와 같은 흰색, ✕만 빨간 글자)
+  // 운영진 수정/✕: 카드 우측 상단 구석 (배경은 카드와 같은 흰색, ✕만 빨간 글자)
   const toolsHtml = isAdmin ? `
-      <button class="btn-mini btn-icon" data-action="edit-event" data-id="${ev.id}" title="수정" aria-label="수정">✏️</button>
+      <button class="btn-mini btn-icon" data-action="edit-event" data-id="${ev.id}" title="수정" aria-label="수정">${ic("pencil")}</button>
       <button class="btn-mini btn-icon btn-x" data-action="del-event" data-id="${ev.id}" title="삭제" aria-label="삭제">✕</button>` : "";
 
   // 운영진: 모든 카테고리 일정의 참석자를 체크박스로 수정
   const manageHtml = isAdmin ? `
     <details class="att-manage" data-id="${ev.id}"${openAtt && openAtt.has(ev.id) ? " open" : ""}>
-      <summary>👥 참석자 관리 <span class="notice-arrow" aria-hidden="true">▾</span></summary>
+      <summary>참석자 관리 <span class="notice-arrow" aria-hidden="true">▾</span></summary>
       <div class="att-checks">${attCheckListHtml(ev.id)}</div>
     </details>` : "";
 
@@ -169,7 +170,7 @@ function eventCardHtml(ev, isPast, openAtt) {
         <div class="app-card-head">
           <h4>${ev.category ? `<span class="event-cat" style="${catBadgeStyle(ev.category)}">${esc(ev.category)}</span>` : ""}${esc(ev.title)}</h4>
         </div>
-        <p class="event-info">🕖 ${esc(ev.time)} · 📍 ${esc(ev.place)}${ev.note ? ` · ${esc(ev.note)}` : ""}${ev.updatedAt ? ` <span class="muted">(수정됨)</span>` : ""}</p>
+        <p class="event-info">${ic("clock")} ${esc(ev.time)} · ${ic("pin")} ${esc(ev.place)}${ev.note ? ` · ${esc(ev.note)}` : ""}${ev.updatedAt ? ` <span class="muted">(수정됨)</span>` : ""}</p>
         ${attendHtml}
         ${manageHtml}
       </div>
@@ -515,7 +516,7 @@ function renderAttMatrix() {
         ${rows.map(({ m, cells, sum }) => `
         <tr${me && m.id === me.uid ? ' class="me-row"' : ""}>
           <td class="nm">${esc(m.name)}</td>
-          ${cells.map((y) => `<td>${y ? '<span class="stamp">🥕</span>' : '<span class="miss">–</span>'}</td>`).join("")}
+          ${cells.map((y) => `<td>${y ? `<span class="stamp">${ic("carrot")}</span>` : '<span class="miss">–</span>'}</td>`).join("")}
           <td class="sum">${sum}</td>
         </tr>`).join("")}
       </tbody>
@@ -546,7 +547,7 @@ export function renderMileage() {
   const t = new Date();
   $("myRecordBox").innerHTML = `
   <div class="my-record">
-    <p class="mr-title">🥕 오늘의 마일리지! ${t.getMonth() + 1}월 ${t.getDate()}일</p>
+    <p class="mr-title">오늘의 마일리지 · ${t.getMonth() + 1}월 ${t.getDate()}일</p>
     <div class="mr-form">
       <input type="text" id="myRecDist" inputmode="decimal" placeholder="5.0" aria-label="오늘 뛴 거리(km)" /><span class="unit">km</span>
       <button type="button" class="btn-save" id="btnSaveMyRec">저장</button>
@@ -568,7 +569,12 @@ export function renderMileage() {
     return;
   }
 
-  const medals = ["🥇", "🥈", "🥉"];
+  // 순위 칩 1·2·3 (금·은·동) — 배번호처럼 기울인 각진 칩
+  const medals = [
+    '<span class="rank-chip r1">1</span>',
+    '<span class="rank-chip r2">2</span>',
+    '<span class="rank-chip r3">3</span>',
+  ];
   $("recTable").innerHTML = `
   <article class="app-card rec-card">
     <table class="rec mileage">
@@ -576,10 +582,10 @@ export function renderMileage() {
       <tbody>
         ${rows.map(({ m, goal, km, att }, i) => {
           const canEdit = isAdmin || (me && m.id === me.uid);
-          const medal = medals[i] && (att > 0 || km > 0) ? `<span class="rank-medal">${medals[i]}</span>` : "";
+          const medal = medals[i] && (att > 0 || km > 0) ? medals[i] : "";
           return `
           <tr${me && m.id === me.uid ? ' class="me-row"' : ""}>
-            <td>${medal}${esc(m.name)}${canEdit ? ` <button type="button" class="btn-edit-rec" data-mileedit="${m.id}" title="목표·누적 마일리지 수정">✏️</button>` : ""}</td>
+            <td>${medal}${esc(m.name)}${canEdit ? ` <button type="button" class="btn-edit-rec" data-mileedit="${m.id}" title="목표·누적 마일리지 수정">${ic("pencil")}</button>` : ""}</td>
             <td>${att ? `${att}회` : '<span class="none">–</span>'}</td>
             <td>${goal ? Math.round(goal * 10) / 10 : '<span class="none">–</span>'}</td>
             <td><b>${km ? Math.round(km * 10) / 10 : 0}</b></td>
@@ -603,7 +609,7 @@ $("ev-rec").addEventListener("click", async (e) => {
         updatedAt: serverTimestamp(),
       }, { merge: true });
       $("myRecDist").value = "";
-      alert(`+${dist}km 누적! 오늘도 잘 달렸어요 🥕`);
+      alert(`+${dist}km 누적! 오늘도 잘 달렸어요.`);
     } catch (err) {
       alert("저장에 실패했어요: " + err.message);
     }

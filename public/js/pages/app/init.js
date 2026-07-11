@@ -5,7 +5,8 @@
    각 화면의 렌더링/폼 처리는 화면 모듈이 담당합니다.
    ============================================================ */
 import { $, closeModal, initModals } from "../../lib/ui.js";
-import { todayStr } from "../../lib/format.js";
+import { ic } from "../../lib/icons.js";
+import { esc, todayStr } from "../../lib/format.js";
 import {
   auth, db, onAuthStateChanged, signOut,
   collection, doc, getDoc, setDoc, onSnapshot, query, orderBy, serverTimestamp,
@@ -82,7 +83,7 @@ onAuthStateChanged(auth, async (user) => {
     setIsAdmin(myProfile.role === "admin");
 
     $("appUser").hidden = false;
-    $("userName").textContent = `${myProfile.name}${isAdmin ? " 👑" : ""}`;
+    $("userName").innerHTML = `${esc(myProfile.name)}${isAdmin ? ` ${ic("crown", "ic-crown")}` : ""}`;
     $("adminPageLink").hidden = !isAdmin;
 
     if (myProfile.role === "pending") {
@@ -289,7 +290,7 @@ function switchTab(name) {
 
 $("appTabs").addEventListener("click", (e) => {
   const btn = e.target.closest(".app-tab");
-  if (btn && btn.dataset.tab) switchTab(btn.dataset.tab); // ⚙️(admin.html 링크)는 그대로 이동
+  if (btn && btn.dataset.tab) switchTab(btn.dataset.tab); // 페이지 관리(admin.html 링크)는 그대로 이동
 });
 
 /* 홈 화면의 바로가기 (D-day 카드, 공지 배너, 일정 행, 투표 등)

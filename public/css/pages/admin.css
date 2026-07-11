@@ -349,6 +349,7 @@
   justify-content: center;
   background: var(--carrot-soft);
   font-size: 1.3rem;
+  color: var(--carrot-deep); /* 당근 라인 아이콘 */
 }
 
 .album-actions {

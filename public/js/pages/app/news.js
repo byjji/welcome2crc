@@ -2,6 +2,7 @@
    pages/app/news.js — 소식 탭 (공지 + 투표)
    ============================================================ */
 import { $, openModal, closeModal, showFormMsg } from "../../lib/ui.js";
+import { ic } from "../../lib/icons.js";
 import { esc, fmtDate } from "../../lib/format.js";
 import {
   db, collection, doc, addDoc, setDoc, updateDoc, deleteDoc, serverTimestamp,
@@ -57,7 +58,7 @@ export function renderNotices() {
   list.innerHTML = sorted.map((n) => `
     <details class="app-card notice-row" data-id="${n.id}"${openIds.has(n.id) ? " open" : ""}>
       <summary>
-        <span class="notice-pin">${n.pinned ? "📌" : ""}</span>
+        <span class="notice-pin">${n.pinned ? ic("pushpin") : ""}</span>
         <span class="notice-title">${esc(n.title)}</span>
         <span class="notice-date">${fmtDate(n.createdAt)}</span>
         <span class="notice-arrow" aria-hidden="true">▾</span>

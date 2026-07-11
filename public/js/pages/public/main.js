@@ -11,6 +11,7 @@
    ============================================================ */
 
 import { esc, escMultiline } from "../../lib/format.js";
+import { ic } from "../../lib/icons.js";
 
 /* 현재 화면에 그릴 콘텐츠 (기본값: site-data.js → Firestore 로 덮어씀) */
 const content = {
@@ -312,7 +313,7 @@ function renderAlbums(albums) {
   grid.innerHTML = albums.map((a, i) => {
     const cover = a.cover
       ? `<img src="${a.cover}" alt="${esc(a.name)}" loading="lazy" />`
-      : `<div class="gallery-placeholder p${(i % 4) + 1}"><span>🥕</span></div>`;
+      : `<div class="gallery-placeholder p${(i % 4) + 1}"><span>${ic("carrot")}</span></div>`;
     return `
       <button class="gallery-item album-card reveal" data-album="${esc(a.id)}" data-name="${esc(a.name)}">
         ${cover}
@@ -356,7 +357,7 @@ function setupGalleryViewer() {
 
     viewer.querySelector(".viewer-title").textContent = card.dataset.name;
     const body = viewer.querySelector(".viewer-body");
-    body.innerHTML = `<p class="viewer-loading">사진 불러오는 중... 🥕</p>`;
+    body.innerHTML = `<p class="viewer-loading">사진 불러오는 중...</p>`;
     viewer.hidden = false;
     document.body.style.overflow = "hidden";
 

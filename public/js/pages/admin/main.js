@@ -7,6 +7,7 @@
    ============================================================ */
 
 import { $ } from "../../lib/ui.js";
+import { ic } from "../../lib/icons.js";
 import { esc, escMultiline } from "../../lib/format.js";
 import { toAuthEmail, displayAccount } from "../../lib/account.js";
 
@@ -52,7 +53,7 @@ function authErrorMsg(err) {
 }
 
 /* 저장 완료 표시 (버튼 옆 메시지) */
-function flashSaved(form, text = "저장했어요 ✅") {
+function flashSaved(form, text = "저장했어요") {
   const el = form.querySelector(".save-msg");
   if (!el) return;
   el.hidden = false;
@@ -123,7 +124,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   $("appUser").hidden = false;
-  $("userName").textContent = `${user.displayName || displayAccount(user.email)} 👑`;
+  $("userName").innerHTML = `${esc(user.displayName || displayAccount(user.email))} ${ic("crown", "ic-crown")}`;
   showView("admin");
   startAdmin();
 });
@@ -682,7 +683,7 @@ function renderAlbums() {
     <article class="app-card album-admin" data-id="${a.id}">
       <div class="app-card-head">
         <div class="album-head-info">
-          ${a.cover ? `<img class="album-cover-thumb" src="${a.cover}" alt="" />` : `<span class="album-cover-thumb empty">🥕</span>`}
+          ${a.cover ? `<img class="album-cover-thumb" src="${a.cover}" alt="" />` : `<span class="album-cover-thumb empty">${ic("carrot")}</span>`}
           <div>
             <h4>${esc(a.name)}</h4>
             <p class="app-card-meta">사진 ${a.photoCount || 0}장</p>
@@ -881,8 +882,8 @@ $("albumList").addEventListener("change", async (e) => {
 
   setStatus(
     failed.length
-      ? `⚠️ ${done}장 완료, ${failed.length}장 실패 (${failed.join(", ")})`
-      : `✅ 사진 ${done}장을 올렸어요!`,
+      ? `${done}장 완료, ${failed.length}장 실패 (${failed.join(", ")})`
+      : `사진 ${done}장을 올렸어요!`,
     true
   );
 });

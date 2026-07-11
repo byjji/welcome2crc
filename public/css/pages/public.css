@@ -288,7 +288,7 @@
   font-size: 1rem;
   font-weight: 800;
   padding: 0.55em 1.5em;
-  border-radius: 999px;
+  border-radius: 8px;
   border: 1.5px solid var(--line);
   background: var(--white);
   color: var(--ink-soft);
@@ -381,7 +381,7 @@
   font-weight: 700;
   font-size: 0.82rem;
   padding: 0.2em 0.9em;
-  border-radius: 999px;
+  border-radius: 4px;
 }
 
 .record-table .time {
@@ -416,6 +416,7 @@
   align-items: center;
   justify-content: center;
   font-size: 2.4rem;
+  color: var(--carrot); /* 당근 라인 아이콘 */
 }
 
 .gallery-placeholder.p1 { background: linear-gradient(135deg, var(--carrot-soft), var(--carrot-line)); }
@@ -620,7 +621,7 @@
   font-size: 0.88rem;
   font-weight: 800;
   padding: 0.4em 1.1em;
-  border-radius: 999px;
+  border-radius: 8px;
   border: 1.5px solid var(--line);
   background: var(--white);
   color: var(--ink-soft);
@@ -710,7 +711,7 @@
   font-weight: 800;
   font-size: 0.75rem;
   padding: 0.15em 0.7em;
-  border-radius: 999px;
+  border-radius: 4px;
 }
 
 /* ----- 앨범 사진 뷰어 (전체 화면 오버레이) ----- */

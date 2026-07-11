@@ -7,7 +7,7 @@
   <meta name="description" content="당근러닝크루 크루원 전용 공간. 공지, 일정, 출석체크, 투표를 한곳에서." />
   <meta name="robots" content="noindex" />
 
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥕</text></svg>" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
 
   <!-- Pretendard 폰트 -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
@@ -21,7 +21,7 @@
   <header class="site-header scrolled">
     <div class="container header-inner">
       <a href="index.html" class="logo" aria-label="당근러닝크루 홈">
-        <span class="logo-mark">🥕</span>
+        <span class="logo-mark"><svg viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path class="lf" stroke="var(--leaf)" d="M12 8.5 7.5 3.5M12 8.5V2.8M12 8.5l4.5-5"/><path class="bd" stroke="var(--carrot-vivid)" d="M8.2 9h7.6L12 21.5 8.2 9zM9.8 13h4.4M10.9 16.8h2.2"/></svg></span>
         <span class="logo-text">C.R.C <small>크루공간</small></span>
       </a>
       <div class="app-user" id="appUser" hidden>
@@ -37,7 +37,7 @@
       <!-- ===== 로딩 ===== -->
       <section class="app-view" id="viewLoading">
         <div class="center-card">
-          <div class="spinner">🥕</div>
+          <div class="spinner"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path stroke="var(--leaf)" d="M12 8.5 7.5 3.5M12 8.5V2.8M12 8.5l4.5-5"/><path stroke="var(--carrot-vivid)" d="M8.2 9h7.6L12 21.5 8.2 9zM9.8 13h4.4M10.9 16.8h2.2"/></svg></div>
           <p>불러오는 중...</p>
         </div>
       </section>
@@ -45,7 +45,7 @@
       <!-- ===== Firebase 설정 안내 (설정 전) ===== -->
       <section class="app-view" id="viewConfig" hidden>
         <div class="center-card">
-          <h2>⚙️ Firebase 설정이 필요합니다</h2>
+          <h2>Firebase 설정이 필요합니다</h2>
           <p>
             아직 Firebase 프로젝트가 연결되지 않았어요.<br />
             <code>js/firebase-config.js</code> 파일에 본인 프로젝트의 설정값을 붙여넣어 주세요.
@@ -59,7 +59,7 @@
       <section class="app-view" id="viewLogin" hidden>
         <div class="auth-card">
           <div class="auth-head">
-            <span class="auth-logo">🥕</span>
+            <span class="auth-logo"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path stroke="var(--leaf)" d="M12 8.5 7.5 3.5M12 8.5V2.8M12 8.5l4.5-5"/><path stroke="var(--carrot-vivid)" d="M8.2 9h7.6L12 21.5 8.2 9zM9.8 13h4.4M10.9 16.8h2.2"/></svg></span>
             <h1>크루 공간</h1>
             <p>공지 · 일정 · 출석체크 · 투표를 한곳에서.<br />당근러닝크루 크루원 전용 공간입니다.</p>
           </div>
@@ -149,12 +149,12 @@
       <!-- ===== 승인 대기 ===== -->
       <section class="app-view" id="viewPending" hidden>
         <div class="center-card">
-          <div class="big-emoji">⏳</div>
+          <div class="big-emoji"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></div>
           <h2>가입 승인 대기 중입니다</h2>
           <p>
             <strong id="pendingName"></strong>님, 반가워요!<br />
             운영진이 확인 후 승인하면 크루 공간을 이용할 수 있어요.<br />
-            빠른 승인이 필요하면 운영진에게 알려주세요. 🥕
+            빠른 승인이 필요하면 운영진에게 알려주세요.
           </p>
           <button class="btn btn-primary" id="btnLogoutPending">로그아웃</button>
         </div>
@@ -163,7 +163,7 @@
       <!-- ===== 가입 거절됨 / 내보내기됨 ===== -->
       <section class="app-view" id="viewRejected" hidden>
         <div class="center-card">
-          <div class="big-emoji">🚫</div>
+          <div class="big-emoji"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m6 6 12 12"/></svg></div>
           <h2 id="rejectedTitle">가입이 승인되지 않았어요</h2>
           <p>
             <strong id="rejectedName"></strong>님, <span id="rejectedDesc">아쉽지만 이번 가입 신청은 승인되지 않았어요.</span><br />
@@ -190,9 +190,9 @@
         <!-- 일정·출첵 -->
         <div class="tab-panel" id="tab-events">
           <div class="sub-tabs" id="eventSubTabs">
-            <button class="sub-tab active" data-subtab="ev-list">📅 일정</button>
-            <button class="sub-tab" data-subtab="ev-att">🥕 출석 현황</button>
-            <button class="sub-tab" data-subtab="ev-rec">🏆 이달의 기록</button>
+            <button class="sub-tab active" data-subtab="ev-list">일정</button>
+            <button class="sub-tab" data-subtab="ev-att">출석 현황</button>
+            <button class="sub-tab" data-subtab="ev-rec">이달의 기록</button>
           </div>
 
           <!-- 서브탭 1: 일정 -->
@@ -240,7 +240,7 @@
             </div>
             <div class="sum-chips" id="attSummary"></div>
             <div id="attMatrix"><p class="empty-note">출석 현황을 불러오는 중...</p></div>
-            <p class="mtx-cap">🥕 = 참석 · <strong>정기런</strong> 일정만 출석으로 집계돼요</p>
+            <p class="mtx-cap"><svg class="svg-ic" style="color: var(--carrot-vivid)" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M12 8.5 7.5 3.5M12 8.5V2.8M12 8.5l4.5-5"/><path d="M8.2 9h7.6L12 21.5 8.2 9z"/><path d="M9.8 13h4.4M10.9 16.8h2.2"/></svg> = 참석 · <strong>정기런</strong> 일정만 출석으로 집계돼요</p>
           </div>
 
           <!-- 서브탭 3: 이달의 기록 (마일리지 + 월별 랭킹) -->
@@ -252,7 +252,7 @@
               <button type="button" data-mnav="1" aria-label="다음 달">›</button>
             </div>
             <div id="recTable"><p class="empty-note">기록을 불러오는 중...</p></div>
-            <p class="mtx-cap">🥇🥈🥉 = 출석 많은 순, 같으면 누적(km) 많은 순 · 출석은 <strong>정기런</strong> 기준</p>
+            <p class="mtx-cap"><span class="rank-chip r1">1</span><span class="rank-chip r2">2</span><span class="rank-chip r3">3</span> = 출석 많은 순, 같으면 누적(km) 많은 순 · 출석은 <strong>정기런</strong> 기준</p>
           </div>
         </div>
 
@@ -267,7 +267,7 @@
               <div class="form-row">
                 <textarea id="noticeBody" rows="5" required maxlength="4000" placeholder="공지 내용"></textarea>
               </div>
-              <label class="check-row"><input type="checkbox" id="noticePinned" /> 상단 고정 📌</label>
+              <label class="check-row"><input type="checkbox" id="noticePinned" /> 상단 고정</label>
               <button type="submit" class="btn btn-primary">공지 올리기</button>
             </form>
           </details>
@@ -286,16 +286,16 @@
 
           <div class="sub-tabs news-filter" id="newsFilter">
             <button class="sub-tab active" data-news="all">전체</button>
-            <button class="sub-tab" data-news="notice">📢 공지</button>
-            <button class="sub-tab" data-news="poll">🗳️ 투표</button>
+            <button class="sub-tab" data-news="notice">공지</button>
+            <button class="sub-tab" data-news="poll">투표</button>
           </div>
 
           <div id="newsNotices">
-            <h3 class="panel-subtitle news-subtitle">📢 공지</h3>
+            <h3 class="panel-subtitle news-subtitle">공지</h3>
             <div class="card-list" id="noticeList"><p class="empty-note">공지를 불러오는 중...</p></div>
           </div>
           <div id="newsPolls">
-            <h3 class="panel-subtitle news-subtitle">🗳️ 투표</h3>
+            <h3 class="panel-subtitle news-subtitle">투표</h3>
             <div class="card-list" id="pollList"><p class="empty-note">투표를 불러오는 중...</p></div>
           </div>
         </div>
@@ -304,9 +304,9 @@
         <div class="tab-panel" id="tab-members">
           <div id="adminSection" hidden>
             <div class="sub-tabs" id="memberSubTabs">
-              <button class="sub-tab active" data-subtab="pending">🕐 승인 대기 <span class="sub-cnt" id="pendingCount">0</span></button>
-              <button class="sub-tab" data-subtab="rejected">🚫 거절 <span class="sub-cnt" id="rejectedCount">0</span></button>
-              <button class="sub-tab" data-subtab="removed">👋 내보내기 <span class="sub-cnt" id="removedCount">0</span></button>
+              <button class="sub-tab active" data-subtab="pending">승인 대기 <span class="sub-cnt" id="pendingCount">0</span></button>
+              <button class="sub-tab" data-subtab="rejected">거절 <span class="sub-cnt" id="rejectedCount">0</span></button>
+              <button class="sub-tab" data-subtab="removed">내보내기 <span class="sub-cnt" id="removedCount">0</span></button>
             </div>
             <div class="sub-panel active" id="subtab-pending">
               <div class="card-list" id="pendingList"><p class="empty-note">대기 중인 멤버가 없습니다.</p></div>
@@ -325,11 +325,11 @@
         <!-- 하단 고정 탭 -->
         <nav class="bottom-nav" id="appTabs" aria-label="크루 공간 메뉴">
           <div class="nav-inner">
-            <button class="app-tab active" data-tab="home"><span class="ic">🏠</span>홈</button>
-            <button class="app-tab" data-tab="events"><span class="ic">🥕</span>일정·출첵</button>
-            <button class="app-tab" data-tab="news"><span class="ic">📢</span>소식</button>
-            <button class="app-tab" data-tab="members"><span class="ic">👥</span>멤버</button>
-            <a class="app-tab" id="adminPageLink" href="admin.html" hidden title="페이지 관리"><span class="ic">⚙️</span>페이지 관리</a>
+            <button class="app-tab active" data-tab="home"><span class="ic"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 11.5 12 4.5l8 7"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-5.5h4V20"/></svg></span>홈</button>
+            <button class="app-tab" data-tab="events"><span class="ic"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><rect x="4.5" y="6.5" width="15" height="13.5"/><path d="M4.5 10.5h15M8.5 3.5V7M15.5 3.5V7"/></svg></span>일정·출첵</button>
+            <button class="app-tab" data-tab="news"><span class="ic"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 10v4h4.5l10 5.5v-15L8.5 10H4z"/><path d="M7.2 14.5 8.5 20"/></svg></span>소식</button>
+            <button class="app-tab" data-tab="members"><span class="ic"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><circle cx="9" cy="7.8" r="3.3"/><path d="M3.5 19.5v-.4c0-3 2.4-4.8 5.5-4.8s5.5 1.8 5.5 4.8v.4"/><path d="M15.6 4.9a3.3 3.3 0 0 1 0 5.8M17.4 14.8c2 .7 3.1 2.2 3.1 4.3v.4"/></svg></span>멤버</button>
+            <a class="app-tab" id="adminPageLink" href="admin.html" hidden title="페이지 관리"><span class="ic"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 8h8.7M17.3 8H20"/><rect x="12.7" y="5.7" width="4.6" height="4.6"/><path d="M4 16h2.7M11.3 16H20"/><rect x="6.7" y="13.7" width="4.6" height="4.6"/></svg></span>페이지 관리</a>
           </div>
         </nav>
 
@@ -341,7 +341,7 @@
   <div class="modal" id="resetModal" hidden>
     <div class="modal-card">
       <div class="modal-head">
-        <h3>🔑 비밀번호를 잊었나요?</h3>
+        <h3>비밀번호를 잊었나요?</h3>
         <button type="button" class="modal-close" data-close="resetModal" aria-label="닫기">✕</button>
       </div>
       <p class="modal-desc">질문항목을 선택하여 답변하시면 새 비밀번호를 설정 할 수 있습니다.</p>
@@ -374,7 +374,7 @@
   <div class="modal" id="newPwModal" hidden>
     <div class="modal-card">
       <div class="modal-head">
-        <h3>🔑 비밀번호 재설정</h3>
+        <h3>비밀번호 재설정</h3>
         <button type="button" class="modal-close" data-close="newPwModal" aria-label="닫기">✕</button>
       </div>
       <p class="modal-desc">확인되었습니다. 새 비밀번호를 설정해 주세요.</p>
@@ -397,7 +397,7 @@
   <div class="modal" id="profileModal" hidden>
     <div class="modal-card">
       <div class="modal-head">
-        <h3>👤 내 정보 수정</h3>
+        <h3>내 정보 수정</h3>
         <button type="button" class="modal-close" data-close="profileModal" aria-label="닫기">✕</button>
       </div>
 
@@ -455,7 +455,7 @@
   <div class="modal" id="editNoticeModal" hidden>
     <div class="modal-card">
       <div class="modal-head">
-        <h3>📢 공지 수정</h3>
+        <h3>공지 수정</h3>
         <button type="button" class="modal-close" data-close="editNoticeModal" aria-label="닫기">✕</button>
       </div>
       <form id="editNoticeForm" class="auth-form">
@@ -477,7 +477,7 @@
   <div class="modal" id="editEventModal" hidden>
     <div class="modal-card">
       <div class="modal-head">
-        <h3>📅 일정 수정</h3>
+        <h3>일정 수정</h3>
         <button type="button" class="modal-close" data-close="editEventModal" aria-label="닫기">✕</button>
       </div>
       <form id="editEventForm" class="auth-form">
@@ -517,7 +517,7 @@
   <div class="modal" id="mileageModal" hidden>
     <div class="modal-card">
       <div class="modal-head">
-        <h3>🥕 기록 수정</h3>
+        <h3>기록 수정</h3>
         <button type="button" class="modal-close" data-close="mileageModal" aria-label="닫기">✕</button>
       </div>
       <p class="modal-desc" id="mileageWho"></p>
@@ -542,7 +542,7 @@
   <div class="modal" id="editPollModal" hidden>
     <div class="modal-card">
       <div class="modal-head">
-        <h3>🗳️ 투표 수정</h3>
+        <h3>투표 수정</h3>
         <button type="button" class="modal-close" data-close="editPollModal" aria-label="닫기">✕</button>
       </div>
       <form id="editPollForm" class="auth-form">
@@ -555,7 +555,7 @@
           <textarea id="editPollOptions" rows="4" required></textarea>
         </div>
         <p class="modal-desc">
-          ⚠️ 이미 투표가 진행 중이면 <strong>글자 수정(오타 고치기)만</strong> 하는 걸 권해요.<br />
+          이미 투표가 진행 중이면 <strong>글자 수정(오타 고치기)만</strong> 하는 걸 권해요.<br />
           선택지 순서를 바꾸거나 줄이면 기존 표가 다른 선택지로 옮겨가거나 사라질 수 있어요.
         </p>
         <button type="submit" class="btn btn-primary btn-block">수정 저장</button>
@@ -565,7 +565,7 @@
   </div>
 
   <footer class="app-footer">
-    <p>🥕 당근러닝크루 C.R.C · <a href="index.html">소개 페이지</a></p>
+    <p>당근러닝크루 C.R.C · <a href="index.html">소개 페이지</a></p>
   </footer>
 
   <script src="js/firebase-config.js"></script>

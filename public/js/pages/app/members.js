@@ -2,6 +2,7 @@
    pages/app/members.js — 멤버 탭 (목록 + 운영진 관리)
    ============================================================ */
 import { $ } from "../../lib/ui.js";
+import { ic } from "../../lib/icons.js";
 import { esc, fmtDate } from "../../lib/format.js";
 import { displayAccount } from "../../lib/account.js";
 import { db, doc, updateDoc, deleteDoc, serverTimestamp } from "../../lib/firebase.js";
@@ -21,12 +22,12 @@ export function renderMembers() {
 
   $("memberCount").textContent = `${approved.length}명`;
 
-  // 한 줄 목록 — 이름 | 합류날짜, 운영진에게만 👑 배지 (멤버는 배지 없음)
+  // 한 줄 목록 — 이름 | 합류날짜, 운영진에게만 왕관 배지 (멤버는 배지 없음)
   $("memberList").innerHTML = approved.length ? approved.map((m) => `
     <div class="member-row">
       <span class="member-name">${esc(m.name)}</span>
       <span class="member-since">${fmtDate(m.createdAt)} 합류</span>
-      ${m.role === "admin" ? `<span class="role-badge admin" title="운영진">👑</span>` : ""}
+      ${m.role === "admin" ? `<span class="role-badge admin" title="운영진">${ic("crown")}</span>` : ""}
       ${isAdmin ? `
       <div class="member-actions">
         ${m.id !== me.uid ? `
@@ -95,7 +96,7 @@ export function renderMembers() {
 /* 가입신청서에 적은 정보 (승인 대기/거절 카드에 표시) */
 function applicantInfoHtml(m) {
   const line1 = [m.gender, m.ageGroup, m.career, m.region].filter(Boolean).map(esc).join(" · ");
-  const line2 = m.contact ? `📱 ${esc(m.contact)}` : "";
+  const line2 = m.contact ? `연락처 ${esc(m.contact)}` : "";
   return `
     ${line1 ? `<p class="app-card-meta">${line1}</p>` : ""}
     ${line2 ? `<p class="app-card-meta">${line2}</p>` : ""}

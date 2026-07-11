@@ -127,7 +127,7 @@
   font-size: 0.75rem;
   font-weight: 800;
   padding: 0.18em 0.8em;
-  border-radius: 999px;
+  border-radius: 4px;
 }
 
 .poll-status.open {
@@ -225,7 +225,7 @@
   font-size: 0.72rem;
   font-weight: 800;
   padding: 0.15em 0.7em;
-  border-radius: 999px;
+  border-radius: 4px;
   background: var(--carrot-soft);
   color: var(--carrot-deep);
   white-space: nowrap;
@@ -233,7 +233,7 @@
 
 .role-badge.admin {
   background: var(--ink);
-  color: var(--carrot-line);
+  color: #d9a514; /* 왕관 라인 아이콘 */
 }
 
 /* ---------- 반응형 (일정 카드) ---------- */
@@ -265,6 +265,7 @@ details.notice-row summary::-webkit-details-marker {
   width: 1.25em;
   text-align: center;
   font-size: 0.9rem;
+  color: var(--carrot-vivid); /* 고정핀 라인 아이콘 */
 }
 
 .notice-title {
@@ -336,7 +337,7 @@ details.notice-row[open] .notice-arrow {
   font-size: 0.92rem;
   font-weight: 800;
   padding: 0.45em 1.1em;
-  border-radius: 999px;
+  border-radius: 8px;
   border: 1.5px solid var(--line);
   background: var(--white);
   color: var(--ink-soft);
@@ -359,7 +360,7 @@ details.notice-row[open] .notice-arrow {
   display: inline-block;
   min-width: 1.5em;
   padding: 0 0.4em;
-  border-radius: 999px;
+  border-radius: 4px;
   background: rgba(0, 0, 0, 0.08);
   font-size: 0.82em;
   text-align: center;
@@ -421,7 +422,7 @@ details.notice-row[open] .notice-arrow {
   font-weight: 800;
   font-size: 0.72rem;
   padding: 0.15em 0.7em;
-  border-radius: 999px;
+  border-radius: 4px;
   vertical-align: 2px;
   margin-left: 0.3rem;
 }
@@ -550,7 +551,7 @@ details.notice-row[open] .notice-arrow {
   gap: 0.35em;
   padding: 0.5em 0.9em;
   border: 1.5px solid var(--line);
-  border-radius: 999px;
+  border-radius: 8px;
   background: var(--cream);
   font-size: 0.88rem;
   font-weight: 600;
@@ -607,7 +608,7 @@ details.notice-row[open] .notice-arrow {
   align-items: center;
   justify-content: center;
   border: 1.5px dashed var(--line);
-  border-radius: 999px;
+  border-radius: 8px;
   background: var(--white);
   font-family: var(--font);
   font-size: 0.9rem;
@@ -628,7 +629,7 @@ details.notice-row[open] .notice-arrow {
   font-weight: 700;
   color: #fff;
   padding: 0.18em 0.65em;
-  border-radius: 999px;
+  border-radius: 4px;
   margin-right: 0.45em;
   vertical-align: 2px;
   white-space: nowrap;
@@ -648,7 +649,7 @@ details.notice-row[open] .notice-arrow {
   gap: 0.4em;
   padding: 0.42em 0.95em;
   border: 1.5px solid var(--line);
-  border-radius: 999px;
+  border-radius: 8px;
   background: var(--white);
   font-family: var(--font);
   font-size: 0.85rem;
@@ -725,9 +726,13 @@ details.notice-row[open] .notice-arrow {
 .bottom-nav .app-tab .ic {
   font-size: 1.25rem;
   line-height: 1.2;
-  padding: 0.1em 0.7em;
-  border-radius: 999px;
+  padding: 0.16em 0.7em;
+  border-radius: 8px;
   transition: background 0.15s ease;
+}
+
+.bottom-nav .app-tab .ic .svg-ic {
+  display: block;
 }
 
 .bottom-nav .app-tab:hover {
@@ -807,7 +812,7 @@ details.notice-row[open] .notice-arrow {
   font-weight: 800;
   letter-spacing: 0.02em;
   background: rgba(255, 255, 255, 0.24);
-  border-radius: 999px;
+  border-radius: 4px;
   padding: 0.16em 0.75em;
   align-self: flex-start;
   white-space: nowrap;
@@ -1017,7 +1022,7 @@ details.notice-row[open] .notice-arrow {
   color: var(--ink-soft);
   background: var(--white);
   border: 1.5px solid var(--line);
-  border-radius: 999px;
+  border-radius: 8px;
   padding: 0.45em 0.2em;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -1099,6 +1104,7 @@ table.mtx tbody tr:last-child td {
 table.mtx .stamp {
   font-size: 1.05rem;
   line-height: 1;
+  color: var(--carrot-vivid); /* 당근 라인 아이콘 */
 }
 
 table.mtx .miss {
@@ -1137,7 +1143,7 @@ table.mtx th.sum {
   font-size: 0.8rem;
   font-weight: 700;
   padding: 0.5em 1em;
-  border-radius: 999px;
+  border-radius: 8px;
   border: 1.5px solid var(--line);
   background: var(--white);
   color: var(--ink-soft);
@@ -1259,7 +1265,7 @@ tr.me-row td {
   font-size: 0.86rem;
   font-weight: 800;
   padding: 0.55em 1.3em;
-  border-radius: 999px;
+  border-radius: 8px;
   border: none;
   background: var(--carrot-vivid);
   color: #fff;
@@ -1280,11 +1286,25 @@ tr.me-row td {
   color: var(--leaf);
 }
 
-/* 이달의 기록: 메달 + ✏️ 수정 버튼 */
-.rank-medal {
-  font-size: 0.95rem;
-  margin-right: 3px;
+/* 이달의 기록: 순위 칩(1·2·3 금·은·동) — 배번호처럼 기울인 각진 칩 */
+.rank-chip {
+  display: inline-block;
+  min-width: 1.5em;
+  margin-right: 0.35em;
+  padding: 0.08em 0.25em;
+  border-radius: 4px;
+  transform: skewX(-8deg);
+  font-size: 0.78em;
+  font-weight: 900;
+  text-align: center;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
 }
+
+.rank-chip.r1 { background: #c9930b; }
+.rank-chip.r2 { background: #8f99a4; }
+.rank-chip.r3 { background: #b07040; }
 
 .btn-edit-rec {
   border: none;
@@ -1403,7 +1423,7 @@ details.att-manage[open] > summary .notice-arrow {
   gap: 0.35em;
   padding: 0.35em 0.75em;
   border: 1.5px solid var(--line);
-  border-radius: 999px;
+  border-radius: 8px;
   background: var(--cream);
   font-size: 0.8rem;
   font-weight: 600;
