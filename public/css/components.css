@@ -434,6 +434,7 @@
    (body.app-page 로 특이도를 올려 아래 모바일 미디어쿼리보다 우선) */
 body.app-page .app-main {
   padding-bottom: calc(96px + env(safe-area-inset-bottom));
+  overflow-x: hidden; /* 탭 슬라이드 전환 시 가로 스크롤 방지 */
 }
 
 .tab-panel {
@@ -442,6 +443,19 @@ body.app-page .app-main {
 
 .tab-panel.active {
   display: block;
+}
+
+/* 탭 전환 슬라이드 인 (좌/우 스와이프 · 하단 탭 클릭 공통) */
+@keyframes tabSlideNext {
+  from { opacity: 0.35; transform: translateX(16px); }
+  to   { opacity: 1;    transform: translateX(0); }
+}
+@keyframes tabSlidePrev {
+  from { opacity: 0.35; transform: translateX(-16px); }
+  to   { opacity: 1;    transform: translateX(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #tab-home, #tab-events, #tab-news, #tab-members { animation: none !important; }
 }
 
 .panel-subtitle {

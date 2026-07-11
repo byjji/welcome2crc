@@ -293,11 +293,28 @@ function renderAll() {
 /* ============================================================
    3. 탭 전환 (하단 고정 탭: 홈 / 일정·출첵 / 소식 / 멤버)
    ============================================================ */
+const SWIPE_TABS = ["home", "events", "news", "members"]; // 관리는 별도 페이지라 제외
+
+function activeTabName() {
+  return document.querySelector(".app-tab.active")?.dataset.tab || null;
+}
+
 function switchTab(name) {
+  const from = SWIPE_TABS.indexOf(activeTabName());
   document.querySelectorAll(".app-tab").forEach((t) =>
     t.classList.toggle("active", t.dataset.tab === name));
   document.querySelectorAll(".tab-panel").forEach((p) =>
     p.classList.toggle("active", p.id === `tab-${name}`));
+
+  // 방향 있는 슬라이드 인 (하단 탭 클릭·좌우 스와이프 공통)
+  const to = SWIPE_TABS.indexOf(name);
+  const panel = document.getElementById(`tab-${name}`);
+  if (panel && from >= 0 && to >= 0 && from !== to) {
+    const dir = to > from ? "tabSlideNext" : "tabSlidePrev";
+    panel.style.animation = "none";
+    void panel.offsetWidth;                 // 리플로우 → 애니메이션 재실행 보장
+    panel.style.animation = `${dir} 0.24s ease`;
+  }
   window.scrollTo(0, 0);
 }
 
@@ -305,6 +322,45 @@ $("appTabs").addEventListener("click", (e) => {
   const btn = e.target.closest(".app-tab");
   if (btn && btn.dataset.tab) switchTab(btn.dataset.tab); // 관리(admin.html 링크)는 그대로 이동
 });
+
+/* ---------- 좌/우 스와이프로 탭 이동 ---------- */
+const SWIPE_MIN = 55;     // 최소 가로 이동(px)
+const SWIPE_RATIO = 1.5;  // 세로보다 가로가 이만큼 우세할 때만 탭 이동(세로 스크롤 보호)
+let swActive = false, swStartX = 0, swStartY = 0;
+const appView = $("viewApp");
+
+/* 시작 지점이 가로 스크롤 가능한 요소(서브탭·칩·표 등) 안이면 스와이프 무시 */
+function inHScroll(node) {
+  let el = node instanceof Element ? node : node?.parentElement;
+  while (el && el !== appView) {
+    const ox = getComputedStyle(el).overflowX;
+    if ((ox === "auto" || ox === "scroll") && el.scrollWidth > el.clientWidth + 2) return true;
+    el = el.parentElement;
+  }
+  return false;
+}
+
+appView.addEventListener("touchstart", (e) => {
+  if (e.touches.length !== 1 ||
+      document.querySelector(".modal:not([hidden])") || // 모달 열려 있으면 무시
+      inHScroll(e.target)) { swActive = false; return; }
+  swActive = true;
+  swStartX = e.touches[0].clientX;
+  swStartY = e.touches[0].clientY;
+}, { passive: true });
+
+appView.addEventListener("touchend", (e) => {
+  if (!swActive) return;
+  swActive = false;
+  const dx = e.changedTouches[0].clientX - swStartX;
+  const dy = e.changedTouches[0].clientY - swStartY;
+  if (Math.abs(dx) < SWIPE_MIN || Math.abs(dx) < Math.abs(dy) * SWIPE_RATIO) return;
+  const cur = SWIPE_TABS.indexOf(activeTabName());
+  if (cur < 0) return;
+  const next = cur + (dx < 0 ? 1 : -1); // 왼쪽으로 밀면 다음 탭, 오른쪽이면 이전 탭
+  if (next < 0 || next >= SWIPE_TABS.length) return;
+  switchTab(SWIPE_TABS[next]);
+}, { passive: true });
 
 /* 홈 화면의 바로가기 (D-day 카드, 공지 배너, 일정 행, 투표 등)
    data-goto="탭" 또는 "탭:하위" — 예) "events", "news:poll", "news:notice" */
