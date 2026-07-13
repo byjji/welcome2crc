@@ -1627,6 +1627,17 @@ tr.me-row td {
   padding: 0.65rem 0.9rem;
 }
 
+/* 운영진: 줄을 누르면 가입신청 정보 모달 */
+.member-row.tappable {
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.member-row.tappable:hover {
+  border-color: var(--carrot);
+  background: var(--carrot-pale);
+}
+
 .member-row .member-name {
   font-weight: 800;
   font-size: 0.95rem;
@@ -1646,6 +1657,46 @@ tr.me-row td {
   font-size: 0.7rem;
   padding: 0.35em 0.75em;
   white-space: nowrap;
+}
+
+/* ----- 멤버 정보 모달 (가입신청서 내용) ----- */
+.info-list {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.info-list > div {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7rem;
+  padding: 0.55em 0.9em;
+  border-radius: 10px;
+  background: var(--cream);
+}
+
+.info-list dt {
+  flex: 0 0 4.6em;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+}
+
+.info-list dd {
+  font-size: 0.92rem;
+  font-weight: 600;
+  word-break: break-all;
+}
+
+.info-list dd a {
+  color: var(--carrot-deep);
+  font-weight: 800;
+}
+
+.info-label {
+  margin: 1rem 0 0.35rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--ink-soft);
 }
 
 /* ============================================================

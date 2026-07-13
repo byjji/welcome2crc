@@ -1,7 +1,7 @@
 /* ============================================================
    pages/app/members.js — 멤버 탭 (목록 + 운영진 관리)
    ============================================================ */
-import { $ } from "../../lib/ui.js";
+import { $, openModal } from "../../lib/ui.js";
 import { ic } from "../../lib/icons.js";
 import { esc, fmtDate } from "../../lib/format.js";
 import { displayAccount } from "../../lib/account.js";
@@ -31,8 +31,9 @@ export function renderMembers() {
   }
 
   // 한 줄 목록 — 이름 | 합류날짜, 운영진에게만 왕관 배지 (멤버는 배지 없음)
+  // 운영진은 줄을 누르면 그 멤버의 가입신청 정보 모달이 열림
   $("memberList").innerHTML = approved.length ? approved.map((m) => `
-    <div class="member-row">
+    <div class="member-row${isAdmin ? " tappable" : ""}" data-member="${m.id}"${isAdmin ? ' role="button" tabindex="0"' : ""}>
       <span class="member-name">${esc(m.name)}</span>
       <span class="member-since">${fmtDate(m.createdAt)} 합류</span>
       ${m.role === "admin" ? `<span class="role-badge admin" title="운영진">${ic("crown")}</span>` : ""}
@@ -99,6 +100,9 @@ export function renderMembers() {
       ${applicantInfoHtml(m)}
     </article>
   `).join("") : `<p class="empty-note">내보내기 기록이 없습니다.</p>`;
+
+  // 멤버 정보 모달이 열려 있으면 방금 바뀐 내용까지 반영
+  if (infoUid && !$("memberInfoModal").hidden) renderMemberInfo(infoUid);
 }
 
 /* 가입신청서에 적은 정보 (승인 대기/거절 카드에 표시) */
@@ -110,6 +114,59 @@ function applicantInfoHtml(m) {
     ${line2 ? `<p class="app-card-meta">${line2}</p>` : ""}
     ${m.intro ? `<div class="app-card-body">${esc(m.intro)}</div>` : ""}`;
 }
+
+/* ============================================================
+   멤버 정보 모달 (운영진 전용) — 목록에서 멤버를 누르면 열림
+   ------------------------------------------------------------
+   가입신청서에 적은 내용(성별·연령대·경력·사는 곳·연락처·하고 싶은 말)을
+   그대로 보여줍니다. 연락처는 눌러서 바로 전화할 수 있게 tel: 링크로.
+   ============================================================ */
+let infoUid = null; // 모달로 보고 있는 멤버
+
+function renderMemberInfo(uid) {
+  const m = state.members.find((x) => x.id === uid);
+  if (!m) return;
+
+  $("memberInfoName").innerHTML =
+    `${esc(m.name)}${m.role === "admin" ? ` ${ic("crown", "ic-crown")}` : ""}`;
+
+  const rows = [
+    ["계정", esc(displayAccount(m.email))],
+    ["합류", `${fmtDate(m.createdAt)}`],
+    ["성별", esc(m.gender)],
+    ["연령대", esc(m.ageGroup)],
+    ["대회 경력", esc(m.career)],
+    ["사는 곳", esc(m.region)],
+    ["연락처", m.contact ? `<a href="tel:${esc(String(m.contact).replace(/[^\d+-]/g, ""))}">${esc(m.contact)}</a>` : ""],
+  ].filter(([, v]) => v);
+
+  // 가입신청서를 거치지 않은 초기·예전 멤버는 계정·합류일 외에 적을 내용이 없음
+  const noApplication = rows.length <= 2 && !m.intro;
+
+  $("memberInfoBody").innerHTML = `
+    <dl class="info-list">
+      ${rows.map(([label, value]) => `<div><dt>${label}</dt><dd>${value}</dd></div>`).join("")}
+    </dl>
+    ${m.intro ? `
+      <p class="info-label">하고 싶은 말</p>
+      <div class="app-card-body">${esc(m.intro)}</div>` : ""}
+    ${noApplication ? `<p class="empty-note">가입신청서에 적은 정보가 없어요.</p>` : ""}`;
+}
+
+function openMemberInfo(uid) {
+  infoUid = uid;
+  renderMemberInfo(uid);
+  openModal("memberInfoModal");
+}
+
+/* 키보드(Enter·Space)로도 멤버 줄을 열 수 있게 */
+$("memberList").addEventListener("keydown", (e) => {
+  if (e.key !== "Enter" && e.key !== " ") return;
+  const row = e.target.closest(".member-row");
+  if (!row || !isAdmin) return;
+  e.preventDefault();
+  openMemberInfo(row.dataset.member);
+});
 
 /* 승인 대기 / 거절 서브탭 전환 */
 $("memberSubTabs").addEventListener("click", (e) => {
@@ -123,7 +180,12 @@ $("memberSubTabs").addEventListener("click", (e) => {
 
 $("tab-members").addEventListener("click", async (e) => {
   const btn = e.target.closest("[data-action]");
-  if (!btn) return;
+  if (!btn) {
+    // 운영진이 멤버 줄(버튼이 아닌 곳)을 누르면 가입신청 정보 모달
+    const row = e.target.closest(".member-row");
+    if (row && isAdmin) openMemberInfo(row.dataset.member);
+    return;
+  }
   const { action, id } = btn.dataset;
 
   try {

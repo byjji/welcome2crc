@@ -24,6 +24,7 @@ const CORE = [
   "css/pages/public.css",
   "css/pages/app.css",
   "css/pages/admin.css",
+  "data/cheers.json",
   "favicon.svg",
   "img/logo.png",
   "manifest.webmanifest",

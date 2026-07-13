@@ -10,10 +10,23 @@ import { esc, DOW, todayStr, dday, addDaysStr, parseDateParts, catColor, catBadg
 import { state, myProfile } from "./state.js";
 import { isPollClosed } from "./news.js";
 
+/* ---------- 인사말 뒤 응원 문구 (data/cheers.json) ----------
+   앱을 켤 때 하나를 뽑아 그 세션 동안 유지 → 다시 켜면 다른 문구 */
+let cheer = "오늘도 가볍게 달려요!"; // 문구를 못 불러왔을 때
+
+fetch("data/cheers.json")
+  .then((res) => res.json())
+  .then((list) => {
+    if (!Array.isArray(list) || !list.length) return;
+    cheer = list[Math.floor(Math.random() * list.length)];
+    renderHome(); // 홈이 이미 그려졌다면 문구만 최신으로
+  })
+  .catch(() => { /* 못 불러오면 기본 문구로 */ });
+
 export function renderHome() {
   if (!myProfile) return;
   $("dashHello").innerHTML =
-    `${esc(myProfile.name)}님, 반가워요! <span class="muted">오늘도 가볍게 달려요.</span>`;
+    `${esc(myProfile.name)}님! <span class="muted">${esc(cheer)}</span>`;
 
   const today = todayStr();
 
