@@ -6,13 +6,12 @@
      ③Firestore 의 최신 저장 내용으로 갱신(+캐시 저장)됩니다.
      → 운영진이 바꾼 내용이 기본값 깜빡임 없이 바로 보입니다.
    — 항목이 하나도 없는 섹션(크루 현황 숫자·핵심 가치·정기런 일정)은
-     자동으로 숨겨지고, 공식 기록·갤러리 섹션은 운영진이 저장한
-     내용이 있을 때만 표시됩니다.
+     자동으로 숨겨지고, 공식 기록 섹션은 운영진이 저장한 내용이
+     있을 때만 표시됩니다.
    — 가입 신청은 폼 없이 인스타그램 DM 으로만 받습니다.
    ============================================================ */
 
 import { esc, escMultiline } from "../../lib/format.js";
-import { ic } from "../../lib/icons.js";
 
 /* 현재 화면에 그릴 콘텐츠 (기본값: site-data.js → Firestore 로 덮어씀) */
 const content = {
@@ -24,11 +23,8 @@ const content = {
   joinContact: "", // 가입 문의 문구 — 운영진이 저장한 내용만 표시 (기본값 없음)
 };
 
-/* 종목(거리) 탭 표시 순서 */
-const EVENT_ORDER = ["풀코스", "하프", "10km", "5km", "3km"];
-
-let db = null; // Firestore 인스턴스 (원격 콘텐츠 로드 후 갤러리에서 재사용)
-const albumPhotoCache = {}; // albumId → photos[]
+/* 종목(거리) 탭 표시 순서 — 짧은 거리부터 (페이지 관리의 종목 선택과 동일) */
+const EVENT_ORDER = ["3km", "5km", "10km", "하프", "풀코스"];
 
 document.addEventListener("DOMContentLoaded", () => {
   applyCachedContent(); // 지난 방문 때 저장해 둔 운영진 콘텐츠로 먼저 그림 (기본값 깜빡임 방지)
@@ -41,7 +37,6 @@ document.addEventListener("DOMContentLoaded", () => {
   setupNav();
   setupReveal();
   setupRecordTabs();
-  setupGalleryViewer();
   document.getElementById("year").textContent = new Date().getFullYear();
 
   loadRemoteContent(); // Firestore 에 저장된 내용이 있으면 자동 반영
@@ -107,14 +102,11 @@ async function loadRemoteContent() {
   }
 
   try {
-    const fb = await import("../../lib/firebase.js");
-    const { doc, getDoc, collection, getDocs } = fb;
-    db = fb.db;
+    const { db, doc, getDoc, collection, getDocs } = await import("../../lib/firebase.js");
 
-    const [siteSnap, recordSnap, gallerySnap] = await Promise.all([
+    const [siteSnap, recordSnap] = await Promise.all([
       getDoc(doc(db, "site", "content")).catch(() => null),
       getDocs(collection(db, "records")).catch(() => null),
-      getDocs(collection(db, "gallery")).catch(() => null),
     ]);
 
     // 소개 문구/통계/핵심가치/정기런 — 최신 내용 반영 + 다음 방문용 캐시
@@ -137,15 +129,6 @@ async function loadRemoteContent() {
     if (recordSnap && recordSnap.size) {
       renderRecords(recordsFromDocs(recordSnap.docs));
       toggleSection("records", true);
-    }
-
-    // 갤러리 — 운영진이 저장한 앨범이 있을 때만 섹션 표시
-    if (gallerySnap && gallerySnap.size) {
-      const albums = gallerySnap.docs
-        .map((d) => ({ id: d.id, ...d.data() }))
-        .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-      renderAlbums(albums);
-      toggleSection("gallery", true);
     }
   } catch (err) {
     console.warn("원격 콘텐츠 로드 실패 (기본 내용으로 표시):", err);
@@ -247,11 +230,15 @@ function recordsFromDocs(docs) {
     }));
 }
 
-/* "3:28:41" / "45:10" → 초 (정렬용) */
-function timeToSeconds(t) {
-  const parts = String(t || "").trim().split(":").map(Number);
-  if (parts.some(isNaN) || !parts.length) return Infinity;
-  return parts.reduce((acc, n) => acc * 60 + n, 0);
+/* 입상 순위 — 예전에 저장한 완주 기록(time)도 그대로 보여줍니다 */
+function recordText(r) {
+  return r.rank || r.time || "";
+}
+
+/* "1위" → 1 (정렬용). 숫자로 시작하지 않는 값("우승" 등)은 맨 뒤로 */
+function rankOrder(r) {
+  const n = parseInt(String(recordText(r)).trim(), 10);
+  return Number.isNaN(n) ? Infinity : n;
 }
 
 function raceCardHtml(race, uid) {
@@ -274,18 +261,17 @@ function raceCardHtml(race, uid) {
   const panels = events.map((ev, i) => {
     const rows = groups[ev]
       .slice()
-      .sort((a, b) => timeToSeconds(a.time) - timeToSeconds(b.time))
-      .map((r, rank) => `
+      .sort((a, b) => rankOrder(a) - rankOrder(b))
+      .map((r) => `
         <tr>
-          <td class="rank">${rank + 1}</td>
           <td>${esc(r.name)}</td>
-          <td class="time">${esc(r.time)}</td>
+          <td class="place">${esc(recordText(r))}</td>
         </tr>`).join("");
     return `
       <div class="event-panel ${i === 0 ? "active" : ""}" data-event="${esc(ev)}" role="tabpanel">
         <div class="table-scroll">
           <table class="record-table slim">
-            <thead><tr><th></th><th>이름</th><th>기록</th></tr></thead>
+            <thead><tr><th>이름</th><th>입상 순위</th></tr></thead>
             <tbody>${rows}</tbody>
           </table>
         </div>
@@ -359,86 +345,6 @@ function setupRecordTabs() {
       p.classList.toggle("active", p.dataset.event === btn.dataset.event);
     });
   });
-}
-
-/* ============================================================
-   갤러리 — Firestore 앨범 (운영진이 저장한 앨범만 표시)
-   ============================================================ */
-/* Firestore 앨범 목록 */
-function renderAlbums(albums) {
-  const grid = document.getElementById("galleryGrid");
-  grid.innerHTML = albums.map((a, i) => {
-    const cover = a.cover
-      ? `<img src="${a.cover}" alt="${esc(a.name)}" loading="lazy" />`
-      : `<div class="gallery-placeholder p${(i % 4) + 1}"><span>${ic("carrot")}</span></div>`;
-    return `
-      <button class="gallery-item album-card reveal" data-album="${esc(a.id)}" data-name="${esc(a.name)}">
-        ${cover}
-        <span class="album-caption">
-          <span class="album-name">${esc(a.name)}</span>
-          <span class="album-count">${a.photoCount || 0}장</span>
-        </span>
-      </button>`;
-  }).join("");
-  observeReveals(grid);
-}
-
-/* 앨범 뷰어 (모바일 전체화면 오버레이) */
-function setupGalleryViewer() {
-  const viewer = document.createElement("div");
-  viewer.className = "album-viewer";
-  viewer.hidden = true;
-  viewer.innerHTML = `
-    <div class="viewer-head">
-      <strong class="viewer-title"></strong>
-      <button class="viewer-close" aria-label="닫기">✕</button>
-    </div>
-    <div class="viewer-body"></div>`;
-  document.body.appendChild(viewer);
-
-  const close = () => {
-    viewer.hidden = true;
-    document.body.style.overflow = "";
-  };
-  viewer.querySelector(".viewer-close").addEventListener("click", close);
-  viewer.addEventListener("click", (e) => {
-    if (e.target === viewer) close();
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !viewer.hidden) close();
-  });
-
-  document.getElementById("galleryGrid").addEventListener("click", async (e) => {
-    const card = e.target.closest(".album-card");
-    if (!card || !db) return;
-
-    viewer.querySelector(".viewer-title").textContent = card.dataset.name;
-    const body = viewer.querySelector(".viewer-body");
-    body.innerHTML = `<p class="viewer-loading">사진 불러오는 중...</p>`;
-    viewer.hidden = false;
-    document.body.style.overflow = "hidden";
-
-    try {
-      const photos = await loadAlbumPhotos(card.dataset.album);
-      body.innerHTML = photos.length
-        ? photos.map((p) => `<img src="${p.data}" alt="${esc(card.dataset.name)}" loading="lazy" />`).join("")
-        : `<p class="viewer-loading">아직 사진이 없어요.</p>`;
-    } catch (err) {
-      console.error("사진 로드 실패:", err);
-      body.innerHTML = `<p class="viewer-loading">사진을 불러오지 못했어요. 잠시 후 다시 시도해 주세요.</p>`;
-    }
-  });
-}
-
-async function loadAlbumPhotos(albumId) {
-  if (albumPhotoCache[albumId]) return albumPhotoCache[albumId];
-  const { collection, getDocs, query, orderBy } = await import("../../lib/firebase.js");
-  const qs = await getDocs(
-    query(collection(db, "gallery", albumId, "photos"), orderBy("createdAt", "asc"))
-  );
-  const photos = qs.docs.map((d) => d.data());
-  albumPhotoCache[albumId] = photos;
-  return photos;
 }
 
 /* ---------- 가입 안내 (JOIN US) — 운영진이 저장한 절차가 있을 때만 표시 ---------- */

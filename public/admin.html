@@ -200,7 +200,7 @@
         <!-- ===== 5. 공식 기록 ===== -->
         <section class="edit-sec" id="sec-records">
           <h2 class="sec-label">공식 기록</h2>
-          <p class="admin-hint">대회를 먼저 등록하고, 대회마다 종목(풀코스·하프·10km·5km)별 기록을 추가하세요. 저장하면 소개 페이지 '크루 공식 기록'에 바로 표시돼요.</p>
+          <p class="admin-hint">대회를 먼저 등록하고, 대회마다 종목(3km·5km·10km·하프·풀코스)별로 <strong>입상 순위</strong>를 추가하세요. 저장하면 소개 페이지 '크루 공식 기록'에 바로 표시돼요.</p>
 
           <details class="admin-form">
             <summary>＋ 대회 추가</summary>
@@ -219,25 +219,7 @@
           <div class="card-list" id="raceList"><p class="empty-note">기록을 불러오는 중...</p></div>
         </section>
 
-        <!-- ===== 6. 갤러리 ===== -->
-        <section class="edit-sec" id="sec-gallery">
-          <h2 class="sec-label">갤러리</h2>
-          <p class="admin-hint">앨범을 만들고 사진을 올리면 소개 페이지 "함께 달린 순간들"에 표시됩니다. 사진은 자동으로 용량이 줄여져 저장돼요.</p>
-
-          <details class="admin-form">
-            <summary>＋ 앨범 만들기</summary>
-            <form id="albumForm">
-              <div class="form-row">
-                <input type="text" id="albumName" required maxlength="60" placeholder="앨범 이름 (예: 2026 태화강 마라톤)" />
-              </div>
-              <button type="submit" class="btn btn-primary">앨범 만들기</button>
-            </form>
-          </details>
-
-          <div class="card-list" id="albumList"><p class="empty-note">앨범을 불러오는 중...</p></div>
-        </section>
-
-        <!-- ===== 7. 가입 안내 + 가입 문의 ===== -->
+        <!-- ===== 6. 가입 안내 + 가입 문의 ===== -->
         <section class="edit-sec" id="sec-join">
           <h2 class="sec-label">가입 안내 · 문의</h2>
           <div class="pv-frame"><span class="pv-tag">미리보기</span><div id="pvJoin"></div></div>

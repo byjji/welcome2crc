@@ -439,51 +439,11 @@ html.splash .boot-splash {
   border-radius: 4px;
 }
 
-.record-table .time {
+/* 입상 순위 */
+.record-table .place {
   font-weight: 800;
+  color: var(--carrot-deep);
   font-variant-numeric: tabular-nums;
-}
-
-/* ---------- 갤러리 ---------- */
-.gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.2rem;
-}
-
-.gallery-item {
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: var(--white);
-  border: 1px solid var(--line);
-  box-shadow: var(--shadow);
-}
-
-.gallery-item img,
-.gallery-placeholder {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  object-fit: cover;
-}
-
-.gallery-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.4rem;
-  color: var(--carrot); /* 당근 라인 아이콘 */
-}
-
-.gallery-placeholder.p1 { background: linear-gradient(135deg, var(--carrot-soft), var(--carrot-line)); }
-.gallery-placeholder.p2 { background: linear-gradient(135deg, var(--leaf-soft), var(--leaf-line)); }
-.gallery-placeholder.p3 { background: linear-gradient(135deg, var(--carrot-pale), var(--carrot-soft)); }
-.gallery-placeholder.p4 { background: linear-gradient(135deg, var(--line), var(--ink-faint)); }
-
-.gallery-item figcaption {
-  padding: 0.8rem 1.1rem;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--ink-soft);
 }
 
 /* ---------- 가입 ---------- */
@@ -646,18 +606,8 @@ html.splash .boot-splash {
     grid-template-columns: 1fr;
   }
 
-  .gallery-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
   .section {
     padding: 4.2rem 0;
-  }
-}
-
-@media (max-width: 480px) {
-  .gallery-grid {
-    grid-template-columns: 1fr;
   }
 }
 
@@ -708,131 +658,12 @@ html.splash .boot-splash {
   display: block;
 }
 
-/* 종목 탭 안의 표는 좁아도 OK (이름/기록 2열) */
+
+/* 종목 탭 안의 표는 좁아도 OK (이름/입상 순위 2열) */
 .record-table.slim {
   min-width: 0;
-}
-
-.record-table .rank {
-  width: 2.2em;
-  color: var(--ink-soft);
-  opacity: 0.6;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
 }
 
 .race-empty {
   padding: 1.2rem 1.6rem;
 }
-
-/* ============================================================
-   공개 페이지: 갤러리 앨범 + 뷰어
-   ============================================================ */
-.album-card {
-  font-family: var(--font);
-  border: 1px solid var(--line);
-  padding: 0;
-  text-align: left;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.album-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 14px 34px rgba(29, 23, 18, 0.13);
-}
-
-.album-caption {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.6rem;
-  padding: 0.8rem 1.1rem;
-  font-size: 0.88rem;
-}
-
-.album-name {
-  font-weight: 700;
-  color: var(--ink);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.album-count {
-  flex: 0 0 auto;
-  background: var(--carrot-soft);
-  color: var(--carrot-deep);
-  font-weight: 800;
-  font-size: 0.75rem;
-  padding: 0.15em 0.7em;
-  border-radius: 4px;
-}
-
-/* ----- 앨범 사진 뷰어 (전체 화면 오버레이) ----- */
-.album-viewer {
-  position: fixed;
-  inset: 0;
-  z-index: 500;
-  background: rgba(20, 15, 11, 0.96);
-  display: flex;
-  flex-direction: column;
-}
-
-.viewer-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.9rem 1.2rem;
-  color: #fff;
-}
-
-.viewer-title {
-  font-size: 1.02rem;
-  font-weight: 800;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.viewer-close {
-  flex: 0 0 auto;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(255, 255, 255, 0.12);
-  color: #fff;
-  font-size: 1.1rem;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.viewer-close:hover {
-  background: var(--carrot-vivid);
-}
-
-.viewer-body {
-  flex: 1;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-  padding: 0 0.8rem 2rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-  align-items: center;
-}
-
-.viewer-body img {
-  width: 100%;
-  max-width: 720px;
-  border-radius: 12px;
-}
-
-.viewer-loading {
-  color: rgba(255, 255, 255, 0.75);
-  padding: 3rem 1rem;
-  text-align: center;
-}
-

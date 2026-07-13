@@ -192,36 +192,37 @@
   color: var(--ink-soft);
 }
 
+/* 마감 시각 (진행 중: "7/20 18:00 까지") */
+.poll-due {
+  display: inline-block;
+  margin-left: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  font-variant-numeric: tabular-nums;
+}
+
 .poll-options {
   margin-top: 1rem;
   display: grid;
   gap: 0.55rem;
 }
 
+/* 선택지 = [투표 버튼] + [인원수 버튼(투표자 보기)] 한 줄 */
 .poll-option {
   position: relative;
-  display: block;
-  width: 100%;
-  text-align: left;
-  font-family: var(--font);
-  font-size: 0.95rem;
-  font-weight: 600;
-  padding: 0.7em 1.1em;
+  display: flex;
+  align-items: center;
   border-radius: 12px;
   border: 1.5px solid var(--line);
   background: var(--cream);
-  color: var(--ink);
-  cursor: pointer;
   overflow: hidden;
   transition: border-color 0.15s ease;
 }
 
-.poll-option:hover:not(:disabled) {
+/* 마감된 투표는 눌러도 바뀌지 않으므로 hover 강조도 하지 않음 */
+.poll-option:has(.opt-pick:not(:disabled)):hover {
   border-color: var(--carrot);
-}
-
-.poll-option:disabled {
-  cursor: default;
 }
 
 .poll-option .bar {
@@ -231,17 +232,54 @@
   transition: width 0.4s ease;
 }
 
-.poll-option .opt-label {
+.opt-pick {
   position: relative;
-  display: flex;
-  justify-content: space-between;
-  gap: 0.8rem;
+  flex: 1;
+  min-width: 0;
+  text-align: left;
+  font-family: var(--font);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--ink);
+  background: none;
+  border: none;
+  padding: 0.75em 0.5em 0.75em 1.1em;
+  cursor: pointer;
 }
 
-.poll-option .opt-count {
+.opt-pick:disabled {
+  cursor: default;
+}
+
+.opt-count {
+  position: relative;
+  flex: 0 0 auto;
+  margin-right: 0.5rem;
+  font-family: var(--font);
+  font-size: 0.8rem;
   font-weight: 800;
   color: var(--carrot-deep);
+  background: var(--carrot-soft);
+  border: 1.5px solid transparent;
+  border-radius: 8px;
+  padding: 0.35em 0.7em;
   white-space: nowrap;
+  cursor: pointer;
+}
+
+.opt-count:hover:not(:disabled) {
+  border-color: var(--carrot);
+}
+
+.opt-count:disabled {
+  background: transparent;
+  color: var(--ink-soft);
+  cursor: default;
+}
+
+.opt-pct {
+  font-weight: 700;
+  opacity: 0.7;
 }
 
 .poll-option.mine {
@@ -249,7 +287,7 @@
   background: #fff;
 }
 
-.poll-option.mine .opt-label::before {
+.poll-option.mine .opt-pick::before {
   content: "✓ ";
   color: var(--carrot-deep);
   font-weight: 900;
@@ -259,6 +297,78 @@
   margin-top: 0.7rem;
   font-size: 0.84rem;
   color: var(--ink-soft);
+}
+
+.poll-total strong {
+  color: var(--carrot-deep);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 투표 만들기·수정 폼 (선택지 ＋/− · 마감일) ---------- */
+.opt-head {
+  font-weight: 700;
+  font-size: 0.88rem;
+  margin-bottom: 0.45rem;
+}
+
+.opt-rows {
+  display: grid;
+  gap: 0.45rem;
+  margin-bottom: 0.6rem;
+}
+
+.opt-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.opt-row .f-opt {
+  flex: 1;
+  min-width: 0;
+}
+
+.opt-del {
+  flex: 0 0 auto;
+  width: 40px;
+  align-self: stretch;
+  border-radius: 10px;
+  border: 1.5px solid var(--line);
+  background: var(--cream);
+  color: var(--ink-soft);
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.opt-del:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.due-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+}
+
+/* ---------- 투표자 보기 모달 ---------- */
+.voter-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  max-height: 55vh;
+  overflow-y: auto;
+}
+
+.voter-chip {
+  padding: 0.4em 0.85em;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  background: var(--cream);
+  font-size: 0.85rem;
+  font-weight: 700;
 }
 
 /* ---------- 멤버 ---------- */

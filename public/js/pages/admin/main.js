@@ -1,9 +1,9 @@
 /* ============================================================
    페이지 관리 (admin.html) — 운영진 전용
    ------------------------------------------------------------
-   소개 페이지(index.html)의 문구 / 크루 공식 기록 / 갤러리를
-   Firestore 에 저장합니다. 저장된 내용은 소개 페이지가 열릴 때
-   자동으로 불러와 표시됩니다.
+   소개 페이지(index.html)의 문구 / 크루 공식 기록을 Firestore 에
+   저장합니다. 저장된 내용은 소개 페이지가 열릴 때 자동으로
+   불러와 표시됩니다.
    ============================================================ */
 
 import { $ } from "../../lib/ui.js";
@@ -41,8 +41,8 @@ if (!window.FIREBASE_READY) {
 const {
   auth, db,
   onAuthStateChanged, signOut, signInWithEmailAndPassword,
-  collection, doc, getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc,
-  onSnapshot, query, orderBy, serverTimestamp,
+  collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc,
+  onSnapshot, serverTimestamp,
 } = await import("../../lib/firebase.js");
 
 function authErrorMsg(err) {
@@ -69,7 +69,12 @@ function flashSaved(form, text = "저장했어요") {
   el._t = setTimeout(() => (el.hidden = true), 3000);
 }
 
-const EVENT_OPTIONS = ["풀코스", "하프", "10km", "5km", "3km"];
+/* 종목(거리) 표시 순서 — 짧은 거리부터 (소개 페이지의 종목 탭과 동일) */
+const EVENT_OPTIONS = ["3km", "5km", "10km", "하프", "풀코스"];
+const eventOrder = (ev) => {
+  const i = EVENT_OPTIONS.indexOf(ev);
+  return i === -1 ? 99 : i; // 목록에 없는 종목은 맨 뒤로
+};
 
 /* ============================================================
    1. 인증 + 운영진 확인
@@ -141,7 +146,6 @@ function startAdmin() {
   adminStarted = true;
   loadSiteContent();
   startRecordsListener();
-  startGalleryListener();
 }
 
 /* ============================================================
@@ -537,6 +541,11 @@ function fmtMonth(month) {
   return y ? `${y}. ${Number(m)}.` : "";
 }
 
+/* 입상 순위 — 예전에 저장한 완주 기록(time)도 그대로 보여줍니다 */
+function recordText(r) {
+  return r.rank || r.time || "";
+}
+
 function renderRaces() {
   const list = $("raceList");
   if (!races.length) {
@@ -550,9 +559,7 @@ function renderRaces() {
     results.forEach((r, idx) => {
       (groups[r.event] = groups[r.event] || []).push({ ...r, idx });
     });
-    const events = Object.keys(groups).sort(
-      (a, b) => (EVENT_OPTIONS.indexOf(a) + 99) % 99 - (EVENT_OPTIONS.indexOf(b) + 99) % 99
-    );
+    const events = Object.keys(groups).sort((a, b) => eventOrder(a) - eventOrder(b));
 
     const recordsHtml = events.length
       ? events.map((ev) => `
@@ -562,7 +569,7 @@ function renderRaces() {
             ${groups[ev].map((r) => `
               <li>
                 <span class="rec-name">${esc(r.name)}</span>
-                <span class="rec-time">${esc(r.time)}</span>
+                <span class="rec-rank">${esc(recordText(r))}</span>
                 <button type="button" class="row-del" data-action="del-rec" data-id="${race.id}" data-idx="${r.idx}" aria-label="기록 삭제">✕</button>
               </li>`).join("")}
           </ul>
@@ -587,7 +594,7 @@ function renderRaces() {
         <select class="f-event">
           ${EVENT_OPTIONS.map((o) => `<option>${o}</option>`).join("")}
         </select>
-        <input class="f-time" required maxlength="10" placeholder="기록 (3:28:41)" inputmode="numeric" />
+        <input class="f-rank" required maxlength="20" placeholder="입상 순위" />
         <button type="submit" class="btn-mini leaf">추가</button>
       </form>
     </article>`;
@@ -619,11 +626,8 @@ $("raceList").addEventListener("submit", async (e) => {
   if (!form) return;
   e.preventDefault();
 
-  const time = form.querySelector(".f-time").value.trim();
-  if (!/^\d{1,2}(:\d{2}){1,2}$/.test(time)) {
-    alert("기록은 45:10 또는 3:28:41 형식으로 입력해 주세요.");
-    return;
-  }
+  const rank = form.querySelector(".f-rank").value.trim();
+  if (!rank) return;
 
   const race = races.find((r) => r.id === form.dataset.id);
   if (!race) return;
@@ -635,12 +639,12 @@ $("raceList").addEventListener("submit", async (e) => {
         {
           name: form.querySelector(".f-name").value.trim(),
           event: form.querySelector(".f-event").value,
-          time,
+          rank,
         },
       ],
     });
     form.querySelector(".f-name").value = "";
-    form.querySelector(".f-time").value = "";
+    form.querySelector(".f-rank").value = "";
   } catch (err) {
     alert("기록 추가에 실패했어요: " + err.message);
   }
@@ -677,305 +681,3 @@ $("raceList").addEventListener("click", async (e) => {
     alert("처리에 실패했어요: " + err.message);
   }
 });
-
-/* ============================================================
-   4. 갤러리 (gallery 컬렉션 + photos 하위 컬렉션)
-   ============================================================ */
-let albums = [];
-const photosCache = {};      // albumId → [{id, data}]
-const openAlbums = new Set(); // 사진 목록이 펼쳐진 앨범
-
-function startGalleryListener() {
-  unsubs.push(onSnapshot(
-    collection(db, "gallery"),
-    (qs) => {
-      albums = qs.docs
-        .map((d) => ({ id: d.id, ...d.data() }))
-        .sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0));
-      renderAlbums();
-    },
-    (e) => console.error("갤러리 구독 오류:", e)
-  ));
-}
-
-function renderAlbums() {
-  const list = $("albumList");
-  if (!albums.length) {
-    list.innerHTML = `<p class="empty-note">아직 앨범이 없습니다. 위의 '앨범 만들기'로 시작해 보세요!</p>`;
-    return;
-  }
-
-  list.innerHTML = albums.map((a) => `
-    <article class="app-card album-admin" data-id="${a.id}">
-      <div class="app-card-head">
-        <div class="album-head-info">
-          ${a.cover ? `<img class="album-cover-thumb" src="${a.cover}" alt="" />` : `<span class="album-cover-thumb empty">${ic("carrot")}</span>`}
-          <div>
-            <h4>${esc(a.name)}</h4>
-            <p class="app-card-meta">사진 ${a.photoCount || 0}장</p>
-          </div>
-        </div>
-        <div class="card-actions">
-          <button class="btn-mini dark" data-action="rename-album" data-id="${a.id}">이름 수정</button>
-          <button class="btn-mini danger" data-action="del-album" data-id="${a.id}">앨범 삭제</button>
-        </div>
-      </div>
-
-      <div class="album-actions">
-        <label class="btn-mini leaf upload-label">
-          ＋ 사진 추가
-          <input type="file" accept="image/*" multiple hidden data-upload="${a.id}" />
-        </label>
-        <button class="btn-mini dark" data-action="toggle-photos" data-id="${a.id}">
-          ${openAlbums.has(a.id) ? "사진 접기" : "사진 보기·삭제"}
-        </button>
-      </div>
-      <p class="upload-status" id="upStatus-${a.id}" hidden></p>
-      <div class="photo-grid" id="photoGrid-${a.id}" ${openAlbums.has(a.id) ? "" : "hidden"}></div>
-    </article>
-  `).join("");
-
-  // 펼쳐져 있던 앨범은 사진 그리드 다시 채우기
-  openAlbums.forEach((id) => {
-    if (photosCache[id]) renderPhotoGrid(id);
-  });
-}
-
-function renderPhotoGrid(albumId) {
-  const grid = $(`photoGrid-${albumId}`);
-  if (!grid) return;
-  const photos = photosCache[albumId] || [];
-  grid.innerHTML = photos.length
-    ? photos.map((p) => `
-        <div class="photo-cell">
-          <img src="${p.data}" alt="" loading="lazy" />
-          <button type="button" class="photo-del" data-action="del-photo" data-album="${albumId}" data-photo="${p.id}" aria-label="사진 삭제">✕</button>
-        </div>`).join("")
-    : `<p class="empty-note">아직 사진이 없어요.</p>`;
-}
-
-async function fetchPhotos(albumId) {
-  const qs = await getDocs(
-    query(collection(db, "gallery", albumId, "photos"), orderBy("createdAt", "asc"))
-  );
-  photosCache[albumId] = qs.docs.map((d) => ({ id: d.id, ...d.data() }));
-  return photosCache[albumId];
-}
-
-/* 사진 수/커버 최신화 (업로드·삭제 후) */
-async function syncAlbumMeta(albumId) {
-  const photos = photosCache[albumId] || [];
-  let cover = "";
-  if (photos.length) {
-    try {
-      cover = await thumbFromDataUrl(photos[0].data);
-    } catch (err) {
-      console.warn("커버 생성 실패:", err);
-    }
-  }
-  await updateDoc(doc(db, "gallery", albumId), {
-    photoCount: photos.length,
-    cover,
-    updatedAt: serverTimestamp(),
-  });
-}
-
-/* 앨범 만들기 */
-$("albumForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  try {
-    await addDoc(collection(db, "gallery"), {
-      name: $("albumName").value.trim(),
-      photoCount: 0,
-      cover: "",
-      createdAt: serverTimestamp(),
-    });
-    e.target.reset();
-    e.target.closest("details").open = false;
-  } catch (err) {
-    alert("앨범 만들기에 실패했어요: " + err.message);
-  }
-});
-
-/* 앨범 버튼들 */
-$("albumList").addEventListener("click", async (e) => {
-  const btn = e.target.closest("[data-action]");
-  if (!btn) return;
-  const { action } = btn.dataset;
-
-  try {
-    if (action === "toggle-photos") {
-      const id = btn.dataset.id;
-      const grid = $(`photoGrid-${id}`);
-      if (openAlbums.has(id)) {
-        openAlbums.delete(id);
-        grid.hidden = true;
-        btn.textContent = "사진 보기·삭제";
-      } else {
-        openAlbums.add(id);
-        grid.hidden = false;
-        btn.textContent = "사진 접기";
-        if (!photosCache[id]) {
-          grid.innerHTML = `<p class="empty-note">사진 불러오는 중...</p>`;
-          await fetchPhotos(id);
-        }
-        renderPhotoGrid(id);
-      }
-    } else if (action === "rename-album") {
-      const album = albums.find((a) => a.id === btn.dataset.id);
-      const name = prompt("앨범 이름 수정:", album ? album.name : "");
-      if (name && name.trim()) {
-        await updateDoc(doc(db, "gallery", btn.dataset.id), { name: name.trim() });
-      }
-    } else if (action === "del-album") {
-      const album = albums.find((a) => a.id === btn.dataset.id);
-      if (!album) return;
-      if (!confirm(`'${album.name}' 앨범과 사진 ${album.photoCount || 0}장을 모두 삭제할까요?`)) return;
-      const photos = photosCache[album.id] || (await fetchPhotos(album.id));
-      for (const p of photos) {
-        await deleteDoc(doc(db, "gallery", album.id, "photos", p.id));
-      }
-      delete photosCache[album.id];
-      openAlbums.delete(album.id);
-      await deleteDoc(doc(db, "gallery", album.id));
-    } else if (action === "del-photo") {
-      if (!confirm("이 사진을 삭제할까요?")) return;
-      const albumId = btn.dataset.album;
-      await deleteDoc(doc(db, "gallery", albumId, "photos", btn.dataset.photo));
-      photosCache[albumId] = (photosCache[albumId] || []).filter((p) => p.id !== btn.dataset.photo);
-      renderPhotoGrid(albumId);
-      await syncAlbumMeta(albumId);
-    }
-  } catch (err) {
-    alert("처리에 실패했어요: " + err.message);
-  }
-});
-
-/* 사진 업로드 */
-$("albumList").addEventListener("change", async (e) => {
-  const input = e.target.closest("[data-upload]");
-  if (!input || !input.files.length) return;
-
-  const albumId = input.dataset.upload;
-  const files = [...input.files];
-  input.value = "";
-
-  // 스냅샷 갱신으로 카드가 다시 그려져도 상태 표시가 유지되도록 매번 다시 찾음
-  const setStatus = (text, hide = false) => {
-    const el = $(`upStatus-${albumId}`);
-    if (!el) return;
-    el.hidden = false;
-    el.textContent = text;
-    clearTimeout(el._t);
-    if (hide) el._t = setTimeout(() => (el.hidden = true), 4000);
-  };
-
-  let done = 0;
-  const failed = [];
-
-  if (!photosCache[albumId]) {
-    try {
-      await fetchPhotos(albumId);
-    } catch (err) {
-      console.warn("사진 목록 로드 실패:", err);
-      photosCache[albumId] = [];
-    }
-  }
-
-  for (const file of files) {
-    setStatus(`사진 올리는 중... (${done + 1}/${files.length})`);
-    try {
-      const data = await compressFile(file, 1400, 850000);
-      const ref = await addDoc(collection(db, "gallery", albumId, "photos"), {
-        data,
-        createdAt: serverTimestamp(),
-      });
-      photosCache[albumId].push({ id: ref.id, data });
-      done++;
-    } catch (err) {
-      console.error("사진 업로드 실패:", file.name, err);
-      failed.push(file.name);
-    }
-  }
-
-  try {
-    await syncAlbumMeta(albumId);
-  } catch (err) {
-    console.error("앨범 정보 갱신 실패:", err);
-  }
-
-  if (openAlbums.has(albumId)) renderPhotoGrid(albumId);
-
-  setStatus(
-    failed.length
-      ? `${done}장 완료, ${failed.length}장 실패 (${failed.join(", ")})`
-      : `사진 ${done}장을 올렸어요!`,
-    true
-  );
-});
-
-/* ============================================================
-   5. 이미지 압축 (Firestore 문서 1MB 제한에 맞춤)
-   ============================================================ */
-async function loadBitmap(file) {
-  try {
-    return await createImageBitmap(file, { imageOrientation: "from-image" });
-  } catch {
-    return await new Promise((resolve, reject) => {
-      const url = URL.createObjectURL(file);
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = () => {
-        URL.revokeObjectURL(url);
-        reject(new Error("이미지를 열 수 없어요"));
-      };
-      img.src = url;
-    });
-  }
-}
-
-function drawScaled(src, maxDim) {
-  const w = src.width || src.naturalWidth;
-  const h = src.height || src.naturalHeight;
-  const scale = Math.min(1, maxDim / Math.max(w, h));
-  const canvas = document.createElement("canvas");
-  canvas.width = Math.max(1, Math.round(w * scale));
-  canvas.height = Math.max(1, Math.round(h * scale));
-  const ctx = canvas.getContext("2d");
-  ctx.fillStyle = "#fff"; // 투명 PNG → JPEG 변환 시 검은 배경 방지
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-  ctx.drawImage(src, 0, 0, canvas.width, canvas.height);
-  return canvas;
-}
-
-/* 파일 → 리사이즈 + 품질을 낮춰가며 maxChars 이하의 dataURL 로 */
-async function compressFile(file, maxDim, maxChars) {
-  const bmp = await loadBitmap(file);
-  let dim = maxDim;
-
-  for (let attempt = 0; attempt < 4; attempt++) {
-    const canvas = drawScaled(bmp, dim);
-    let q = 0.82;
-    let url = canvas.toDataURL("image/jpeg", q);
-    while (url.length > maxChars && q > 0.45) {
-      q -= 0.08;
-      url = canvas.toDataURL("image/jpeg", q);
-    }
-    if (url.length <= maxChars) return url;
-    dim = Math.round(dim * 0.72); // 그래도 크면 크기를 더 줄여서 재시도
-  }
-  throw new Error("사진 용량을 충분히 줄이지 못했어요");
-}
-
-/* 앨범 커버용 작은 썸네일 */
-function thumbFromDataUrl(dataUrl) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      const canvas = drawScaled(img, 480);
-      resolve(canvas.toDataURL("image/jpeg", 0.62));
-    };
-    img.onerror = () => reject(new Error("썸네일 생성 실패"));
-    img.src = dataUrl;
-  });
-}

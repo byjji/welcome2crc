@@ -297,7 +297,16 @@
                 <input type="text" id="pollQuestion" required maxlength="150" placeholder="질문 (예: 이번 주 토요일 번개런 갈까요?)" />
               </div>
               <div class="form-row">
-                <textarea id="pollOptions" rows="4" required placeholder="선택지를 한 줄에 하나씩 입력&#10;예)&#10;참여!&#10;이번엔 패스"></textarea>
+                <p class="opt-head">선택지 <span class="muted">(＋ 로 추가 · − 로 삭제 · 2개 이상)</span></p>
+                <div class="opt-rows" id="pollOptionRows"></div>
+                <button type="button" class="btn-mini dark" data-opt-add="pollOptionRows">＋ 선택지 추가</button>
+              </div>
+              <div class="form-row">
+                <p class="opt-head">투표 마감 <span class="muted">(비우면 마감일 없음 · 지나면 자동 마감)</span></p>
+                <div class="due-row">
+                  <input type="date" id="pollDueDate" aria-label="마감 날짜" />
+                  <input type="time" id="pollDueTime" step="300" aria-label="마감 시각" />
+                </div>
               </div>
               <button type="submit" class="btn btn-primary">투표 시작</button>
             </form>
@@ -651,8 +660,16 @@
           <input type="text" id="editPollQuestion" required maxlength="150" />
         </div>
         <div class="form-row">
-          <label for="editPollOptions">선택지 (한 줄에 하나씩)</label>
-          <textarea id="editPollOptions" rows="4" required></textarea>
+          <label>선택지 <span class="muted">(＋ 로 추가 · − 로 삭제)</span></label>
+          <div class="opt-rows" id="editPollOptionRows"></div>
+          <button type="button" class="btn-mini dark" data-opt-add="editPollOptionRows">＋ 선택지 추가</button>
+        </div>
+        <div class="form-row">
+          <label for="editPollDueDate">투표 마감 <span class="muted">(비우면 마감일 없음)</span></label>
+          <div class="due-row">
+            <input type="date" id="editPollDueDate" aria-label="마감 날짜" />
+            <input type="time" id="editPollDueTime" step="300" aria-label="마감 시각" />
+          </div>
         </div>
         <p class="modal-desc">
           이미 투표가 진행 중이면 <strong>글자 수정(오타 고치기)만</strong> 하는 걸 권해요.<br />
@@ -661,6 +678,18 @@
         <button type="submit" class="btn btn-primary btn-block">수정 저장</button>
         <p class="form-msg" id="editPollMsg" hidden></p>
       </form>
+    </div>
+  </div>
+
+  <!-- ===== 투표자 보기 모달 (선택지의 인원수를 누르면 열림) ===== -->
+  <div class="modal" id="pollVotersModal" hidden>
+    <div class="modal-card">
+      <div class="modal-head">
+        <h3>투표자</h3>
+        <button type="button" class="modal-close" data-close="pollVotersModal" aria-label="닫기">✕</button>
+      </div>
+      <p class="modal-desc" id="pollVotersWho"></p>
+      <div class="voter-list" id="pollVotersList"></div>
     </div>
   </div>
 

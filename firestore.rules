@@ -102,17 +102,6 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
-    // ----- 갤러리 (앨범 + 사진) -----
-    match /gallery/{albumId} {
-      allow read: if true;
-      allow write: if isAdmin();
-
-      match /photos/{photoId} {
-        allow read: if true;
-        allow write: if isAdmin();
-      }
-    }
-
     // ----- 투표 -----
     match /polls/{pollId} {
       allow read: if isMember();

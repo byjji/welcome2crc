@@ -133,6 +133,7 @@ function enterApp() {
 let unsubs = [];                 // 컬렉션 리스너
 let attendanceUnsubs = {};       // eventId → unsub
 let voteUnsubs = {};             // pollId → unsub
+let deadlineTimer = null;        // 투표 마감 시각에 맞춘 재렌더링 타이머
 
 function cleanupAll() {
   unsubs.forEach((u) => u());
@@ -141,6 +142,7 @@ function cleanupAll() {
   attendanceUnsubs = {};
   Object.values(voteUnsubs).forEach((u) => u());
   voteUnsubs = {};
+  clearTimeout(deadlineTimer);
   if (profileUnsub) { profileUnsub(); profileUnsub = null; }
   appEntered = false;
   resetData();
@@ -195,6 +197,7 @@ function startListeners() {
       syncVoteListeners();
       renderPolls();
       renderHome();
+      scheduleDeadlineRerender();
     },
     (e) => console.error("투표 구독 오류:", e)
   ));
@@ -205,6 +208,7 @@ function startListeners() {
       state.members = qs.docs.map((d) => ({ id: d.id, ...d.data() }));
       renderMembers();
       renderHome();
+      renderPolls();   // 참여율(3/25)의 분모가 크루원 수
       renderMileage();
       renderStatsIfLoaded();
     },
@@ -275,10 +279,30 @@ function syncVoteListeners() {
         qs.docs.forEach((d) => (map[d.id] = d.data()));
         state.votes[p.id] = map;
         renderPolls();
+        renderHome(); // 홈의 '진행 중인 투표' 참여 인원도 함께
       },
       (e) => console.error("투표결과 구독 오류:", e)
     );
   });
+}
+
+/* 마감일이 지나면 화면을 열어둔 채로도 '마감'으로 바뀌도록,
+   가장 가까운 마감 시각에 맞춰 한 번 다시 그림 (최대 10분 간격으로 재확인) */
+function scheduleDeadlineRerender() {
+  clearTimeout(deadlineTimer);
+  const now = Date.now();
+  const next = state.polls
+    .filter((p) => !p.closed && p.deadline)
+    .map((p) => new Date(p.deadline).getTime())
+    .filter((t) => t > now)
+    .sort((a, b) => a - b)[0];
+  if (!next) return;
+
+  deadlineTimer = setTimeout(() => {
+    renderPolls();
+    renderHome();
+    scheduleDeadlineRerender();
+  }, Math.min(next - now + 1000, 600000));
 }
 
 function renderAll() {

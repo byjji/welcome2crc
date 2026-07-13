@@ -287,9 +287,10 @@
   font-weight: 700;
 }
 
-.rec-time {
+.rec-rank {
   margin-left: auto;
   font-weight: 800;
+  color: var(--carrot-deep);
   font-variant-numeric: tabular-nums;
 }
 
@@ -324,89 +325,5 @@
   outline: none;
   border-color: var(--carrot);
   background: #fff;
-}
-
-/* ----- 갤러리 관리 ----- */
-.album-head-info {
-  display: flex;
-  align-items: center;
-  gap: 0.9rem;
-  min-width: 0;
-}
-
-.album-cover-thumb {
-  flex: 0 0 52px;
-  width: 52px;
-  height: 52px;
-  border-radius: 12px;
-  object-fit: cover;
-  border: 1px solid var(--line);
-}
-
-.album-cover-thumb.empty {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--carrot-soft);
-  font-size: 1.3rem;
-  color: var(--carrot-deep); /* 당근 라인 아이콘 */
-}
-
-.album-actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
-  flex-wrap: wrap;
-}
-
-.upload-label {
-  display: inline-block;
-  cursor: pointer;
-}
-
-.upload-status {
-  margin-top: 0.7rem;
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: var(--leaf);
-}
-
-.photo-grid {
-  margin-top: 1rem;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-  gap: 0.6rem;
-}
-
-.photo-cell {
-  position: relative;
-  border-radius: 10px;
-  overflow: hidden;
-  border: 1px solid var(--line);
-}
-
-.photo-cell img {
-  width: 100%;
-  aspect-ratio: 1;
-  object-fit: cover;
-}
-
-.photo-del {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  border: none;
-  background: rgba(20, 15, 11, 0.65);
-  color: #fff;
-  font-size: 0.75rem;
-  font-weight: 800;
-  cursor: pointer;
-}
-
-.photo-del:hover {
-  background: var(--danger);
 }
 

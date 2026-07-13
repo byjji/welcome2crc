@@ -8,6 +8,7 @@ import { $ } from "../../lib/ui.js";
 import { ic } from "../../lib/icons.js";
 import { esc, DOW, todayStr, dday, addDaysStr, parseDateParts, catColor, catBadgeStyle, shadeColor } from "../../lib/format.js";
 import { state, myProfile } from "./state.js";
+import { isPollClosed } from "./news.js";
 
 export function renderHome() {
   if (!myProfile) return;
@@ -60,14 +61,15 @@ export function renderHome() {
     </div>`;
   }).join("") : `<p class="empty-note">2주 안에 예정된 일정이 없어요.</p>`;
 
-  // 진행 중인 투표 (가장 최근 것 하나)
-  const open = state.polls.find((p) => !p.closed);
+  // 진행 중인 투표 (가장 최근 것 하나 · 마감일이 지난 투표는 제외)
+  const open = state.polls.find((p) => !isPollClosed(p));
   if (open) {
-    const total = Object.keys(state.votes[open.id] || {}).length;
+    const voted = Object.keys(state.votes[open.id] || {}).length;
+    const crew = state.members.filter((m) => m.role === "member" || m.role === "admin").length;
     $("dashPoll").innerHTML = `
     <article class="app-card dash-poll" data-goto="news:poll" role="button">
       <p class="poll-q">${ic("vote")} ${esc(open.question)}</p>
-      <p class="poll-meta">지금까지 ${total}명 참여 · 눌러서 참여하기 ›</p>
+      <p class="poll-meta">${voted}/${crew} 참여 · 눌러서 참여하기 ›</p>
     </article>`;
   } else {
     $("dashPoll").innerHTML = `<p class="empty-note">진행 중인 투표가 없습니다.</p>`;
