@@ -1692,11 +1692,12 @@ tr.me-row td {
   font-weight: 800;
 }
 
-.info-label {
-  margin: 1rem 0 0.35rem;
-  font-size: 0.78rem;
-  font-weight: 700;
+/* 이름 바로 아래에 오는 '하고 싶은 말' (필드명 없이 내용만) */
+.info-intro {
+  margin: -0.4rem 0 1rem;
   color: var(--ink-soft);
+  font-size: 0.95rem;
+  white-space: pre-wrap;
 }
 
 /* ============================================================
