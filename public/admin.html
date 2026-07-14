@@ -105,151 +105,165 @@
       <!-- ===== 관리 본화면 ===== -->
       <section class="app-view" id="viewAdmin" hidden>
 
-        <p class="admin-hint">소개 페이지에 보이는 <strong>순서 그대로</strong> 한 화면에 모았어요. 미리보기 아래에서 고치면 바로 반영되고, <strong>저장</strong>을 눌러야 진짜 페이지에 적용됩니다. <a href="index.html" target="_blank" rel="noopener" class="inline-link">소개 페이지 열어보기 ↗</a></p>
+        <!-- ===== 관리 상단 탭 ===== -->
+        <div class="admin-tabs" id="adminTabs">
+          <button type="button" class="admin-tab active" data-atab="intro">소개 관리</button>
+          <button type="button" class="admin-tab" data-atab="stats">통계</button>
+        </div>
 
-        <!-- ===== 1. 기본 (히어로 + 소개 문단) ===== -->
-        <section class="edit-sec" id="sec-basic">
-          <h2 class="sec-label">기본 <span class="muted">(첫 화면 · 소개 문단)</span></h2>
-          <div class="pv-frame"><span class="pv-tag">미리보기</span><div id="pvBasic"></div></div>
+        <!-- ===== 소개 관리 (소개 페이지 내용 전체) ===== -->
+        <div class="admin-panel active" id="apanel-intro">
+          <p class="admin-hint">소개 페이지에 보이는 <strong>순서 그대로</strong> 한 화면에 모았어요. 미리보기 아래에서 고치면 바로 반영되고, <strong>저장</strong>을 눌러야 진짜 페이지에 적용됩니다. <a href="index.html" target="_blank" rel="noopener" class="inline-link">소개 페이지 열어보기 ↗</a></p>
 
-          <section class="admin-block">
-            <h3>기본 정보</h3>
-            <form id="formSite">
-              <div class="form-row">
-                <label for="siteCrewName">크루 이름</label>
-                <input id="siteCrewName" maxlength="30" required />
-              </div>
-              <div class="form-row">
-                <label for="siteSlogan">메인 슬로건 <span class="muted">(줄바꿈 그대로 표시돼요)</span></label>
-                <textarea id="siteSlogan" rows="2" maxlength="80" required></textarea>
-              </div>
-              <div class="form-row">
-                <label for="siteSubSlogan">서브 슬로건</label>
-                <textarea id="siteSubSlogan" rows="2" maxlength="150"></textarea>
-              </div>
-              <div class="form-row">
-                <label for="siteAboutDesc">소개 문단 (ABOUT US)</label>
-                <textarea id="siteAboutDesc" rows="4" maxlength="600"></textarea>
-              </div>
-              <div class="form-row">
-                <label for="siteInstagram">인스타그램 아이디 <span class="muted">(@ 제외)</span></label>
-                <input id="siteInstagram" maxlength="40" />
-              </div>
-              <div class="save-row">
-                <button type="submit" class="btn btn-primary">기본 정보 저장</button>
-                <span class="save-msg" hidden></span>
-              </div>
-            </form>
-          </section>
-        </section>
+          <!-- ===== 1. 기본 (히어로 + 소개 문단) ===== -->
+          <section class="edit-sec" id="sec-basic">
+            <h2 class="sec-label">기본 <span class="muted">(첫 화면 · 소개 문단)</span></h2>
+            <div class="pv-frame"><span class="pv-tag">미리보기</span><div id="pvBasic"></div></div>
 
-        <!-- ===== 2. 크루 현황 숫자 ===== -->
-        <section class="edit-sec" id="sec-stats">
-          <h2 class="sec-label">크루 현황 <span class="muted">(히어로 아래 통계)</span></h2>
-          <div class="pv-frame"><span class="pv-tag">미리보기</span><div id="pvStats"></div></div>
-
-          <section class="admin-block">
-            <h3>크루 현황 숫자 <span class="muted">(히어로 아래 통계 · 모두 지우면 섹션이 숨겨져요)</span></h3>
-            <form id="formStats">
-              <div class="row-list" id="statRows"></div>
-              <button type="button" class="btn-mini dark" data-add="stat">＋ 항목 추가</button>
-              <div class="save-row">
-                <button type="submit" class="btn btn-primary">크루 현황 저장</button>
-                <span class="save-msg" hidden></span>
-              </div>
-            </form>
-          </section>
-        </section>
-
-        <!-- ===== 3. 핵심 가치 ===== -->
-        <section class="edit-sec" id="sec-values">
-          <h2 class="sec-label">핵심 가치 <span class="muted">(소개 섹션 카드)</span></h2>
-          <div class="pv-frame"><span class="pv-tag">미리보기</span><div id="pvValues"></div></div>
-
-          <section class="admin-block">
-            <h3>핵심 가치 <span class="muted">(소개 섹션 카드 · 모두 지우면 숨겨져요)</span></h3>
-            <form id="formValues">
-              <div class="row-list" id="valueRows"></div>
-              <button type="button" class="btn-mini dark" data-add="value">＋ 카드 추가</button>
-              <div class="save-row">
-                <button type="submit" class="btn btn-primary">핵심 가치 저장</button>
-                <span class="save-msg" hidden></span>
-              </div>
-            </form>
-          </section>
-        </section>
-
-        <!-- ===== 4. 정기런 일정 ===== -->
-        <section class="edit-sec" id="sec-schedule">
-          <h2 class="sec-label">정기런 일정</h2>
-          <div class="pv-frame"><span class="pv-tag">미리보기</span><div id="pvSchedule"></div></div>
-
-          <section class="admin-block">
-            <h3>정기런 일정 <span class="muted">(모두 지우면 섹션이 숨겨져요)</span></h3>
-            <form id="formSchedule">
-              <div class="row-list" id="scheduleRows"></div>
-              <button type="button" class="btn-mini dark" data-add="schedule">＋ 일정 추가</button>
-              <div class="save-row">
-                <button type="submit" class="btn btn-primary">정기런 일정 저장</button>
-                <span class="save-msg" hidden></span>
-              </div>
-            </form>
-          </section>
-        </section>
-
-        <!-- ===== 5. 공식 기록 ===== -->
-        <section class="edit-sec" id="sec-records">
-          <h2 class="sec-label">공식 기록</h2>
-          <p class="admin-hint">대회를 먼저 등록하고, 대회마다 종목(3km·5km·10km·하프·풀코스)별로 <strong>입상 순위</strong>를 추가하세요. 저장하면 소개 페이지 '크루 공식 기록'에 바로 표시돼요.</p>
-
-          <details class="admin-form">
-            <summary>＋ 대회 추가</summary>
-            <form id="raceForm">
-              <div class="form-row">
-                <input type="text" id="raceName" required maxlength="80" placeholder="대회명 (예: 2026 태화강 울산마라톤)" />
-              </div>
-              <div class="form-row">
-                <label for="raceMonth">대회 연월</label>
-                <input type="month" id="raceMonth" required />
-              </div>
-              <button type="submit" class="btn btn-primary">대회 등록</button>
-            </form>
-          </details>
-
-          <div class="card-list" id="raceList"><p class="empty-note">기록을 불러오는 중...</p></div>
-        </section>
-
-        <!-- ===== 6. 가입 안내 + 가입 문의 ===== -->
-        <section class="edit-sec" id="sec-join">
-          <h2 class="sec-label">가입 안내 · 문의</h2>
-          <div class="pv-frame"><span class="pv-tag">미리보기</span><div id="pvJoin"></div></div>
-
-          <section class="admin-block">
-            <h3>가입 안내 (JOIN US) <span class="muted">(절차가 하나도 없으면 섹션이 숨겨져요)</span></h3>
-            <form id="formJoin">
-              <div class="row-list" id="joinRows"></div>
-              <button type="button" class="btn-mini dark" data-add="join">＋ 절차 추가</button>
-              <div class="save-row">
-                <button type="submit" class="btn btn-primary">가입 안내 저장</button>
-                <span class="save-msg" hidden></span>
-              </div>
-            </form>
+            <section class="admin-block">
+              <h3>기본 정보</h3>
+              <form id="formSite">
+                <div class="form-row">
+                  <label for="siteCrewName">크루 이름</label>
+                  <input id="siteCrewName" maxlength="30" required />
+                </div>
+                <div class="form-row">
+                  <label for="siteSlogan">메인 슬로건 <span class="muted">(줄바꿈 그대로 표시돼요)</span></label>
+                  <textarea id="siteSlogan" rows="2" maxlength="80" required></textarea>
+                </div>
+                <div class="form-row">
+                  <label for="siteSubSlogan">서브 슬로건</label>
+                  <textarea id="siteSubSlogan" rows="2" maxlength="150"></textarea>
+                </div>
+                <div class="form-row">
+                  <label for="siteAboutDesc">소개 문단 (ABOUT US)</label>
+                  <textarea id="siteAboutDesc" rows="4" maxlength="600"></textarea>
+                </div>
+                <div class="form-row">
+                  <label for="siteInstagram">인스타그램 아이디 <span class="muted">(@ 제외)</span></label>
+                  <input id="siteInstagram" maxlength="40" />
+                </div>
+                <div class="save-row">
+                  <button type="submit" class="btn btn-primary">기본 정보 저장</button>
+                  <span class="save-msg" hidden></span>
+                </div>
+              </form>
+            </section>
           </section>
 
-          <section class="admin-block">
-            <h3>가입 문의 <span class="muted">(내용이 없으면 섹션이 숨겨져요)</span></h3>
-            <form id="formContact">
-              <div class="form-row">
-                <label for="joinContactInput">문의 안내 문구 <span class="muted">(줄바꿈 그대로 표시돼요)</span></label>
-                <textarea id="joinContactInput" rows="3" maxlength="500" placeholder="예) 인스타그램 @carrot_running_crew DM으로 편하게 연락 주세요."></textarea>
-              </div>
-              <div class="save-row">
-                <button type="submit" class="btn btn-primary">가입 문의 저장</button>
-                <span class="save-msg" hidden></span>
-              </div>
-            </form>
+          <!-- ===== 2. 크루 현황 숫자 ===== -->
+          <section class="edit-sec" id="sec-stats">
+            <h2 class="sec-label">크루 현황 <span class="muted">(히어로 아래 통계)</span></h2>
+            <div class="pv-frame"><span class="pv-tag">미리보기</span><div id="pvStats"></div></div>
+
+            <section class="admin-block">
+              <h3>크루 현황 숫자 <span class="muted">(히어로 아래 통계 · 모두 지우면 섹션이 숨겨져요)</span></h3>
+              <form id="formStats">
+                <div class="row-list" id="statRows"></div>
+                <button type="button" class="btn-mini dark" data-add="stat">＋ 항목 추가</button>
+                <div class="save-row">
+                  <button type="submit" class="btn btn-primary">크루 현황 저장</button>
+                  <span class="save-msg" hidden></span>
+                </div>
+              </form>
+            </section>
           </section>
-        </section>
+
+          <!-- ===== 3. 핵심 가치 ===== -->
+          <section class="edit-sec" id="sec-values">
+            <h2 class="sec-label">핵심 가치 <span class="muted">(소개 섹션 카드)</span></h2>
+            <div class="pv-frame"><span class="pv-tag">미리보기</span><div id="pvValues"></div></div>
+
+            <section class="admin-block">
+              <h3>핵심 가치 <span class="muted">(소개 섹션 카드 · 모두 지우면 숨겨져요)</span></h3>
+              <form id="formValues">
+                <div class="row-list" id="valueRows"></div>
+                <button type="button" class="btn-mini dark" data-add="value">＋ 카드 추가</button>
+                <div class="save-row">
+                  <button type="submit" class="btn btn-primary">핵심 가치 저장</button>
+                  <span class="save-msg" hidden></span>
+                </div>
+              </form>
+            </section>
+          </section>
+
+          <!-- ===== 4. 정기런 일정 ===== -->
+          <section class="edit-sec" id="sec-schedule">
+            <h2 class="sec-label">정기런 일정</h2>
+            <div class="pv-frame"><span class="pv-tag">미리보기</span><div id="pvSchedule"></div></div>
+
+            <section class="admin-block">
+              <h3>정기런 일정 <span class="muted">(모두 지우면 섹션이 숨겨져요)</span></h3>
+              <form id="formSchedule">
+                <div class="row-list" id="scheduleRows"></div>
+                <button type="button" class="btn-mini dark" data-add="schedule">＋ 일정 추가</button>
+                <div class="save-row">
+                  <button type="submit" class="btn btn-primary">정기런 일정 저장</button>
+                  <span class="save-msg" hidden></span>
+                </div>
+              </form>
+            </section>
+          </section>
+
+          <!-- ===== 5. 공식 기록 ===== -->
+          <section class="edit-sec" id="sec-records">
+            <h2 class="sec-label">공식 기록</h2>
+            <p class="admin-hint">대회를 먼저 등록하고, 대회마다 종목(3km·5km·10km·하프·풀코스)별로 <strong>입상 순위</strong>를 추가하세요. 저장하면 소개 페이지 '크루 공식 기록'에 바로 표시돼요.</p>
+
+            <details class="admin-form">
+              <summary>＋ 대회 추가</summary>
+              <form id="raceForm">
+                <div class="form-row">
+                  <input type="text" id="raceName" required maxlength="80" placeholder="대회명 (예: 2026 태화강 울산마라톤)" />
+                </div>
+                <div class="form-row">
+                  <label for="raceMonth">대회 연월</label>
+                  <input type="month" id="raceMonth" required />
+                </div>
+                <button type="submit" class="btn btn-primary">대회 등록</button>
+              </form>
+            </details>
+
+            <div class="card-list" id="raceList"><p class="empty-note">기록을 불러오는 중...</p></div>
+          </section>
+
+          <!-- ===== 6. 가입 안내 + 가입 문의 ===== -->
+          <section class="edit-sec" id="sec-join">
+            <h2 class="sec-label">가입 안내 · 문의</h2>
+            <div class="pv-frame"><span class="pv-tag">미리보기</span><div id="pvJoin"></div></div>
+
+            <section class="admin-block">
+              <h3>가입 안내 (JOIN US) <span class="muted">(절차가 하나도 없으면 섹션이 숨겨져요)</span></h3>
+              <form id="formJoin">
+                <div class="row-list" id="joinRows"></div>
+                <button type="button" class="btn-mini dark" data-add="join">＋ 절차 추가</button>
+                <div class="save-row">
+                  <button type="submit" class="btn btn-primary">가입 안내 저장</button>
+                  <span class="save-msg" hidden></span>
+                </div>
+              </form>
+            </section>
+
+            <section class="admin-block">
+              <h3>가입 문의 <span class="muted">(내용이 없으면 섹션이 숨겨져요)</span></h3>
+              <form id="formContact">
+                <div class="form-row">
+                  <label for="joinContactInput">문의 안내 문구 <span class="muted">(줄바꿈 그대로 표시돼요)</span></label>
+                  <textarea id="joinContactInput" rows="3" maxlength="500" placeholder="예) 인스타그램 @carrot_running_crew DM으로 편하게 연락 주세요."></textarea>
+                </div>
+                <div class="save-row">
+                  <button type="submit" class="btn btn-primary">가입 문의 저장</button>
+                  <span class="save-msg" hidden></span>
+                </div>
+              </form>
+            </section>
+          </section>
+        </div>
+
+        <!-- ===== 통계 (탭만 — 내용은 아직 없음) ===== -->
+        <div class="admin-panel" id="apanel-stats">
+          <p class="empty-note">통계는 준비 중이에요.</p>
+        </div>
 
         <!-- 하단 고정 탭 — 크루 공간과 동일 구성, 여기서는 '관리'가 활성 -->
         <nav class="bottom-nav" aria-label="크루 공간 메뉴">

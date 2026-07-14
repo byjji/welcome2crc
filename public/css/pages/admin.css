@@ -1,7 +1,80 @@
 /* ============================================================
    pages/admin.css — 페이지 관리(admin.html) 전용
-   관리 힌트 · 미리보기 프레임 · 편집 블록 · 동적 행 · 공식 기록/갤러리 관리
+   상단 탭 · 관리 힌트 · 미리보기 프레임 · 편집 블록 · 동적 행 · 공식 기록 관리
    ============================================================ */
+
+/* ============================================================
+   상단 탭 — 책갈피(폴더 탭) 모양
+   ------------------------------------------------------------
+   탭 아래에 가로줄(연석 라인)을 깔고, 활성 탭만 그 줄을 덮으며
+   아래 내용과 이어지게 만듭니다. 활성 탭 머리엔 스피드 마크.
+   ============================================================ */
+.admin-tabs {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.25rem;
+  padding: 0 0.3rem;
+  margin: 1.3rem 0 1.5rem;
+  border-bottom: 2px solid var(--carrot);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.admin-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.admin-tab {
+  position: relative;
+  flex: 0 0 auto;
+  margin-bottom: -2px; /* 아래 가로줄 위에 걸치게 */
+  font-family: var(--font);
+  font-size: 0.93rem;
+  font-weight: 800;
+  padding: 0.6em 1.3em 0.55em;
+  border: 1.5px solid var(--line);
+  border-bottom: 2px solid var(--carrot);
+  border-radius: 12px 12px 0 0;
+  background: var(--surface-tint);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.admin-tab:not(.active) {
+  transform: translateY(2px); /* 비활성 탭은 살짝 내려가 뒤에 꽂힌 느낌 */
+}
+
+.admin-tab:hover:not(.active) {
+  background: var(--carrot-pale);
+  color: var(--carrot-deep);
+}
+
+/* 활성 탭: 아래 가로줄을 페이지 배경색으로 덮어 본문과 이어짐 */
+.admin-tab.active {
+  background: var(--cream);
+  border-color: var(--carrot);
+  border-bottom-color: var(--cream);
+  color: var(--carrot-deep);
+}
+
+/* 활성 탭 머리의 스피드 마크 — 레이스 데이 모티프 */
+.admin-tab.active::before {
+  content: "";
+  position: absolute;
+  inset: 0 10px auto;
+  height: 3px;
+  background: var(--speed-marks);
+  border-radius: 2px;
+}
+
+.admin-panel {
+  display: none;
+}
+
+.admin-panel.active {
+  display: block;
+}
 
 /* ============================================================
    한 화면 편집 — 소개 페이지 순서대로 섹션(미리보기 + 폼) 나열

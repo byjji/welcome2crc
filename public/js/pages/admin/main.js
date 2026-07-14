@@ -25,6 +25,17 @@ function showView(name) {
   Object.entries(views).forEach(([k, el]) => (el.hidden = k !== name));
 }
 
+/* ---------- 관리 상단 탭 (소개 관리 · 앞으로 늘어날 탭들) ---------- */
+$("adminTabs").addEventListener("click", (e) => {
+  const btn = e.target.closest(".admin-tab");
+  if (!btn) return;
+  document.querySelectorAll("#adminTabs .admin-tab").forEach((t) =>
+    t.classList.toggle("active", t === btn));
+  document.querySelectorAll("#viewAdmin .admin-panel").forEach((p) =>
+    p.classList.toggle("active", p.id === `apanel-${btn.dataset.atab}`));
+  window.scrollTo(0, 0);
+});
+
 /* 관리 화면에서 오른쪽으로 스와이프 → 크루 공간 '멤버' 탭으로 복귀
    (크루 공간의 스와이프 순서상 관리 바로 왼쪽이 멤버) */
 onSwipe((dir) => {
