@@ -17,7 +17,7 @@ import {
   serverTimestamp, increment,
 } from "../../lib/firebase.js";
 import {
-  state, me, myProfile, isAdmin, ATT_CAT,
+  state, me, myProfile, isAdmin, ATT_CAT, withoutSystem,
   eventCatFilter, setEventCatFilter,
   statMonth, setStatMonth, monthAtt, monthLoaded,
   attDayId, setAttDayId,
@@ -255,13 +255,13 @@ function attCheckListHtml(evId) {
 
 function eventCardHtml(ev, isPast) {
   const dp = parseDateParts(ev.date);
-  const att = state.attendance[ev.id] || null;
+  const raw = state.attendance[ev.id] || null; // 내 참석 여부는 원본에서 (내가 운영용 계정이어도 동작)
   let footHtml = "";
 
   if (!isPast) {
-    const entries = att ? Object.entries(att) : [];
+    const entries = raw ? Object.entries(withoutSystem(raw)) : [];
     const yes = entries.filter(([, v]) => v.status === "yes");
-    const mine = att && me && att[me.uid] ? att[me.uid].status : null;
+    const mine = raw && me && raw[me.uid] ? raw[me.uid].status : null;
 
     // 왼쪽: 참석자 요약(운영진은 관리 모달, 크루원은 이름만) / 오른쪽: 참석 여부 토글 버튼
     let leftPart = "";
@@ -398,7 +398,10 @@ async function handleEventClick(e) {
       openModal("editEventModal");
     } else if (action === "load-past-att") {
       const qs = await getDocs(collection(db, "events", id, "attendance"));
-      const yes = qs.docs.map((d) => d.data()).filter((v) => v.status === "yes");
+      const yes = qs.docs
+        .filter((d) => !state.systemUids.has(d.id))
+        .map((d) => d.data())
+        .filter((v) => v.status === "yes");
       const target = $(`pastAtt-${id}`);
       if (target) {
         target.innerHTML = yes.length
@@ -518,7 +521,7 @@ $("editEventForm").addEventListener("submit", async (e) => {
    필요할 때 한 번 읽어 monthAtt 에 캐시.
    ============================================================ */
 function attOf(evId) {
-  return state.attendance[evId] || monthAtt[evId] || {};
+  return withoutSystem(state.attendance[evId] || monthAtt[evId] || {});
 }
 
 function monthEvents(key) {

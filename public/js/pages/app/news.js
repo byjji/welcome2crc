@@ -7,7 +7,7 @@ import { esc, fmtDate } from "../../lib/format.js";
 import {
   db, collection, doc, addDoc, setDoc, updateDoc, deleteDoc, serverTimestamp,
 } from "../../lib/firebase.js";
-import { state, me, myProfile, isAdmin } from "./state.js";
+import { state, me, myProfile, isAdmin, withoutSystem } from "./state.js";
 
 /* ---------- 소식 필터: 전체 / 공지 / 투표 ---------- */
 $("newsFilter").addEventListener("click", (e) => {
@@ -227,7 +227,7 @@ export function renderPolls() {
   const crew = crewTotal();
 
   list.innerHTML = state.polls.map((p) => {
-    const votes = state.votes[p.id] || {};
+    const votes = withoutSystem(state.votes[p.id]); // 운영용 계정(admin)의 표는 집계에서 제외
     const entries = Object.entries(votes);
     const total = entries.length;
     const closed = isPollClosed(p);
@@ -283,7 +283,7 @@ function renderVoters(pollId, option) {
   const poll = state.polls.find((p) => p.id === pollId);
   if (!poll) return;
 
-  const names = Object.values(state.votes[pollId] || {})
+  const names = Object.values(withoutSystem(state.votes[pollId]))
     .filter((v) => v.option === option)
     .map((v) => v.name || "이름 없음")
     .sort((a, b) => a.localeCompare(b, "ko"));

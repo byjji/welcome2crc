@@ -27,6 +27,15 @@ export function displayAccount(email) {
   return m[1].replace(/\+([a-z])/g, (_, c) => c.toUpperCase());
 }
 
+/* ---------- 앱 운영용 시스템 계정 ----------
+   'admin' 은 사이트 운영을 위한 계정이지 크루원이 아닙니다.
+   멤버 목록·인원수는 물론 투표 집계·출석·기록 어디에도 나오지 않습니다. */
+export const SYSTEM_ACCOUNTS = ["admin"];
+
+export function isSystemAccount(email) {
+  return SYSTEM_ACCOUNTS.includes(displayAccount(email).trim().toLowerCase());
+}
+
 /* ---------- 비밀번호 힌트 암호화 ---------- */
 const textEnc = new TextEncoder();
 const textDec = new TextDecoder();

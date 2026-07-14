@@ -27,7 +27,8 @@ export const state = {
   notices: [],
   events: [],
   polls: [],
-  members: [],
+  members: [],      // 시스템 계정(admin)은 빠져 있음 — init.js 가 걸러서 넣음
+  systemUids: new Set(), // 크루원이 아닌 운영용 계정의 uid (집계에서 제외)
   attendance: {},   // eventId → { uid: {name, status} } (옛 문서엔 dist·sec이 남아 있을 수 있음)
   votes: {},        // pollId → { uid: {name, option} }
   eventCats: [...DEFAULT_EVENT_CATS],  // 일정 카테고리 (site/eventCategories 의 list)
@@ -47,11 +48,23 @@ export function setStatMonth(v) { statMonth = v; }
 export function setAttDayId(v) { attDayId = v; }
 
 /* 로그아웃/계정 전환 시 데이터 초기화 (리스너 해제는 init.js 가 담당) */
+/* 출석·투표 맵에서 시스템 계정(admin)의 기록을 뺀 사본
+   — uid 목록이 멤버 구독보다 늦게 채워질 수 있어 집계할 때 걸러냅니다 */
+export function withoutSystem(map) {
+  if (!state.systemUids.size) return map || {};
+  const out = {};
+  Object.entries(map || {}).forEach(([uid, v]) => {
+    if (!state.systemUids.has(uid)) out[uid] = v;
+  });
+  return out;
+}
+
 export function resetData() {
   state.notices = [];
   state.events = [];
   state.polls = [];
   state.members = [];
+  state.systemUids = new Set();
   state.attendance = {};
   state.votes = {};
   state.eventCats = [...DEFAULT_EVENT_CATS];

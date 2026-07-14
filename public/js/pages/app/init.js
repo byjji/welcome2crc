@@ -8,6 +8,7 @@ import { $, closeModal, initModals } from "../../lib/ui.js";
 import { ic } from "../../lib/icons.js";
 import { onSwipe } from "../../lib/swipe.js";
 import { esc, todayStr, setCatColors } from "../../lib/format.js";
+import { isSystemAccount } from "../../lib/account.js";
 import {
   auth, db, onAuthStateChanged, signOut,
   collection, doc, getDoc, setDoc, onSnapshot, query, orderBy, serverTimestamp,
@@ -205,10 +206,15 @@ function startListeners() {
   unsubs.push(onSnapshot(
     collection(db, "members"),
     (qs) => {
-      state.members = qs.docs.map((d) => ({ id: d.id, ...d.data() }));
+      // 앱 운영용 계정(ID: admin)은 크루원이 아니므로 목록·인원수·집계에서 제외
+      const all = qs.docs.map((d) => ({ id: d.id, ...d.data() }));
+      state.systemUids = new Set(all.filter((m) => isSystemAccount(m.email)).map((m) => m.id));
+      state.members = all.filter((m) => !state.systemUids.has(m.id));
+
       renderMembers();
       renderHome();
       renderPolls();   // 참여율(3/25)의 분모가 크루원 수
+      renderEvents();  // 참석자 명단·인원수에서도 시스템 계정 제외
       renderMileage();
       renderStatsIfLoaded();
     },

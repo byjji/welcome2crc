@@ -7,7 +7,7 @@
 import { $ } from "../../lib/ui.js";
 import { ic } from "../../lib/icons.js";
 import { esc, DOW, todayStr, dday, addDaysStr, parseDateParts, catColor, catBadgeStyle, shadeColor } from "../../lib/format.js";
-import { state, myProfile } from "./state.js";
+import { state, myProfile, withoutSystem } from "./state.js";
 import { isPollClosed } from "./news.js";
 
 /* ---------- 인사말 뒤 응원 문구 (data/cheers.json) ----------
@@ -77,7 +77,7 @@ export function renderHome() {
   // 진행 중인 투표 (가장 최근 것 하나 · 마감일이 지난 투표는 제외)
   const open = state.polls.find((p) => !isPollClosed(p));
   if (open) {
-    const voted = Object.keys(state.votes[open.id] || {}).length;
+    const voted = Object.keys(withoutSystem(state.votes[open.id])).length;
     const crew = state.members.filter((m) => m.role === "member" || m.role === "admin").length;
     $("dashPoll").innerHTML = `
     <article class="app-card dash-poll" data-goto="news:poll" role="button">
