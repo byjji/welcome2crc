@@ -69,7 +69,13 @@ service cloud.firestore {
     // ----- 일정 + 출석체크 -----
     match /events/{eventId} {
       allow read: if isMember();
-      allow create, update, delete: if isAdmin();
+      allow create, delete: if isAdmin();
+      // 앨범 연결(albumId)만 크루원도 갱신 가능
+      // (일정 카드에서 첫 사진을 올릴 때 앨범을 만들어 연결 — 갤러리)
+      allow update: if isAdmin()
+                    || (isMember()
+                        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['albumId'])
+                        && request.resource.data.albumId is string);
 
       // 출석 + 러닝 기록(거리·시간): 본인 것만 기록/수정/취소 가능.
       // 운영진은 기록을 대신 입력/수정하거나 정리할 수 있음.
@@ -100,6 +106,32 @@ service cloud.firestore {
     match /records/{raceId} {
       allow read: if true;
       allow write: if isAdmin();
+    }
+
+    // ----- 갤러리 (앨범 + 사진) -----
+    // 크루원은 일정에 연결된 앨범만 생성 가능 — 일정 카드에서 첫 사진을
+    // 올릴 때 그 자리에서 앨범을 만들기 위해. 반드시 일정(eventId)과 연결.
+    // 일정과 무관한 독립 앨범·앨범 정보 수정·삭제는 운영진만.
+    match /albums/{albumId} {
+      allow read: if isMember();
+      allow create: if isAdmin()
+                    || (isMember()
+                        && request.resource.data.eventId is string
+                        && request.resource.data.title is string);
+      // 크루원은 사진을 올리고 지울 때 장수(photoCount)·표지(coverUrl)만 갱신
+      allow update: if isAdmin()
+                    || (isMember()
+                        && request.resource.data.diff(resource.data).affectedKeys()
+                           .hasOnly(['photoCount', 'coverUrl', 'updatedAt']));
+      allow delete: if isAdmin();
+
+      // 사진 메타: 업로드는 본인 것만, 삭제는 본인 + 운영진
+      match /photos/{photoId} {
+        allow read: if isMember();
+        allow create: if isMember() && request.resource.data.uploaderUid == request.auth.uid;
+        allow update: if false;
+        allow delete: if isAdmin() || (isMember() && resource.data.uploaderUid == request.auth.uid);
+      }
     }
 
     // ----- 투표 -----

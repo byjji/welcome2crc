@@ -22,6 +22,10 @@ const PATHS = {
   ban: '<circle cx="12" cy="12" r="8.5"/><path d="m6 6 12 12"/>',
   lock: '<rect x="5" y="11" width="14" height="9.5"/><path d="M8.2 11V7.3a3.8 3.8 0 0 1 7.6 0V11"/><path d="M12 14.5v2.5"/>',
   vote: '<rect x="4.5" y="4.5" width="15" height="15"/><path d="m8 12.5 3 3L16.5 9"/>',
+  /* 갤러리 — 사진(액자)·카메라·다운로드 */
+  photo: '<rect x="4" y="5.5" width="16" height="14"/><circle cx="9" cy="10.2" r="1.7"/><path d="m4 16.5 5-4.5 4 3.5 3-2.5 4 3.5"/>',
+  camera: '<path d="M4.5 7.5h3.6l1.6-2.5h4.6l1.6 2.5h3.6v12h-15v-12z"/><circle cx="12" cy="13.2" r="3.4"/>',
+  download: '<path d="M12 4v10.5M7.5 10.5 12 15l4.5-4.5"/><path d="M5 19.5h14"/>',
 };
 
 export function ic(name, cls = "") {

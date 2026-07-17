@@ -31,5 +31,5 @@ export const {
 export const {
   collection, doc,
   getDoc, getDocs, setDoc, addDoc, updateDoc, deleteDoc,
-  onSnapshot, query, orderBy, serverTimestamp, increment,
+  onSnapshot, query, orderBy, serverTimestamp, increment, deleteField,
 } = fsMod;

@@ -1,17 +1,18 @@
 /* ============================================================
-   pages/app/auth.js — 로그인 · 가입신청 · 비밀번호 찾기 · 내 정보
+   pages/app/auth.js — 로그인 · 가입신청 · 비밀번호 찾기
    ------------------------------------------------------------
    계정(아이디) 변환·비밀번호 힌트 암호화는 lib/account.js 공용.
    로그인 상태에 따른 화면 라우팅은 init.js 가 담당합니다.
+   내 정보 수정(이름·비밀번호·힌트)은 내 정보·관리 허브(admin.html)로 이동.
    ============================================================ */
 import { $, openModal, closeModal, showFormMsg } from "../../lib/ui.js";
 import { ACCOUNT_RE, toAuthEmail, normAnswer, hintDocId, sealText, openSealed } from "../../lib/account.js";
 import {
-  auth, db, doc, getDoc, setDoc, updateDoc, serverTimestamp,
+  auth, db, doc, getDoc, setDoc, serverTimestamp,
   createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile,
-  EmailAuthProvider, reauthenticateWithCredential, updatePassword,
+  updatePassword,
 } from "../../lib/firebase.js";
-import { me, myProfile, setSignupName, setSignupExtra } from "./state.js";
+import { setSignupName, setSignupExtra } from "./state.js";
 
 function authErrorMsg(err) {
   const code = err && err.code ? err.code : "";
@@ -208,86 +209,8 @@ $("newPwForm").addEventListener("submit", async (e) => {
 });
 
 /* ============================================================
-   내 정보 수정 (이름 · 비밀번호 · 비밀번호 힌트)
+   내 정보 · 관리 허브로 이동 (이름·비밀번호·힌트 수정은 허브에서)
    ============================================================ */
 $("userName").addEventListener("click", () => {
-  if (!me || !myProfile) return;
-  $("profileName").value = myProfile.name || "";
-  $("nameMsg").hidden = true;
-  $("pwMsg").hidden = true;
-  $("hintMsg").hidden = true;
-  $("pwForm").reset();
-  $("hintForm").reset();
-  openModal("profileModal");
-});
-
-$("nameForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const name = $("profileName").value.trim();
-  if (!name) return;
-  try {
-    await updateDoc(doc(db, "members", me.uid), { name });
-    await updateProfile(me, { displayName: name });
-    showFormMsg("nameMsg", "이름을 변경했어요.", "ok");
-  } catch (err) {
-    showFormMsg("nameMsg", "이름 변경에 실패했어요: " + err.message, "error");
-  }
-});
-
-$("pwForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const currentPw = $("pwCurrent").value;
-  const newPw = $("pwNew").value;
-  try {
-    // 본인 확인(현재 비밀번호) 후 새 비밀번호 적용
-    const cred = EmailAuthProvider.credential(me.email, currentPw);
-    await reauthenticateWithCredential(me, cred);
-    await updatePassword(me, newPw);
-    // 비밀번호 힌트도 새 비밀번호 기준으로 자동 갱신 (기존 답변 재사용)
-    try {
-      const snap = await getDoc(doc(db, "pwhints", hintDocId(me.email)));
-      if (snap.exists()) {
-        const hint = snap.data();
-        const answer = await openSealed(hint.ansSealed, currentPw);
-        if (answer) await savePwHint(me.uid, me.email, newPw, hint.question, answer);
-      }
-    } catch (err) {
-      console.error("비밀번호 힌트 갱신 실패:", err);
-    }
-    e.target.reset();
-    showFormMsg("pwMsg", "비밀번호를 변경했어요. 다음 로그인부터 새 비밀번호를 사용하세요.", "ok");
-  } catch (err) {
-    const map = {
-      "auth/invalid-credential": "현재 비밀번호가 올바르지 않아요.",
-      "auth/wrong-password": "현재 비밀번호가 올바르지 않아요.",
-      "auth/weak-password": "새 비밀번호는 6자 이상으로 해주세요.",
-    };
-    showFormMsg("pwMsg", map[err.code] || authErrorMsg(err), "error");
-  }
-});
-
-/* 비밀번호 힌트 등록/변경 (힌트 없이 가입한 기존 계정도 여기서 등록) */
-$("hintForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const question = $("profileHintQ").value;
-  const answer = $("profileHintA").value;
-  const pw = $("profileHintPw").value;
-  if (!question || !normAnswer(answer)) {
-    showFormMsg("hintMsg", "질문을 선택하고 답변을 입력해 주세요.", "error");
-    return;
-  }
-  try {
-    // 현재 비밀번호로 본인 확인 (힌트에는 이 비밀번호가 잠겨 들어감)
-    const cred = EmailAuthProvider.credential(me.email, pw);
-    await reauthenticateWithCredential(me, cred);
-    await savePwHint(me.uid, me.email, pw, question, answer);
-    e.target.reset();
-    showFormMsg("hintMsg", "비밀번호 힌트를 저장했어요. 이제 비밀번호 찾기에서 사용할 수 있어요.", "ok");
-  } catch (err) {
-    const map = {
-      "auth/invalid-credential": "현재 비밀번호가 올바르지 않아요.",
-      "auth/wrong-password": "현재 비밀번호가 올바르지 않아요.",
-    };
-    showFormMsg("hintMsg", map[err.code] || authErrorMsg(err), "error");
-  }
+  location.href = "admin.html";
 });

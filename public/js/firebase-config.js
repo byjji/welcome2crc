@@ -12,7 +12,7 @@ window.FIREBASE_CONFIG = {
   apiKey: "AIzaSyAh9026Wd0PbPgPZ5r_NKQrl8rlkJGubfY",
   authDomain: "carrotrunningcrew.firebaseapp.com",
   projectId: "carrotrunningcrew",
-  storageBucket: "carrotrunningcrew.firebasestorage.app",
+  storageBucket: "carrotrunningcrew.firebasestorage.app", /* ★ Firestore와 같은 리전(asia-northeast3)으로 재생성함 */
   messagingSenderId: "909696169662",
   appId: "1:909696169662:web:d982838019cc58620a50ef"
 };

@@ -19,7 +19,7 @@ import {
   me, setMe, myProfile, setMyProfile, isAdmin, setIsAdmin,
   signupName, signupExtra, resetData,
 } from "./state.js";
-import "./auth.js"; // 로그인·가입신청·비밀번호 찾기·내 정보 폼 바인딩
+import "./auth.js"; // 로그인·가입신청·비밀번호 찾기 폼 바인딩
 import { renderHome } from "./home.js";
 import { renderNotices, renderPolls } from "./news.js";
 import { renderMembers } from "./members.js";
@@ -27,6 +27,7 @@ import {
   renderEventCatRow, renderEvents, renderStatsIfLoaded,
   ensureMonthData, renderMileage,
 } from "./events.js";
+import { renderGallery, resetGallery } from "./gallery.js";
 
 initModals();
 
@@ -43,7 +44,6 @@ let profileUnsub = null;
 onAuthStateChanged(auth, async (user) => {
   cleanupAll();
   closeModal("resetModal");
-  closeModal("profileModal");
   setMe(user);
 
   if (!user) {
@@ -86,7 +86,6 @@ onAuthStateChanged(auth, async (user) => {
 
     $("appUser").hidden = false;
     $("userName").innerHTML = `${esc(myProfile.name)}${isAdmin ? ` ${ic("crown", "ic-crown")}` : ""}`;
-    $("adminPageLink").hidden = !isAdmin;
 
     if (myProfile.role === "pending") {
       $("pendingName").textContent = myProfile.name;
@@ -116,7 +115,7 @@ function enterApp() {
   showView("app");
 
   // 관리 화면의 하단 탭에서 넘어온 경우: #tab=events 같은 해시로 해당 탭 열기
-  const wanted = location.hash.match(/^#tab=(events|news|members)$/);
+  const wanted = location.hash.match(/^#tab=(events|news|gallery|members)$/);
   if (wanted) {
     switchTab(wanted[1]);
     history.replaceState(null, "", location.pathname); // 해시 소비 (새로고침하면 홈부터)
@@ -146,6 +145,7 @@ function cleanupAll() {
   clearTimeout(deadlineTimer);
   if (profileUnsub) { profileUnsub(); profileUnsub = null; }
   appEntered = false;
+  resetGallery(); // 사진 구독 해제 + 갤러리 화면 상태 초기화
   resetData();
 }
 
@@ -230,6 +230,18 @@ function startListeners() {
       renderMileage();
     },
     (e) => console.error("마일리지 구독 오류:", e)
+  ));
+
+  // 갤러리 앨범 (사진은 앨범을 열 때만 gallery.js 가 구독)
+  unsubs.push(onSnapshot(
+    query(collection(db, "albums"), orderBy("date", "desc")),
+    (qs) => {
+      state.albums = qs.docs.map((d) => ({ id: d.id, ...d.data() }));
+      state.albumsLoaded = true;
+      renderGallery();
+      renderEvents(); // 일정 카드의 '사진' 버튼 상태 (앨범 연결 여부)
+    },
+    (e) => console.error("앨범 구독 오류:", e)
   ));
 }
 
@@ -319,18 +331,19 @@ function renderAll() {
   renderPolls();
   renderMembers();
   renderMileage();
+  renderGallery();
 }
 
 /* ============================================================
-   3. 탭 전환 (하단 고정 탭: 홈 / 일정·출첵 / 소식 / 멤버)
+   3. 탭 전환 (하단 고정 탭: 홈 / 일정·출첵 / 소식 / 갤러리 / 멤버)
    ============================================================ */
-const SWIPE_TABS = ["home", "events", "news", "members"]; // 관리는 별도 페이지라 제외
+const SWIPE_TABS = ["home", "events", "news", "gallery", "members"];
 
 function activeTabName() {
   return document.querySelector(".app-tab.active")?.dataset.tab || null;
 }
 
-function switchTab(name) {
+export function switchTab(name) {
   const from = SWIPE_TABS.indexOf(activeTabName());
   document.querySelectorAll(".app-tab").forEach((t) =>
     t.classList.toggle("active", t.dataset.tab === name));
@@ -351,7 +364,7 @@ function switchTab(name) {
 
 $("appTabs").addEventListener("click", (e) => {
   const btn = e.target.closest(".app-tab");
-  if (btn && btn.dataset.tab) switchTab(btn.dataset.tab); // 관리(admin.html 링크)는 그대로 이동
+  if (btn && btn.dataset.tab) switchTab(btn.dataset.tab);
 });
 
 /* ---------- 좌/우 스와이프로 탭 이동 (크루 공간 본화면일 때만) ---------- */
@@ -359,12 +372,7 @@ onSwipe((dir) => {
   const cur = SWIPE_TABS.indexOf(activeTabName());
   if (cur < 0) return;
   const next = cur + (dir === "left" ? 1 : -1); // 왼쪽으로 밀면 다음 탭, 오른쪽이면 이전 탭
-  if (next >= SWIPE_TABS.length) {
-    // 마지막(멤버)에서 더 왼쪽으로 밀면 — 운영진만 '관리' 페이지로 이동
-    if (isAdmin) location.href = "admin.html";
-    return;
-  }
-  if (next < 0) return; // 첫 탭(홈)에서 오른쪽으로 더 밀어도 밖으로 나가지 않음
+  if (next < 0 || next >= SWIPE_TABS.length) return; // 양 끝에서는 더 나가지 않음
   switchTab(SWIPE_TABS[next]);
 }, { enabled: () => !$("viewApp").hidden });
 

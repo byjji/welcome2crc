@@ -1839,3 +1839,528 @@ tr.me-row td {
   padding: 0.34em 0.55em;
   white-space: nowrap;
 }
+
+/* ============================================================
+   일정 카드 — 사진(갤러리) 지름길 버튼
+   ============================================================ */
+/* 카드 하단 오른쪽 버튼 묶음: [사진] [참석 n] */
+.event-foot .foot-btns {
+  flex: none;
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.event-foot .foot-btns .btn-mini {
+  margin-left: 0; /* 묶음 안에서는 개별 auto 마진 해제 */
+}
+
+.btn-album {
+  position: relative;
+}
+
+/* 앨범 있음: 당근색 포인트 */
+.btn-mini.btn-icon.btn-album.has {
+  border-color: var(--carrot);
+  color: var(--carrot-deep);
+}
+
+/* 앨범 없음(만들기): 점선 + ＋ 배지 */
+.btn-mini.btn-icon.btn-album.none {
+  border-style: dashed;
+  opacity: 0.85;
+}
+
+.btn-album .ab-plus {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  font-size: 0.58rem;
+  font-weight: 900;
+  line-height: 1;
+  padding: 1.5px 2.5px;
+  border-radius: 4px;
+  background: var(--carrot-vivid);
+  color: #fff;
+}
+
+.rsvp-row .btn-album {
+  flex: none;
+}
+
+/* ============================================================
+   갤러리 — 앨범 목록
+   ============================================================ */
+/* 카테고리 책갈피 탭 (가로) — 레이스 데이 폴더 탭
+   당근색 연석 라인 위에 탭이 걸치고, 활성 탭만 라인을 끊어 본문과 이어짐 */
+.gal-cats {
+  display: flex;
+  gap: 0.3rem;
+  overflow-x: auto;
+  border-bottom: 2px solid var(--carrot);
+  margin: 0.2rem 0 0.9rem;
+  padding-top: 0.3rem;
+  scrollbar-width: none;
+}
+
+.gal-cats::-webkit-scrollbar { display: none; }
+
+.gal-cat {
+  position: relative;
+  flex: 0 0 auto;
+  margin-bottom: -2px; /* 아래 연석 라인 위에 걸치게 */
+  font-family: var(--font);
+  font-size: 0.82rem;
+  font-weight: 800;
+  padding: 0.65em 1em 0.7em;
+  border: 1.5px solid var(--line);
+  border-bottom: 2px solid var(--carrot);
+  border-radius: 12px 12px 0 0;
+  background: var(--surface-tint);
+  color: var(--ink-soft);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.gal-cat:not(.active) {
+  transform: translateY(2px); /* 비활성 갈피는 살짝 내려가 덜 꽂힌 느낌 */
+}
+
+.gal-cat:hover:not(.active) {
+  background: var(--carrot-pale);
+  color: var(--carrot-deep);
+}
+
+/* 활성 갈피: 아래 연석 라인을 페이지 배경색(cream)으로 덮어 본문과 이어짐 */
+.gal-cat.active {
+  background: var(--cream);
+  border-color: var(--carrot);
+  border-bottom-color: var(--cream);
+  color: var(--carrot-deep);
+  padding-top: 0.85em; /* 위쪽 스피드 마크 자리 */
+}
+
+/* 활성 갈피 머리의 스피드 마크 — 카테고리 색 */
+.gal-cat.active::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 5px;
+  height: 4px;
+  background: repeating-linear-gradient(100deg, var(--cat, var(--carrot-vivid)) 0 4px, transparent 4px 8px);
+  border-radius: 2px;
+}
+
+.album-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.8rem;
+}
+
+.album-card {
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.album-card:hover {
+  border-color: var(--carrot);
+  transform: translateY(-2px);
+}
+
+.album-card .al-cover-wrap {
+  position: relative;
+  display: block;
+}
+
+/* 표지 아래 트랙 연석 라인 — 레이스 데이 모티프 */
+.album-card .al-cover-wrap::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: var(--kerb);
+  opacity: 0.9;
+}
+
+.album-card .al-cover {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  display: block;
+}
+
+.album-card .al-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-tint);
+  color: var(--ink-faint);
+  font-size: 2.1rem;
+}
+
+/* 사진 장수: 배번호(bib) 칩 */
+.album-card .al-count {
+  position: absolute;
+  right: 8px;
+  bottom: 9px;
+  background: var(--white);
+  border: 2px solid var(--ink);
+  border-radius: 5px;
+  transform: skewX(-8deg);
+  font-size: 0.68rem;
+  font-weight: 900;
+  padding: 0.04em 0.45em;
+  font-variant-numeric: tabular-nums;
+}
+
+.album-card .al-meta {
+  display: block;
+  padding: 0.55rem 0.75rem 0.65rem;
+}
+
+.album-card .al-title {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.album-card .al-date {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+  margin-top: 0.1rem;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================================
+   갤러리 — 앨범 보기 (헤더 · 업로드 · 사진 그리드)
+   ============================================================ */
+.gal-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  margin: 1.4rem 0 0.9rem;
+}
+
+.gal-back {
+  flex: none;
+  font-family: var(--font);
+  font-size: 0.85rem;
+  font-weight: 800;
+  padding: 0.45em 0.9em;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.gal-back:hover {
+  border-color: var(--carrot);
+  color: var(--carrot-deep);
+}
+
+.gal-title-wrap {
+  flex: 1;
+  min-width: 0;
+}
+
+.gal-title {
+  font-size: 1.08rem;
+  font-weight: 900;
+  line-height: var(--lh-tight);
+}
+
+.gal-sub {
+  font-size: 0.78rem;
+  color: var(--ink-soft);
+  margin-top: 0.15rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.gal-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-bottom: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.gal-tools .muted {
+  font-size: 0.76rem;
+}
+
+.gal-tools .btn-mini:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+/* 업로드 진행 — 스피드 마크가 채워지는 트랙 바 */
+.gal-progress {
+  position: relative;
+  height: 2rem;
+  border: 1.5px dashed var(--carrot);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--white);
+  margin-bottom: 0.9rem;
+}
+
+.gal-progress .gp-bar {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0%;
+  background: var(--carrot-soft);
+  transition: width 0.3s ease;
+}
+
+.gal-progress .gp-bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--speed-marks);
+  opacity: 0.45;
+}
+
+.gal-progress .gp-text {
+  position: relative;
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--carrot-deep);
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+}
+
+.photo-grid .ph {
+  padding: 0;
+  border: none;
+  background: var(--surface-tint);
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  aspect-ratio: 1 / 1;
+}
+
+.photo-grid .ph img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.photo-grid .empty-note {
+  grid-column: 1 / -1;
+}
+
+/* ============================================================
+   라이트박스 (사진 크게 보기)
+   ============================================================ */
+.lightbox {
+  flex-direction: column;
+  padding: 0;
+  background: rgba(15, 11, 8, 0.94);
+}
+
+.lb-close {
+  position: absolute;
+  top: calc(0.7rem + env(safe-area-inset-top));
+  right: 0.8rem;
+  z-index: 2;
+  width: 38px;
+  height: 38px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.lb-counter {
+  position: absolute;
+  top: calc(1.15rem + env(safe-area-inset-top));
+  left: 1rem;
+  z-index: 2;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.8rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.lb-stage {
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.lb-stage img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.lb-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 42px;
+  height: 68px;
+  border: none;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-size: 1.7rem;
+  cursor: pointer;
+}
+
+.lb-nav:disabled {
+  opacity: 0.2;
+  cursor: default;
+}
+
+.lb-prev { left: 0; border-radius: 0 10px 10px 0; }
+.lb-next { right: 0; border-radius: 10px 0 0 10px; }
+
+.lb-foot {
+  flex: none;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.8rem 1rem calc(0.9rem + env(safe-area-inset-bottom));
+  color: #fff;
+}
+
+.lb-info {
+  font-size: 0.82rem;
+  opacity: 0.9;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lb-actions {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.lb-actions a.btn-mini {
+  display: inline-block;
+}
+
+.lb-expired {
+  font-size: 0.76rem;
+  opacity: 0.75;
+}
+
+/* ============================================================
+   업로드 미리보기 (올리기 전 확인)
+   ============================================================ */
+.gp-card {
+  max-width: 460px;
+}
+
+.gp-hint {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  margin-bottom: 0.9rem;
+}
+
+.gp-thumbs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  max-height: 52vh;
+  overflow-y: auto;
+  padding: 2px;
+}
+
+.gp-thumb {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--surface-tint);
+}
+
+.gp-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* 미리보기 못 여는 포맷(HEIC 등) — 타일에 안내만 (업로드는 정상) */
+.gp-thumb.gp-noimg img { display: none; }
+.gp-thumb.gp-noimg::after {
+  content: "미리보기 불가";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.3rem;
+  text-align: center;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+.gp-rm {
+  position: absolute;
+  top: 3px;
+  right: 3px;
+  width: 22px;
+  height: 22px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(20, 15, 11, 0.62);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.gp-foot {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin-top: 1.1rem;
+}
+
+.gp-foot .btn-primary {
+  flex: 1;
+}

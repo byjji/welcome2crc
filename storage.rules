@@ -1,0 +1,48 @@
+rules_version = '2';
+
+// ============================================================
+// 당근러닝크루 — Cloud Storage 보안 규칙 (갤러리 사진)
+// ------------------------------------------------------------
+// 역할(role)은 Firestore 의 members 문서를 그대로 사용합니다
+// (cross-service rules — Storage 규칙에서 Firestore 읽기).
+// 배포: firebase deploy --only storage
+//       ★ 콘솔에서 Storage 를 활성화(Blaze)한 뒤에만 가능
+// ============================================================
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function myRole() {
+      return firestore.get(/databases/(default)/documents/members/$(request.auth.uid)).data.role;
+    }
+
+    function isMember() {
+      return request.auth != null && myRole() in ['member', 'admin'];
+    }
+
+    function isAdmin() {
+      return request.auth != null && myRole() == 'admin';
+    }
+
+    // 갤러리 사진 (하이브리드 저장):
+    //   gallery/live/{앨범}/{사진}/{thumb|display}   → 감상용, 영구 보관
+    //   gallery/expiring/{앨범}/{사진}/original       → 원본
+    // - expiring/ 아래 original 만 Storage 수명주기 규칙이 60일 뒤 자동 삭제
+    //   (live/ 썸네일·디스플레이는 규칙에 안 걸려 계속 남음)
+    // - 업로드 시 customMetadata.uploaderUid 에 본인 uid 를 담아야 함
+    match /gallery/{scope}/{albumId}/{photoId}/{file} {
+      allow read: if isMember();
+      allow create: if isMember()
+                    && request.resource.metadata.uploaderUid == request.auth.uid
+                    && request.resource.size < (file == 'original' ? 30 : 3) * 1024 * 1024
+                    && request.resource.contentType.matches('image/.*');
+      allow update: if false;
+      allow delete: if isAdmin()
+                    || (isMember() && resource.metadata.uploaderUid == request.auth.uid);
+    }
+
+    // 그 외 경로는 전부 차단
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

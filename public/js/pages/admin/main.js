@@ -1,23 +1,25 @@
 /* ============================================================
-   페이지 관리 (admin.html) — 운영진 전용
+   내 정보·관리 허브 (admin.html)
    ------------------------------------------------------------
-   소개 페이지(index.html)의 문구 / 크루 공식 기록을 Firestore 에
-   저장합니다. 저장된 내용은 소개 페이지가 열릴 때 자동으로
-   불러와 표시됩니다.
+   상단 이름(홍길동 ▾)을 누르면 들어오는 화면. 좌측 책갈피 서브탭:
+   · 정보수정  — 모든 크루원 (이름·비밀번호·비밀번호 힌트)
+   · 페이지관리 — 운영진만 (소개 페이지 문구·공식 기록 편집)
+   · 통계      — 운영진만 (준비 중)
    ============================================================ */
 
-import { $ } from "../../lib/ui.js";
+import { $, showFormMsg } from "../../lib/ui.js";
 import { ic } from "../../lib/icons.js";
 import { onSwipe } from "../../lib/swipe.js";
 import { esc, escMultiline } from "../../lib/format.js";
-import { toAuthEmail, displayAccount } from "../../lib/account.js";
+import {
+  toAuthEmail, displayAccount, normAnswer, hintDocId, sealText, openSealed,
+} from "../../lib/account.js";
 
 /* ---------- 화면 요소 ---------- */
 const views = {
   loading: $("viewLoading"),
   config: $("viewConfig"),
   login: $("viewLogin"),
-  denied: $("viewDenied"),
   admin: $("viewAdmin"),
 };
 
@@ -25,21 +27,24 @@ function showView(name) {
   Object.entries(views).forEach(([k, el]) => (el.hidden = k !== name));
 }
 
-/* ---------- 관리 상단 탭 (소개 관리 · 앞으로 늘어날 탭들) ---------- */
+/* ---------- 좌측 책갈피 서브탭 (정보수정 · 페이지관리 · 통계) ---------- */
+function activateTab(name) {
+  document.querySelectorAll("#adminTabs .admin-tab").forEach((t) =>
+    t.classList.toggle("active", t.dataset.atab === name));
+  document.querySelectorAll("#viewAdmin .admin-panel").forEach((p) =>
+    p.classList.toggle("active", p.id === `apanel-${name}`));
+}
+
 $("adminTabs").addEventListener("click", (e) => {
   const btn = e.target.closest(".admin-tab");
   if (!btn) return;
-  document.querySelectorAll("#adminTabs .admin-tab").forEach((t) =>
-    t.classList.toggle("active", t === btn));
-  document.querySelectorAll("#viewAdmin .admin-panel").forEach((p) =>
-    p.classList.toggle("active", p.id === `apanel-${btn.dataset.atab}`));
+  activateTab(btn.dataset.atab);
   window.scrollTo(0, 0);
 });
 
-/* 관리 화면에서 오른쪽으로 스와이프 → 크루 공간 '멤버' 탭으로 복귀
-   (크루 공간의 스와이프 순서상 관리 바로 왼쪽이 멤버) */
+/* 오른쪽으로 스와이프 → 크루 공간으로 복귀 */
 onSwipe((dir) => {
-  if (dir === "right") location.href = "app.html#tab=members";
+  if (dir === "right") location.href = "app.html";
 }, { enabled: () => !$("viewAdmin").hidden });
 
 /* ---------- Firebase 설정 확인 ---------- */
@@ -52,6 +57,7 @@ if (!window.FIREBASE_READY) {
 const {
   auth, db,
   onAuthStateChanged, signOut, signInWithEmailAndPassword,
+  updateProfile, EmailAuthProvider, reauthenticateWithCredential, updatePassword,
   collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc,
   onSnapshot, serverTimestamp,
 } = await import("../../lib/firebase.js");
@@ -112,9 +118,10 @@ function hideAuthError() {
 }
 
 $("btnLogout").addEventListener("click", () => signOut(auth));
-$("btnLogoutDenied").addEventListener("click", () => signOut(auth));
 
 let me = null;
+let myName = "";           // members 문서의 이름 (정보수정 폼 채우기용)
+let isAdminUser = false;   // 운영진 여부 (책갈피·왕관 표시)
 let unsubs = [];
 let adminStarted = false;
 
@@ -133,23 +140,33 @@ onAuthStateChanged(auth, async (user) => {
   showView("loading");
 
   let role = "";
+  myName = user.displayName || displayAccount(user.email) || "";
   try {
     const snap = await getDoc(doc(db, "members", user.uid));
-    role = snap.exists() ? snap.data().role : "";
+    if (snap.exists()) {
+      role = snap.data().role || "";
+      myName = snap.data().name || myName;
+    }
   } catch (err) {
     console.error("권한 확인 실패:", err);
   }
-
-  if (role !== "admin") {
-    $("deniedName").textContent = user.displayName || displayAccount(user.email) || "";
-    showView("denied");
-    return;
-  }
+  isAdminUser = role === "admin";
 
   $("appUser").hidden = false;
-  $("userName").innerHTML = `${esc(user.displayName || displayAccount(user.email))} ${ic("crown", "ic-crown")}`;
+  $("userName").innerHTML = `${esc(myName)}${isAdminUser ? ` ${ic("crown", "ic-crown")}` : ""}`;
+
+  // 운영진 전용 책갈피(페이지관리·통계)는 운영진에게만 표시
+  document.querySelectorAll("#adminTabs .admin-only").forEach((el) => (el.hidden = !isAdminUser));
+  activateTab("profile"); // 들어오면 항상 '정보수정'부터
+
+  // 정보수정 폼 초기화
+  $("profileName").value = myName;
+  ["nameMsg", "pwMsg", "hintMsg"].forEach((id) => ($(id).hidden = true));
+  $("pwForm").reset();
+  $("hintForm").reset();
+
   showView("admin");
-  startAdmin();
+  if (isAdminUser) startAdmin();
 });
 
 function startAdmin() {
@@ -158,6 +175,95 @@ function startAdmin() {
   loadSiteContent();
   startRecordsListener();
 }
+
+/* ============================================================
+   정보수정 — 이름 · 비밀번호 · 비밀번호 힌트 (모든 크루원)
+   ============================================================ */
+/* 비밀번호 힌트 문서 저장 — 비밀번호를 답변으로, 답변을 비밀번호로 서로 잠가 저장
+   (크루 공간 auth.js 의 가입/재설정 흐름과 같은 포맷) */
+async function savePwHint(uid, email, pw, question, answer) {
+  const ans = normAnswer(answer);
+  await setDoc(doc(db, "pwhints", hintDocId(email)), {
+    uid,
+    question,
+    pwSealed: await sealText(pw, ans),
+    ansSealed: await sealText(ans, pw),
+    updatedAt: serverTimestamp(),
+  });
+}
+
+$("nameForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const name = $("profileName").value.trim();
+  if (!name || !me) return;
+  try {
+    await updateDoc(doc(db, "members", me.uid), { name });
+    await updateProfile(me, { displayName: name });
+    myName = name;
+    $("userName").innerHTML = `${esc(name)}${isAdminUser ? ` ${ic("crown", "ic-crown")}` : ""}`;
+    showFormMsg("nameMsg", "이름을 변경했어요.", "ok");
+  } catch (err) {
+    showFormMsg("nameMsg", "이름 변경에 실패했어요: " + err.message, "error");
+  }
+});
+
+$("pwForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const currentPw = $("pwCurrent").value;
+  const newPw = $("pwNew").value;
+  try {
+    // 본인 확인(현재 비밀번호) 후 새 비밀번호 적용
+    const cred = EmailAuthProvider.credential(me.email, currentPw);
+    await reauthenticateWithCredential(me, cred);
+    await updatePassword(me, newPw);
+    // 비밀번호 힌트도 새 비밀번호 기준으로 자동 갱신 (기존 답변 재사용)
+    try {
+      const snap = await getDoc(doc(db, "pwhints", hintDocId(me.email)));
+      if (snap.exists()) {
+        const hint = snap.data();
+        const answer = await openSealed(hint.ansSealed, currentPw);
+        if (answer) await savePwHint(me.uid, me.email, newPw, hint.question, answer);
+      }
+    } catch (err) {
+      console.error("비밀번호 힌트 갱신 실패:", err);
+    }
+    e.target.reset();
+    showFormMsg("pwMsg", "비밀번호를 변경했어요. 다음 로그인부터 새 비밀번호를 사용하세요.", "ok");
+  } catch (err) {
+    const map = {
+      "auth/invalid-credential": "현재 비밀번호가 올바르지 않아요.",
+      "auth/wrong-password": "현재 비밀번호가 올바르지 않아요.",
+      "auth/weak-password": "새 비밀번호는 6자 이상으로 해주세요.",
+    };
+    showFormMsg("pwMsg", map[err.code] || authErrorMsg(err), "error");
+  }
+});
+
+/* 비밀번호 힌트 등록/변경 (힌트 없이 가입한 기존 계정도 여기서 등록) */
+$("hintForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const question = $("profileHintQ").value;
+  const answer = $("profileHintA").value;
+  const pw = $("profileHintPw").value;
+  if (!question || !normAnswer(answer)) {
+    showFormMsg("hintMsg", "질문을 선택하고 답변을 입력해 주세요.", "error");
+    return;
+  }
+  try {
+    // 현재 비밀번호로 본인 확인 (힌트에는 이 비밀번호가 잠겨 들어감)
+    const cred = EmailAuthProvider.credential(me.email, pw);
+    await reauthenticateWithCredential(me, cred);
+    await savePwHint(me.uid, me.email, pw, question, answer);
+    e.target.reset();
+    showFormMsg("hintMsg", "비밀번호 힌트를 저장했어요. 이제 비밀번호 찾기에서 사용할 수 있어요.", "ok");
+  } catch (err) {
+    const map = {
+      "auth/invalid-credential": "현재 비밀번호가 올바르지 않아요.",
+      "auth/wrong-password": "현재 비밀번호가 올바르지 않아요.",
+    };
+    showFormMsg("hintMsg", map[err.code] || authErrorMsg(err), "error");
+  }
+});
 
 /* ============================================================
    2. 소개 문구 (site/content 문서)

@@ -455,7 +455,7 @@ body.app-page .app-main {
   to   { opacity: 1;    transform: translateX(0); }
 }
 @media (prefers-reduced-motion: reduce) {
-  #tab-home, #tab-events, #tab-news, #tab-members { animation: none !important; }
+  #tab-home, #tab-events, #tab-news, #tab-gallery, #tab-members { animation: none !important; }
 }
 
 .panel-subtitle {

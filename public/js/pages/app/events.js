@@ -253,9 +253,24 @@ function attCheckListHtml(evId) {
   }).join("");
 }
 
+/* 일정 카드의 '사진' 버튼 (갤러리 지름길)
+   · 앨범이 연결돼 있으면: 누구나 → 앨범 열기
+   · 없으면: 정기런은 크루원 모두, 그 외 카테고리는 운영진만
+     → 누르면 앨범을 만들고 바로 올리기 (gallery.js) */
+function albumBtnHtml(ev) {
+  const linked = ev.albumId && state.albums.some((a) => a.id === ev.albumId);
+  if (linked) {
+    return `<button class="btn-mini btn-icon btn-album has" data-action="album" data-id="${ev.id}" title="사진 앨범 보기" aria-label="사진 앨범 보기">${ic("camera")}</button>`;
+  }
+  const canCreate = ev.category === ATT_CAT || isAdmin;
+  if (!canCreate) return "";
+  return `<button class="btn-mini btn-icon btn-album none" data-action="album" data-id="${ev.id}" title="앨범 만들고 사진 올리기" aria-label="앨범 만들고 사진 올리기">${ic("camera")}<span class="ab-plus">＋</span></button>`;
+}
+
 function eventCardHtml(ev, isPast) {
   const dp = parseDateParts(ev.date);
   const raw = state.attendance[ev.id] || null; // 내 참석 여부는 원본에서 (내가 운영용 계정이어도 동작)
+  const albumBtn = albumBtnHtml(ev);
   let footHtml = "";
 
   if (!isPast) {
@@ -263,7 +278,7 @@ function eventCardHtml(ev, isPast) {
     const yes = entries.filter(([, v]) => v.status === "yes");
     const mine = raw && me && raw[me.uid] ? raw[me.uid].status : null;
 
-    // 왼쪽: 참석자 요약(운영진은 관리 모달, 크루원은 이름만) / 오른쪽: 참석 여부 토글 버튼
+    // 왼쪽: 참석자 요약(운영진은 관리 모달, 크루원은 이름만) / 오른쪽: 사진 + 참석 버튼
     let leftPart = "";
     if (isAdmin) {
       leftPart = attendSummaryHtml(ev.id, yes.length ? attNamesShort(yes) : "눌러서 참석자 관리", yes.length);
@@ -271,12 +286,12 @@ function eventCardHtml(ev, isPast) {
       leftPart = `<p class="attend-names"><span class="leaf">참석</span> ${attNamesShort(yes)}</p>`;
     }
     const rsvpBtn = `<button class="btn-mini ${mine === "yes" ? "leaf" : "dark"}" data-action="rsvp" data-id="${ev.id}" data-status="yes">${ic("flag")} 참석 ${yes.length}</button>`;
-    footHtml = `<div class="event-foot">${leftPart}${rsvpBtn}</div>`;
+    footHtml = `<div class="event-foot">${leftPart}<div class="foot-btns">${albumBtn}${rsvpBtn}</div></div>`;
   } else if (isAdmin) {
     // 지난 일정도 운영진은 관리 모달로 (모달 열 때 출석을 불러옴)
-    footHtml = `<div class="event-foot">${attendSummaryHtml(ev.id, "눌러서 참석자 관리", null)}</div>`;
+    footHtml = `<div class="event-foot">${attendSummaryHtml(ev.id, "눌러서 참석자 관리", null)}<div class="foot-btns">${albumBtn}</div></div>`;
   } else {
-    footHtml = `<div class="rsvp-row"><button class="btn-mini dark" data-action="load-past-att" data-id="${ev.id}">참석 명단 보기</button><span class="attend-names" id="pastAtt-${ev.id}"></span></div>`;
+    footHtml = `<div class="rsvp-row"><button class="btn-mini dark" data-action="load-past-att" data-id="${ev.id}">참석 명단 보기</button>${albumBtn}<span class="attend-names" id="pastAtt-${ev.id}"></span></div>`;
   }
 
   // 운영진 수정/✕: 카드 우측 상단 구석 (배경은 카드와 같은 흰색, ✕만 빨간 글자)
@@ -411,6 +426,17 @@ async function handleEventClick(e) {
       btn.remove();
     } else if (action === "manage-att") {
       await openAttManageModal(id);
+    } else if (action === "album") {
+      // 갤러리 지름길 — 앨범이 있으면 열고, 없으면 만들고 바로 올리기 (B안)
+      const ev = state.events.find((x) => x.id === id);
+      if (!ev) return;
+      btn.disabled = true;
+      try {
+        const g = await import("./gallery.js");
+        await g.openEventAlbum(ev);
+      } finally {
+        btn.disabled = false;
+      }
     }
   } catch (err) {
     alert("처리에 실패했어요: " + err.message);

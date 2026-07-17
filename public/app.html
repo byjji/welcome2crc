@@ -34,7 +34,7 @@
         <span class="logo-text">C.R.C <small>크루공간</small></span>
       </a>
       <div class="app-user" id="appUser" hidden>
-        <button class="app-user-name" id="userName" title="내 정보 수정"></button>
+        <button class="app-user-name" id="userName" title="내 정보·관리"></button>
         <button class="btn-mini ghost" id="btnLogout">로그아웃</button>
       </div>
     </div>
@@ -328,6 +328,49 @@
           </div>
         </div>
 
+        <!-- 갤러리 (앨범 + 사진) -->
+        <div class="tab-panel" id="tab-gallery">
+
+          <!-- 앨범 목록 -->
+          <div id="galAlbums">
+            <details class="admin-form" id="albumAdmin" hidden>
+              <summary>＋ 앨범 만들기</summary>
+              <form id="albumForm">
+                <div class="form-row">
+                  <input type="text" id="albumTitle" required maxlength="60" placeholder="앨범 이름 (예: 태화강 벚꽃런)" />
+                </div>
+                <div class="form-row">
+                  <label for="albumDate">날짜</label>
+                  <input type="date" id="albumDate" required />
+                </div>
+                <div class="form-row">
+                  <label>카테고리 <span class="muted">(일정 카테고리와 연동)</span></label>
+                  <div class="cat-row" id="albumCatRow"></div>
+                </div>
+                <p class="modal-desc">사진 원본은 올린 뒤 <strong>60일</strong>이 지나면 자동 정리돼요. (썸네일·보기용 사진은 계속 남아요)</p>
+                <button type="submit" class="btn btn-primary">앨범 만들기</button>
+              </form>
+            </details>
+            <h3 class="panel-subtitle">앨범</h3>
+            <div class="gal-cats" id="galCatTabs"></div>
+            <div class="album-grid" id="albumGrid"><p class="empty-note">앨범을 불러오는 중...</p></div>
+          </div>
+
+          <!-- 앨범 보기 (사진 그리드) -->
+          <div id="galAlbum" hidden>
+            <div id="galAlbumHead"></div>
+            <div class="gal-progress" id="galProgress" hidden>
+              <span class="gp-bar" id="galProgressBar"></span>
+              <span class="gp-text" id="galProgressText"></span>
+            </div>
+            <div class="photo-grid" id="galGrid"></div>
+            <p class="mtx-cap" id="galHint" hidden></p>
+          </div>
+
+          <!-- 사진 선택 (숨김 — '사진 올리기' 버튼이 엶) -->
+          <input type="file" id="galFile" accept="image/*" multiple hidden />
+        </div>
+
         <!-- 멤버 -->
         <div class="tab-panel" id="tab-members">
           <div id="adminSection" hidden>
@@ -356,8 +399,8 @@
             <button class="app-tab active" data-tab="home"><span class="ic"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 11.5 12 4.5l8 7"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-5.5h4V20"/></svg></span>홈</button>
             <button class="app-tab" data-tab="events"><span class="ic"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><rect x="4.5" y="6.5" width="15" height="13.5"/><path d="M4.5 10.5h15M8.5 3.5V7M15.5 3.5V7"/></svg></span>일정·출첵</button>
             <button class="app-tab" data-tab="news"><span class="ic"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 10v4h4.5l10 5.5v-15L8.5 10H4z"/><path d="M7.2 14.5 8.5 20"/></svg></span>소식</button>
+            <button class="app-tab" data-tab="gallery"><span class="ic"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><rect x="4" y="5.5" width="16" height="14"/><circle cx="9" cy="10.2" r="1.7"/><path d="m4 16.5 5-4.5 4 3.5 3-2.5 4 3.5"/></svg></span>갤러리</button>
             <button class="app-tab" data-tab="members"><span class="ic"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><circle cx="9" cy="7.8" r="3.3"/><path d="M3.5 19.5v-.4c0-3 2.4-4.8 5.5-4.8s5.5 1.8 5.5 4.8v.4"/><path d="M15.6 4.9a3.3 3.3 0 0 1 0 5.8M17.4 14.8c2 .7 3.1 2.2 3.1 4.3v.4"/></svg><span class="tab-badge" id="memberTabBadge" hidden></span></span>멤버</button>
-            <a class="app-tab" id="adminPageLink" href="admin.html" hidden title="관리"><span class="ic"><svg class="svg-ic" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path d="M4 8h8.7M17.3 8H20"/><rect x="12.7" y="5.7" width="4.6" height="4.6"/><path d="M4 16h2.7M11.3 16H20"/><rect x="6.7" y="13.7" width="4.6" height="4.6"/></svg></span>관리</a>
           </div>
         </nav>
 
@@ -421,61 +464,34 @@
     </div>
   </div>
 
-  <!-- ===== 내 정보 수정 모달 ===== -->
-  <div class="modal" id="profileModal" hidden>
-    <div class="modal-card">
+  <!-- ===== 라이트박스 (갤러리 사진 크게 보기) ===== -->
+  <div class="modal lightbox" id="lightbox" hidden>
+    <button type="button" class="lb-close" data-close="lightbox" aria-label="닫기">✕</button>
+    <span class="lb-counter" id="lbCounter"></span>
+    <div class="lb-stage" id="lbStage">
+      <img id="lbImg" alt="" />
+      <button type="button" class="lb-nav lb-prev" id="lbPrev" aria-label="이전 사진">‹</button>
+      <button type="button" class="lb-nav lb-next" id="lbNext" aria-label="다음 사진">›</button>
+    </div>
+    <div class="lb-foot">
+      <div class="lb-info" id="lbInfo"></div>
+      <div class="lb-actions" id="lbActions"></div>
+    </div>
+  </div>
+
+  <!-- ===== 업로드 미리보기 (고른 사진 확인 → 올리기) ===== -->
+  <div class="modal" id="galPreview" hidden>
+    <div class="modal-card gp-card">
       <div class="modal-head">
-        <h3>내 정보 수정</h3>
-        <button type="button" class="modal-close" data-close="profileModal" aria-label="닫기">✕</button>
+        <h3>올릴 사진 확인</h3>
+        <button type="button" class="modal-close" data-close-preview aria-label="닫기">✕</button>
       </div>
-
-      <form id="nameForm" class="auth-form">
-        <div class="form-row">
-          <label for="profileName">이름 (크루에서 쓰는 이름)</label>
-          <input type="text" id="profileName" required maxlength="20" autocomplete="name" />
-        </div>
-        <button type="submit" class="btn btn-primary btn-block">이름 저장</button>
-        <p class="form-msg" id="nameMsg" hidden></p>
-      </form>
-
-      <div class="auth-divider"><span>비밀번호 변경</span></div>
-
-      <form id="pwForm" class="auth-form">
-        <div class="form-row">
-          <label for="pwCurrent">현재 비밀번호</label>
-          <input type="password" id="pwCurrent" required minlength="6" autocomplete="current-password" />
-        </div>
-        <div class="form-row">
-          <label for="pwNew">새 비밀번호 (6자 이상)</label>
-          <input type="password" id="pwNew" required minlength="6" autocomplete="new-password" />
-        </div>
-        <button type="submit" class="btn btn-primary btn-block">비밀번호 변경</button>
-        <p class="form-msg" id="pwMsg" hidden></p>
-      </form>
-
-      <div class="auth-divider"><span>비밀번호 힌트 (비밀번호 찾기용)</span></div>
-
-      <form id="hintForm" class="auth-form">
-        <div class="form-row">
-          <label for="profileHintQ">질문</label>
-          <select id="profileHintQ" required>
-            <option value="" disabled selected>질문 선택</option>
-            <option>내가 좋아하는 숫자는?</option>
-            <option>내 러닝화 브랜드는?</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <label for="profileHintA">답변</label>
-          <input type="text" id="profileHintA" required maxlength="40" placeholder="답변 (대소문자 구분)" autocomplete="off"
-                 autocapitalize="none" autocorrect="off" spellcheck="false" />
-        </div>
-        <div class="form-row">
-          <label for="profileHintPw">현재 비밀번호 (본인 확인)</label>
-          <input type="password" id="profileHintPw" required minlength="6" autocomplete="current-password" />
-        </div>
-        <button type="submit" class="btn btn-primary btn-block">힌트 저장</button>
-        <p class="form-msg" id="hintMsg" hidden></p>
-      </form>
+      <p class="gp-hint" id="galPreviewNote"></p>
+      <div class="gp-thumbs" id="galPreviewGrid"></div>
+      <div class="gp-foot">
+        <button type="button" class="btn-mini" id="galPreviewAdd">＋ 더 고르기</button>
+        <button type="button" class="btn btn-primary" id="galPreviewUpload">올리기</button>
+      </div>
     </div>
   </div>
 

@@ -34,6 +34,8 @@ export const state = {
   eventCats: [...DEFAULT_EVENT_CATS],  // 일정 카테고리 (site/eventCategories 의 list)
   eventCatColors: {},                  // 카테고리 → 색 (site/eventCategories 의 colors)
   mileage: {},      // uid → { name, goal(목표km), months: { "2026-07": 누적km } }
+  albums: [],       // 갤러리 앨범 (date 내림차순 — init.js 구독)
+  albumsLoaded: false, // 첫 앨범 스냅샷을 받았는지 (열린 앨범 삭제 판정용)
 };
 
 /* ---------- 화면 상태 ---------- */
@@ -70,6 +72,8 @@ export function resetData() {
   state.eventCats = [...DEFAULT_EVENT_CATS];
   state.eventCatColors = {};
   state.mileage = {};
+  state.albums = [];
+  state.albumsLoaded = false;
   eventCatFilter = "all";
   statMonth = null;
   monthAtt = {};
