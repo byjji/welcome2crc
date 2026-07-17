@@ -36,6 +36,7 @@ let lbIndex = -1;        // 라이트박스에서 보고 있는 사진 index
 let uploading = false;
 let staged = [];         // 업로드 전 미리보기에 올려둔 파일 [{ file, url }]
 let galCat = null;       // 앨범 목록에서 선택한 카테고리 책갈피 (null = 첫 탭 자동)
+let cameFromEvents = false; // 일정 카드에서 앨범을 열었는지 (뒤로가기 시 일정으로 복귀)
 const UNCAT = "기타";    // 카테고리 없는(옛) 앨범이 모이는 탭 이름
 
 const album = () => (openId ? state.albums.find((a) => a.id === openId) : null);
@@ -48,6 +49,7 @@ export function resetGallery() {
   lbIndex = -1;
   uploading = false;
   galCat = null;
+  cameFromEvents = false;
   clearStaged();
   const lb = $("lightbox");
   if (lb && !lb.hidden) closeModal("lightbox");
@@ -238,6 +240,7 @@ export async function openEventAlbum(ev) {
   }
 
   galCat = ev.category || UNCAT; // 뒤로 나갔을 때 이 앨범이 있는 탭이 보이도록
+  cameFromEvents = true;         // 뒤로가기 시 일정 화면으로 복귀
   switchTab("gallery");
   openAlbum(id, { pickAfter: created });
 }
@@ -657,11 +660,12 @@ $("tab-gallery").addEventListener("click", (e) => {
   }
 
   const openBtn = e.target.closest("[data-open-album]");
-  if (openBtn) return openAlbum(openBtn.dataset.openAlbum);
+  if (openBtn) { cameFromEvents = false; return openAlbum(openBtn.dataset.openAlbum); }
 
   if (e.target.closest("#galBack")) {
     closeAlbumView();
     renderGallery();
+    if (cameFromEvents) { cameFromEvents = false; switchTab("events"); } // 일정에서 왔으면 일정으로 복귀
     return;
   }
   if (e.target.closest("#btnGalUpload")) return $("galFile").click();

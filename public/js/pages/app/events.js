@@ -281,7 +281,7 @@ function eventCardHtml(ev, isPast) {
     // 왼쪽: 참석자 요약(운영진은 관리 모달, 크루원은 이름만) / 오른쪽: 사진 + 참석 버튼
     let leftPart = "";
     if (isAdmin) {
-      leftPart = attendSummaryHtml(ev.id, yes.length ? attNamesShort(yes) : "눌러서 참석자 관리", yes.length);
+      leftPart = attendSummaryHtml(ev.id, yes.length ? attNamesShort(yes) : "", yes.length);
     } else if (yes.length) {
       leftPart = `<p class="attend-names"><span class="leaf">참석</span> ${attNamesShort(yes)}</p>`;
     }
@@ -289,7 +289,7 @@ function eventCardHtml(ev, isPast) {
     footHtml = `<div class="event-foot">${leftPart}<div class="foot-btns">${albumBtn}${rsvpBtn}</div></div>`;
   } else if (isAdmin) {
     // 지난 일정도 운영진은 관리 모달로 (모달 열 때 출석을 불러옴)
-    footHtml = `<div class="event-foot">${attendSummaryHtml(ev.id, "눌러서 참석자 관리", null)}<div class="foot-btns">${albumBtn}</div></div>`;
+    footHtml = `<div class="event-foot">${attendSummaryHtml(ev.id, "", null)}<div class="foot-btns">${albumBtn}</div></div>`;
   } else {
     footHtml = `<div class="rsvp-row"><button class="btn-mini dark" data-action="load-past-att" data-id="${ev.id}">참석 명단 보기</button>${albumBtn}<span class="attend-names" id="pastAtt-${ev.id}"></span></div>`;
   }
@@ -320,11 +320,12 @@ function eventCardHtml(ev, isPast) {
   `;
 }
 
-/* 운영진 참석자 요약 버튼 → 누르면 참석자 관리 모달 (count=null 이면 인원수 숨김) */
+/* 운영진 참석자 요약 버튼 → 누르면 참석자 관리 모달 (count=null 이면 인원수 숨김)
+   namesText 가 비면 '참석 N' 숫자만 (안내 문구 없음) */
 function attendSummaryHtml(evId, namesText, count) {
   return `<button type="button" class="attend-summary" data-action="manage-att" data-id="${evId}">
       <span class="leaf">참석${count === null ? "자" : ` ${count}`}</span>
-      <span class="am-names">${namesText}</span>
+      ${namesText ? `<span class="am-names">${namesText}</span>` : ""}
     </button>`;
 }
 
