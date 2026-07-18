@@ -85,20 +85,59 @@ function albumDateLabel(a) {
   return `${dp.month} ${dp.day}일 (${dp.dow.charAt(0)})`;
 }
 
-/* 앨범 만들기 폼의 카테고리 선택지 (일정 카테고리와 연동) */
-function renderAlbumCatPicker() {
+/* 앨범 만들기 폼의 카테고리 선택지 (일정 카테고리와 연동)
+   forceSel: 특정 카테고리로 고정 / locked: 일정 연결로 자동 설정돼 편집 잠금 */
+function renderAlbumCatPicker(forceSel = null, locked = false) {
   const row = $("albumCatRow");
   if (!row) return;
-  const sel = row.querySelector("input:checked")?.value || state.eventCats[0] || "";
+  const sel = forceSel || row.querySelector("input:checked")?.value || state.eventCats[0] || "";
   const list = sel && !state.eventCats.includes(sel) ? [...state.eventCats, sel] : state.eventCats;
+  row.classList.toggle("is-locked", locked);
   row.innerHTML = list.map((c) => {
     const cc = catColor(c);
     return `
     <label class="radio-pill cat-pill" style="${catBadgeStyle(c)};border-color:${cc};--cat:${cc}">
-      <input type="radio" name="albumCat" value="${esc(c)}" required${c === sel ? " checked" : ""} />
+      <input type="radio" name="albumCat" value="${esc(c)}" required${c === sel ? " checked" : ""}${locked ? " disabled" : ""} />
       <span>${esc(c)}</span>
     </label>`;
   }).join("");
+}
+
+/* 앨범 만들기 폼: 아직 앨범이 없는 일정을 고를 수 있는 드롭다운 (선택 유지) */
+function renderAlbumEventOptions() {
+  const sel = $("albumEvent");
+  if (!sel) return;
+  const keep = sel.value;
+  const avail = state.events
+    .filter((ev) => !(ev.albumId && state.albums.some((a) => a.id === ev.albumId)))
+    .slice()
+    .sort((a, b) => (b.date || "").localeCompare(a.date || "")); // 최근 날짜 먼저
+  sel.innerHTML = `<option value="">일정 없이 직접 입력</option>` +
+    avail.map((ev) => {
+      const dp = ev.date ? parseDateParts(ev.date) : null;
+      const d = dp ? `${dp.month} ${dp.day}일 · ` : "";
+      const cat = ev.category ? ` (${esc(ev.category)})` : "";
+      return `<option value="${ev.id}">${d}${esc(ev.title)}${cat}</option>`;
+    }).join("");
+  sel.value = keep && avail.some((ev) => ev.id === keep) ? keep : "";
+}
+
+/* 선택한 일정에 맞춰 날짜·카테고리를 자동 채우고 잠금 (없으면 편집 가능) */
+function syncAlbumFormFromEvent() {
+  const sel = $("albumEvent");
+  const dateInput = $("albumDate");
+  if (!sel || !dateInput) return;
+  const ev = sel.value ? state.events.find((e) => e.id === sel.value) : null;
+  if (ev) {
+    dateInput.value = ev.date || "";
+    dateInput.disabled = true;
+    if (!$("albumTitle").value.trim()) $("albumTitle").value = ev.title || "";
+    renderAlbumCatPicker(ev.category, true);
+  } else {
+    dateInput.disabled = false;
+    if (!dateInput.value) dateInput.value = todayStr();
+    renderAlbumCatPicker(null, false);
+  }
 }
 
 /* 앨범이 실제로 존재하는 카테고리만 (일정 카테고리 순서 우선, 미분류는 맨 끝) */
@@ -113,8 +152,8 @@ function albumCategories() {
 }
 
 function renderAlbumList() {
-  if (!$("albumDate").value) $("albumDate").value = todayStr();
-  renderAlbumCatPicker();
+  renderAlbumEventOptions();   // 일정 드롭다운 갱신
+  syncAlbumFormFromEvent();    // 선택된 일정에 맞춰 날짜·카테고리 채움(없으면 편집 가능)
 
   const grid = $("albumGrid");
   const tabs = $("galCatTabs");
@@ -246,25 +285,41 @@ export async function openEventAlbum(ev) {
 }
 
 /* ============================================================
-   앨범 만들기 (갤러리 탭 — 운영진, 일정과 무관한 앨범용)
+   앨범 만들기 (갤러리 탭 — 운영진)
+   · 일정을 고르면: 날짜·카테고리 자동 설정 + 그 일정의 앨범으로 연결
+   · 일정 없이: 날짜·카테고리 직접 입력한 단독 앨범
    ============================================================ */
+$("albumEvent").addEventListener("change", syncAlbumFormFromEvent);
+
+// 폼을 펼칠 때 일정 목록을 최신으로 (일정 구독은 갤러리를 다시 그리지 않으므로)
+$("albumAdmin").addEventListener("toggle", () => {
+  if ($("albumAdmin").open) { renderAlbumEventOptions(); syncAlbumFormFromEvent(); }
+});
+
 $("albumForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const category = document.querySelector('input[name="albumCat"]:checked')?.value;
+  // 일정을 골랐으면 그 일정의 카테고리·날짜를 그대로 쓰고, 앨범을 일정에 연결
+  const evId = $("albumEvent").value;
+  const ev = evId ? state.events.find((x) => x.id === evId) : null;
+  const category = ev ? ev.category : document.querySelector('input[name="albumCat"]:checked')?.value;
   if (!category) return alert("카테고리를 선택해 주세요.");
   try {
     const ref = doc(collection(db, "albums"));
-    await setDoc(ref, {
+    const data = {
       title: $("albumTitle").value.trim(),
-      date: $("albumDate").value,
+      date: ev ? (ev.date || "") : $("albumDate").value,
       category,
       photoCount: 0,
       coverUrl: "",
       createdBy: me.uid,
       createdAt: serverTimestamp(),
-    });
+    };
+    if (ev) data.eventId = ev.id;
+    await setDoc(ref, data);
+    if (ev) await updateDoc(doc(db, "events", ev.id), { albumId: ref.id }); // 일정 카드에도 앨범 연결
     galCat = category; // 만든 앨범이 있는 탭으로
     e.target.reset();
+    $("albumDate").disabled = false; // reset 후 잠금 해제
     $("albumAdmin").open = false;
     openAlbum(ref.id);
   } catch (err) {

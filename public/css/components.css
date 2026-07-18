@@ -491,6 +491,7 @@ body.app-page .app-main {
 }
 
 .admin-form input,
+.admin-form select,
 .admin-form textarea {
   width: 100%;
   font-family: var(--font);
@@ -502,10 +503,17 @@ body.app-page .app-main {
 }
 
 .admin-form input:focus,
+.admin-form select:focus,
 .admin-form textarea:focus {
   outline: none;
   border-color: var(--carrot);
   background: #fff;
+}
+
+/* 일정 연결로 날짜·카테고리가 자동 설정되면 잠금 표시 */
+.cat-row.is-locked {
+  opacity: 0.7;
+  pointer-events: none;
 }
 
 .admin-form label {
