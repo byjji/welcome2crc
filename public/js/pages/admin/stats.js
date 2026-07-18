@@ -30,6 +30,7 @@ let db, collection, getDocs;     // firebase (탭 열 때 동적 로드)
 let systemUids = new Set();      // 운영용 계정 uid (집계 제외)
 let members = [];                // 크루 멤버(시스템 제외, 모든 role)
 let activeCrew = [];             // 활동 크루원 (member·admin)
+let withdrawals = [];            // 탈퇴 기록 { joinedAt, leftAt } (멤버 문서 삭제된 사람)
 let events = [];                 // 전체 일정
 let attCache = {};               // eventId → { uid: {status,...} }  (한 번 읽으면 유지)
 
@@ -61,6 +62,15 @@ export async function initStats() {
     members = raw.filter((m) => !systemUids.has(m.id));
     activeCrew = members.filter((m) => m.role === "member" || m.role === "admin");
     events = esnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+
+    // 탈퇴 기록(멤버 문서가 삭제된 사람) — 규칙 미배포 등으로 실패해도 통계는 계속
+    try {
+      const wsnap = await getDocs(collection(db, "withdrawals"));
+      withdrawals = wsnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    } catch (e) {
+      console.error("탈퇴 기록 로딩 실패:", e);
+      withdrawals = [];
+    }
 
     const def = defaultRange();
     ranges.growth = { ...def };
@@ -198,6 +208,15 @@ function renderGrowth() {
       const lk = tsMonthKey(m.removedAt);
       if (lk && lk in leave) leave[lk]++;
     }
+  });
+
+  // 완전 탈퇴(멤버 문서 삭제)한 사람도 가입·탈퇴로 집계
+  // — 멤버 문서가 이미 삭제됐으므로 위 members 집계와 겹치지 않음(중복 아님)
+  withdrawals.forEach((w) => {
+    const jk = tsMonthKey(w.joinedAt);
+    if (jk && jk in join) join[jk]++;
+    const lk = tsMonthKey(w.leftAt);
+    if (lk && lk in leave) leave[lk]++;
   });
 
   const totJoin = months.reduce((s, k) => s + join[k], 0);

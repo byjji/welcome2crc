@@ -5,7 +5,7 @@ import { $, openModal } from "../../lib/ui.js";
 import { ic } from "../../lib/icons.js";
 import { esc, fmtDate } from "../../lib/format.js";
 import { displayAccount } from "../../lib/account.js";
-import { db, doc, updateDoc, deleteDoc, serverTimestamp } from "../../lib/firebase.js";
+import { db, doc, setDoc, updateDoc, deleteDoc, serverTimestamp } from "../../lib/firebase.js";
 import { state, me, isAdmin } from "./state.js";
 
 export function renderMembers() {
@@ -94,7 +94,7 @@ export function renderMembers() {
         </div>
         <div class="card-actions">
           <button class="btn-mini leaf" data-action="approve" data-id="${m.id}">↩ 멤버로 복구</button>
-          <button class="btn-mini danger" data-action="del-record" data-id="${m.id}" data-name="${esc(m.name)}" data-kind="내보내기">기록 삭제</button>
+          <button class="btn-mini danger" data-action="del-record" data-id="${m.id}" data-name="${esc(m.name)}" data-kind="내보내기">탈퇴</button>
         </div>
       </div>
       ${applicantInfoHtml(m)}
@@ -197,7 +197,25 @@ $("tab-members").addEventListener("click", async (e) => {
       await updateDoc(doc(db, "members", id), { role: "member" });
     } else if (action === "reject" && confirm(`${btn.dataset.name}님의 가입을 거절할까요?\n(거절 기록은 '거절' 탭에 남고, 나중에 승인으로 바꿀 수 있어요)`)) {
       await updateDoc(doc(db, "members", id), { role: "rejected", rejectedAt: serverTimestamp() });
-    } else if (action === "del-record" && confirm(`${btn.dataset.name}님의 ${btn.dataset.kind} 기록을 완전히 삭제할까요?\n(삭제하면 이 사람이 다시 로그인할 때 '승인 대기'로 새로 등록돼요)`)) {
+    } else if (action === "del-record") {
+      const isWithdraw = btn.dataset.kind === "내보내기";
+      const msg = isWithdraw
+        ? `${btn.dataset.name}님을 탈퇴 처리할까요?\n멤버 기록이 삭제돼요. (다시 로그인하면 '승인 대기'로 새로 등록돼요)`
+        : `${btn.dataset.name}님의 ${btn.dataset.kind} 기록을 완전히 삭제할까요?\n(삭제하면 이 사람이 다시 로그인할 때 '승인 대기'로 새로 등록돼요)`;
+      if (!confirm(msg)) return;
+      // 탈퇴(내보내기 → 삭제): 통계의 크루 성장에서 계속 탈퇴로 집계되도록
+      // 가입월·탈퇴월만 withdrawals 에 남기고 멤버 문서는 삭제.
+      // (removedAt 을 탈퇴월로 써서 '내보내기' 때 잡힌 것과 같은 달 → 중복 집계 아님.
+      //  멤버 문서를 지우므로 둘이 동시에 존재하지 않음)
+      if (isWithdraw) {
+        const m = state.members.find((x) => x.id === id);
+        if (m) {
+          await setDoc(doc(db, "withdrawals", id), {
+            joinedAt: m.createdAt || null,
+            leftAt: m.removedAt || serverTimestamp(),
+          });
+        }
+      }
       await deleteDoc(doc(db, "members", id));
     } else if (action === "toggle-admin") {
       const newRole = btn.dataset.role === "admin" ? "member" : "admin";
