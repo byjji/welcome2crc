@@ -814,3 +814,29 @@ button.app-user-name:hover {
 body.app-page .pwa-toast {
   bottom: calc(80px + env(safe-area-inset-bottom));
 }
+
+/* '뒤로가기 한 번 더' 안내 토스트 (하단 탭 위) */
+.back-toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(80px + env(safe-area-inset-bottom));
+  transform: translateX(-50%) translateY(160%);
+  z-index: 300;
+  width: max-content;
+  max-width: 88%;
+  padding: 0.65rem 1.1rem;
+  border-radius: 999px;
+  background: var(--ink);
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.28);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.back-toast.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+}

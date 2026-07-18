@@ -2240,6 +2240,55 @@ tr.me-row td {
   grid-column: 1 / -1;
 }
 
+/* 사진 저장(선택 모드) — 체크 오버레이 */
+.photo-grid .ph.selectable img {
+  transition: transform 0.12s ease, opacity 0.12s ease;
+}
+
+.photo-grid .ph.selectable .ph-check {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 900;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+}
+
+.photo-grid .ph.selectable {
+  position: relative;
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+}
+
+.photo-grid .ph.sel {
+  outline-color: var(--carrot-vivid);
+}
+
+.photo-grid .ph.sel img {
+  transform: scale(0.9);
+  border-radius: 6px;
+}
+
+.photo-grid .ph.sel .ph-check {
+  background: var(--carrot-vivid);
+  border-color: #fff;
+}
+
+.gal-select-head .gal-back {
+  color: var(--carrot-deep);
+  border-color: var(--carrot);
+}
+
 /* ============================================================
    라이트박스 (사진 크게 보기)
    ============================================================ */

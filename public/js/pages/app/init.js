@@ -27,7 +27,7 @@ import {
   renderEventCatRow, renderEvents, renderStatsIfLoaded,
   ensureMonthData, renderMileage,
 } from "./events.js";
-import { renderGallery, resetGallery } from "./gallery.js";
+import { renderGallery, resetGallery, galleryHandleBack } from "./gallery.js";
 
 initModals();
 
@@ -127,6 +127,7 @@ function enterApp() {
   }
   appEntered = true;
   startListeners();
+  armBack(); // 하드웨어/브라우저 뒤로가기 가드 설치 (로그인 세션당 1회)
 }
 
 /* ---------- 리스너 해제 + 데이터 초기화 ---------- */
@@ -404,3 +405,69 @@ $("eventSubTabs").addEventListener("click", (e) => {
   // 출석 현황·이달의 기록 모두 그 달의 출석 데이터가 필요
   if (btn.dataset.subtab === "ev-att" || btn.dataset.subtab === "ev-rec") ensureMonthData();
 });
+
+/* ============================================================
+   4. 뒤로가기 → 앱을 나가지 않고 '이전 단계'로
+   ------------------------------------------------------------
+   히스토리에 가드 항목 하나를 항상 얹어두고(popstate 트랩), 뒤로가기가
+   눌리면 우선순위대로 한 단계만 닫은 뒤 다시 가드를 얹습니다.
+     1) 열려 있는 모달 → 닫기 (라이트박스·미리보기·각종 수정창)
+     2) 갤러리 선택 모드/열린 앨범 → 앨범 목록(또는 일정)으로
+     3) 홈이 아닌 탭 → 홈으로
+   모두 해당 없으면(홈 최상단) 2초 안에 한 번 더 눌러야 실제로 나갑니다.
+   ============================================================ */
+let backExitAt = 0; // '한 번 더 누르면 나가요' 를 띄운 시각
+
+function armBack() {
+  history.pushState({ crcGuard: true }, "");
+}
+
+/* 열려 있는 모달 중 가장 위(마지막) 것 */
+function topOpenModal() {
+  const open = [...document.querySelectorAll(".modal")].filter((m) => !m.hidden);
+  return open.length ? open[open.length - 1] : null;
+}
+
+/* 한 단계 닫기. 닫을 게 있었으면 true */
+function stepBack() {
+  const modal = topOpenModal();
+  if (modal) {
+    // 각 모달의 닫기 버튼을 눌러 고유 정리 로직(미리보기 URL 해제 등)까지 실행
+    const closeBtn = modal.querySelector("[data-close], [data-close-preview]");
+    if (closeBtn) closeBtn.click();
+    else closeModal(modal.id);
+    return true;
+  }
+  if (galleryHandleBack()) return true; // 갤러리 선택 모드/앨범
+  if (activeTabName() && activeTabName() !== "home") { switchTab("home"); return true; }
+  return false;
+}
+
+window.addEventListener("popstate", () => {
+  // 로그인·대기 등 본화면이 아닐 때는 개입하지 않음(자연스러운 뒤로가기)
+  if ($("viewApp").hidden) return;
+
+  if (stepBack()) { armBack(); return; } // 한 단계 닫고 다시 가드
+
+  // 닫을 게 없음 = 홈 최상단. 2초 안에 두 번 누르면 실제로 나감
+  if (Date.now() - backExitAt < 2000) { history.back(); return; }
+  backExitAt = Date.now();
+  showBackToast("뒤로가기를 한 번 더 누르면 앱을 나가요");
+  armBack();
+});
+
+/* 하단에 잠깐 뜨는 안내 (한 번 더 눌러 종료) */
+let backToastTimer = null;
+function showBackToast(text) {
+  let el = $("backToast");
+  if (!el) {
+    el = document.createElement("div");
+    el.id = "backToast";
+    el.className = "back-toast";
+    document.body.appendChild(el);
+  }
+  el.textContent = text;
+  requestAnimationFrame(() => el.classList.add("show"));
+  clearTimeout(backToastTimer);
+  backToastTimer = setTimeout(() => el.classList.remove("show"), 2000);
+}

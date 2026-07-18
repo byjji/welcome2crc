@@ -37,6 +37,8 @@ let uploading = false;
 let staged = [];         // 업로드 전 미리보기에 올려둔 파일 [{ file, url }]
 let galCat = null;       // 앨범 목록에서 선택한 카테고리 책갈피 (null = 첫 탭 자동)
 let cameFromEvents = false; // 일정 카드에서 앨범을 열었는지 (뒤로가기 시 일정으로 복귀)
+let selecting = false;   // 앨범 보기에서 '사진 저장'용 선택 모드인지
+let selected = new Set();// 선택 모드에서 고른 사진 id
 const UNCAT = "기타";    // 카테고리 없는(옛) 앨범이 모이는 탭 이름
 
 const album = () => (openId ? state.albums.find((a) => a.id === openId) : null);
@@ -50,6 +52,8 @@ export function resetGallery() {
   uploading = false;
   galCat = null;
   cameFromEvents = false;
+  selecting = false;
+  selected.clear();
   clearStaged();
   const lb = $("lightbox");
   if (lb && !lb.hidden) closeModal("lightbox");
@@ -199,31 +203,59 @@ function renderAlbumView() {
   const a = album();
   if (!a) return;
 
-  const cnt = a.photoCount || 0;
-  const full = cnt >= MAX_PHOTOS;
-
-  $("galAlbumHead").innerHTML = `
-  <div class="gal-head">
-    <button type="button" class="gal-back" id="galBack">‹ 앨범</button>
-    <div class="gal-title-wrap">
-      <h3 class="gal-title">${esc(a.title)}</h3>
-      <p class="gal-sub">${albumDateLabel(a)} · ${cnt}/${MAX_PHOTOS}장</p>
+  if (selecting) renderSelectBar(a);
+  else {
+    const cnt = a.photoCount || 0;
+    const full = cnt >= MAX_PHOTOS;
+    $("galAlbumHead").innerHTML = `
+    <div class="gal-head">
+      <button type="button" class="gal-back" id="galBack">‹ 앨범</button>
+      <div class="gal-title-wrap">
+        <h3 class="gal-title">${esc(a.title)}</h3>
+        <p class="gal-sub">${albumDateLabel(a)} · ${cnt}/${MAX_PHOTOS}장</p>
+      </div>
+      ${isAdmin ? `<button type="button" class="btn-mini btn-icon btn-x" id="galDelAlbum" title="앨범 삭제" aria-label="앨범 삭제">✕</button>` : ""}
     </div>
-    ${isAdmin ? `<button type="button" class="btn-mini btn-icon btn-x" id="galDelAlbum" title="앨범 삭제" aria-label="앨범 삭제">✕</button>` : ""}
-  </div>
-  <div class="gal-tools">
-    <button type="button" class="btn-mini leaf" id="btnGalUpload"${full || uploading ? " disabled" : ""}>${ic("camera")} 사진 올리기</button>
-    <span class="muted">${full ? "이 앨범은 가득 찼어요 (최대 " + MAX_PHOTOS + "장)" : "사진을 고르면 미리보기에서 확인한 뒤 올려요"}</span>
-  </div>`;
+    <div class="gal-tools">
+      <button type="button" class="btn-mini leaf" id="btnGalUpload"${full || uploading ? " disabled" : ""}>${ic("camera")} 사진 올리기</button>
+      ${photos.length ? `<button type="button" class="btn-mini" id="btnGalSelect">${ic("download")} 사진 저장</button>` : ""}
+      <span class="muted">${full ? "이 앨범은 가득 찼어요 (최대 " + MAX_PHOTOS + "장)" : "사진을 고르면 미리보기에서 확인한 뒤 올려요"}</span>
+    </div>`;
+  }
 
   $("galGrid").innerHTML = photos.length
-    ? photos.map((p, i) =>
-        `<button type="button" class="ph" data-ph="${i}"><img src="${esc(p.thumbUrl)}" loading="lazy" alt="" /></button>`).join("")
+    ? photos.map((p, i) => {
+        const on = selected.has(p.id);
+        return `<button type="button" class="ph${selecting ? " selectable" : ""}${on ? " sel" : ""}" data-ph="${i}">
+          <img src="${esc(p.thumbUrl)}" loading="lazy" alt="" />
+          ${selecting ? `<span class="ph-check">${on ? "✓" : ""}</span>` : ""}
+        </button>`;
+      }).join("")
     : `<p class="empty-note">아직 사진이 없어요. 첫 사진을 올려보세요!</p>`;
 
   const hint = $("galHint");
   hint.hidden = false;
-  hint.textContent = "보기용 사진은 계속 남고, 원본 파일만 60일 뒤 자동 정리돼요. (원본 다운로드는 그 전까지)";
+  hint.textContent = selecting
+    ? "저장할 사진을 눌러 고른 뒤 [저장] 을 눌러요. 원본 보관 기간(60일)이 지난 사진은 저장할 수 없어요."
+    : "보기용 사진은 계속 남고, 원본 파일만 60일 뒤 자동 정리돼요. (원본 다운로드는 그 전까지)";
+}
+
+/* 선택 모드 헤더 — 취소 · 전체 선택/해제 · 저장(N장) */
+function renderSelectBar(a) {
+  const n = selected.size;
+  const allSel = n > 0 && n === photos.length;
+  $("galAlbumHead").innerHTML = `
+  <div class="gal-head gal-select-head">
+    <button type="button" class="gal-back" id="galSelCancel">취소</button>
+    <div class="gal-title-wrap">
+      <h3 class="gal-title">${n}장 선택</h3>
+      <p class="gal-sub">${esc(a.title)}</p>
+    </div>
+  </div>
+  <div class="gal-tools">
+    <button type="button" class="btn-mini" id="galSelAll">${allSel ? "전체 해제" : "전체 선택"}</button>
+    <button type="button" class="btn-mini leaf" id="galSelDownload"${n ? "" : " disabled"}>${ic("download")} 저장 (${n}장)</button>
+  </div>`;
 }
 
 /* ============================================================
@@ -705,6 +737,98 @@ document.addEventListener("keydown", (e) => {
 });
 
 /* ============================================================
+   사진 저장 — 전체/선택 다운로드 (원본, 60일 이내)
+   ------------------------------------------------------------
+   원본은 업로드 때 'attachment' 로 저장돼 링크를 누르면 바로 내려받아져요.
+   여러 장은 사용자의 한 번의 탭(제스처) 안에서 링크를 연달아 눌러
+   브라우저의 '여러 파일 다운로드' 로 처리돼요. (기간 지난 원본은 제외)
+   ============================================================ */
+function enterSelectMode() {
+  if (!photos.length) return;
+  selecting = true;
+  selected = new Set(photos.map((p) => p.id)); // 기본값: 전체 선택
+  renderAlbumView();
+  window.scrollTo(0, 0);
+}
+
+export function exitSelectMode() {
+  if (!selecting) return;
+  selecting = false;
+  selected.clear();
+  renderAlbumView();
+}
+
+function togglePhotoSel(i) {
+  const p = photos[i];
+  if (!p) return;
+  const btn = $("galGrid").querySelector(`[data-ph="${i}"]`);
+  const on = !selected.has(p.id);
+  on ? selected.add(p.id) : selected.delete(p.id);
+  if (btn) {
+    btn.classList.toggle("sel", on);
+    const c = btn.querySelector(".ph-check");
+    if (c) c.textContent = on ? "✓" : "";
+  }
+  renderSelectBar(album()); // 개수·버튼만 갱신 (그리드 이미지는 그대로 두어 깜빡임 방지)
+}
+
+function toggleSelectAll() {
+  const all = selected.size === photos.length;
+  selected = all ? new Set() : new Set(photos.map((p) => p.id));
+  $("galGrid").querySelectorAll("[data-ph]").forEach((btn) => {
+    const p = photos[Number(btn.dataset.ph)];
+    const on = !!p && selected.has(p.id);
+    btn.classList.toggle("sel", on);
+    const c = btn.querySelector(".ph-check");
+    if (c) c.textContent = on ? "✓" : "";
+  });
+  renderSelectBar(album());
+}
+
+/* 링크 하나를 눌러 원본 1장 내려받기 (서버가 파일명 지정) */
+function downloadOne(p) {
+  const a = document.createElement("a");
+  a.href = p.originalUrl;
+  a.download = "";
+  a.rel = "noopener";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+}
+
+function downloadSelected() {
+  const chosen = photos.filter((p) => selected.has(p.id));
+  if (!chosen.length) return;
+  const ok = chosen.filter(canDownloadOriginal);
+  const expired = chosen.length - ok.length;
+  if (!ok.length) {
+    alert(`고른 사진은 원본 보관 기간(${KEEP_DAYS}일)이 지나 저장할 수 없어요.`);
+    return;
+  }
+  if (ok.length > 1) {
+    const extra = expired ? `\n(원본 기간이 지난 ${expired}장은 제외돼요)` : "";
+    if (!confirm(`사진 ${ok.length}장을 저장할게요.\n브라우저가 "여러 파일 다운로드" 를 물으면 허용해 주세요.${extra}`)) return;
+  }
+  // 사용자 제스처 안에서 연달아 실행해야 브라우저가 한 번에 허용해 줘요
+  ok.forEach(downloadOne);
+  if (expired && ok.length === 1) alert(`원본 기간이 지난 ${expired}장은 저장하지 못했어요.`);
+  exitSelectMode();
+}
+
+/* ============================================================
+   뒤로가기(하드웨어/브라우저) 처리 — init.js 의 가드가 호출
+   한 단계 닫았으면 true (선택 모드 → 앨범 → 일정/목록 순)
+   ============================================================ */
+export function galleryHandleBack() {
+  if (selecting) { exitSelectMode(); return true; }
+  if (!openId) return false;
+  closeAlbumView();
+  renderGallery();
+  if (cameFromEvents) { cameFromEvents = false; switchTab("events"); } // 일정에서 왔으면 일정으로 복귀
+  return true;
+}
+
+/* ============================================================
    갤러리 탭 클릭 위임 (앨범 카드 · 뒤로 · 업로드 · 앨범 삭제 · 사진)
    ============================================================ */
 $("tab-gallery").addEventListener("click", (e) => {
@@ -717,15 +841,21 @@ $("tab-gallery").addEventListener("click", (e) => {
   const openBtn = e.target.closest("[data-open-album]");
   if (openBtn) { cameFromEvents = false; return openAlbum(openBtn.dataset.openAlbum); }
 
-  if (e.target.closest("#galBack")) {
-    closeAlbumView();
-    renderGallery();
-    if (cameFromEvents) { cameFromEvents = false; switchTab("events"); } // 일정에서 왔으면 일정으로 복귀
-    return;
-  }
+  if (e.target.closest("#galBack")) return galleryHandleBack();
+
+  // 사진 저장(선택 모드) 컨트롤
+  if (e.target.closest("#btnGalSelect")) return enterSelectMode();
+  if (e.target.closest("#galSelCancel")) return exitSelectMode();
+  if (e.target.closest("#galSelAll")) return toggleSelectAll();
+  if (e.target.closest("#galSelDownload")) return downloadSelected();
+
   if (e.target.closest("#btnGalUpload")) return $("galFile").click();
   if (e.target.closest("#galDelAlbum")) return deleteAlbum();
 
   const ph = e.target.closest("[data-ph]");
-  if (ph) openLightbox(Number(ph.dataset.ph));
+  if (ph) {
+    const i = Number(ph.dataset.ph);
+    if (selecting) return togglePhotoSel(i);
+    openLightbox(i);
+  }
 });
