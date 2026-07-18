@@ -428,3 +428,378 @@
   background: #fff;
 }
 
+/* ============================================================
+   통계 탭 (stats.js)
+   ============================================================ */
+.stat-card {
+  background: var(--white);
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem 1.15rem;
+  margin-bottom: 1rem;
+}
+
+.stat-card > h4,
+.stat-card-head h4 {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--ink);
+  margin-bottom: 0.9rem;
+}
+
+.stat-card .svg-ic { color: var(--carrot); }
+
+.stat-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.4rem;
+}
+
+.stat-card-head h4 { margin-bottom: 0; }
+
+/* 기간 선택 */
+.stat-period { display: flex; gap: 0.3rem; }
+
+.sp-btn {
+  font-family: var(--font);
+  font-size: 0.76rem;
+  font-weight: 800;
+  padding: 0.35em 0.7em;
+  border: 1.5px solid var(--line);
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.sp-btn.active {
+  border-color: var(--carrot);
+  background: var(--carrot-vivid);
+  color: #fff;
+}
+
+/* 큰 숫자 3칸 */
+.stat-nums {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.stat-num {
+  text-align: center;
+  padding: 0.6rem 0.3rem;
+  background: var(--surface-tint);
+  border-radius: 10px;
+}
+
+.stat-num b {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: var(--carrot-deep);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-num span { font-size: 0.72rem; color: var(--ink-soft); }
+
+.stat-sub {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--ink-soft);
+  margin-bottom: 0.5rem;
+}
+
+.stat-kpis {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin-bottom: 0.7rem;
+}
+
+.stat-kpis b { color: var(--carrot-deep); font-variant-numeric: tabular-nums; }
+
+.stat-range {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--carrot-deep);
+  margin: 0 0 0.7rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-note {
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+  margin-top: 0.6rem;
+  line-height: 1.5;
+}
+
+/* 세로 막대 (시계열) — 가로 스크롤 */
+.vbars {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.35rem;
+  overflow-x: auto;
+  padding-bottom: 0.2rem;
+}
+
+.vbars::-webkit-scrollbar { height: 0; }
+
+.vbar {
+  flex: 1 0 34px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.vbar-track {
+  width: 100%;
+  height: 84px;
+  display: flex;
+  align-items: flex-end;
+  background: var(--surface-tint);
+  border-radius: 5px 5px 0 0;
+  overflow: hidden;
+}
+
+.vbar-fill {
+  width: 100%;
+  min-height: 2px;
+  background: var(--carrot-vivid);
+  border-radius: 5px 5px 0 0;
+  transition: height 0.3s ease;
+}
+
+.vbar-num { font-size: 0.72rem; font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; }
+.vbar-lb { font-size: 0.68rem; color: var(--ink-soft); white-space: nowrap; }
+.vbar-sub { font-size: 0.64rem; font-weight: 800; color: var(--leaf); }
+
+/* 가로 막대 (분포) */
+.demo-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.9rem 1.1rem;
+}
+
+.demo-cell h5 {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--ink);
+  margin-bottom: 0.45rem;
+}
+
+.hbars { display: flex; flex-direction: column; gap: 0.3rem; }
+
+.hbar {
+  display: grid;
+  grid-template-columns: 4.6em 1fr auto;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.76rem;
+}
+
+.hbar-lb { color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.hbar-track {
+  height: 0.7rem;
+  background: var(--surface-tint);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.hbar-fill {
+  display: block;
+  height: 100%;
+  background: var(--carrot-soft);
+  border-right: 3px solid var(--carrot-vivid);
+  border-radius: 999px;
+}
+
+.hbar-val { font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.hbar-val em { font-style: normal; font-weight: 700; color: var(--ink-soft); margin-left: 0.2em; font-size: 0.9em; }
+
+@media (max-width: 460px) {
+  .demo-grid { grid-template-columns: 1fr; }
+}
+
+/* 출석 랭킹 표 */
+.stat-rank-scroll { overflow-x: auto; }
+
+.stat-rank {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.stat-rank th,
+.stat-rank td {
+  padding: 0.5em 0.5em;
+  text-align: center;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.stat-rank th {
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+.stat-rank td.nm { text-align: left; font-weight: 700; }
+.stat-rank td b { color: var(--carrot-deep); font-variant-numeric: tabular-nums; }
+.stat-rank .muted { font-size: 0.85em; }
+
+.stat-rank .rk {
+  display: inline-block;
+  min-width: 1.5em;
+  margin-right: 0.35em;
+  color: var(--ink-soft);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-rank .allin {
+  display: inline-block;
+  margin-left: 0.3em;
+  padding: 0.05em 0.4em;
+  border-radius: 4px;
+  background: var(--leaf);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+/* 순위 칩 (app.css 와 동일 — 관리 페이지엔 app.css 가 없어 여기 정의) */
+.stat-rank .rank-chip {
+  display: inline-block;
+  min-width: 1.5em;
+  margin-right: 0.35em;
+  padding: 0.08em 0.25em;
+  border-radius: 4px;
+  transform: skewX(-8deg);
+  font-size: 0.78em;
+  font-weight: 900;
+  text-align: center;
+  color: #fff;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+}
+
+.stat-rank .rank-chip.r1 { background: #c9930b; }
+.stat-rank .rank-chip.r2 { background: #8f99a4; }
+.stat-rank .rank-chip.r3 { background: #b07040; }
+
+/* 기간 선택 툴바 */
+.stat-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  margin-bottom: 1rem;
+}
+
+.stat-range-cur {
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.stat-period-pick {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  background: var(--surface-tint);
+  border: 1.5px solid var(--line);
+  border-radius: 10px;
+}
+
+.stat-period-pick label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+.stat-period-pick input {
+  font-family: var(--font);
+  font-size: 0.9rem;
+  padding: 0.4em 0.6em;
+  border: 1.5px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--ink);
+}
+
+/* 성장 요약 숫자 — 가입(초록)/탈퇴(빨강) */
+.stat-num.up b { color: var(--leaf); }
+.stat-num.down b { color: #c0554a; }
+
+/* 다이버징 막대 (가입 ↑ / 탈퇴 ↓) — 가로 스크롤 */
+.dbars {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  overflow-x: auto;
+  padding-bottom: 0.2rem;
+}
+
+.dbars::-webkit-scrollbar { height: 0; }
+
+.dbar {
+  flex: 1 0 34px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.dbar-up {
+  width: 100%;
+  height: 44px;
+  display: flex;
+  align-items: flex-end;
+}
+
+.dbar-dn {
+  width: 100%;
+  height: 44px;
+  display: flex;
+  align-items: flex-start;
+  border-top: 1.5px solid var(--line);
+}
+
+.dbar-fill {
+  width: 62%;
+  margin: 0 auto;
+  min-height: 0;
+  display: block;
+}
+
+.dbar-fill.up { background: var(--leaf); border-radius: 4px 4px 0 0; }
+.dbar-fill.down { background: #c0554a; border-radius: 0 0 4px 4px; }
+
+.dbar-nums {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.15;
+  min-height: 1.6em;
+  margin-top: 0.1rem;
+}
+
+.dbar-nums .up { color: var(--leaf); font-weight: 800; font-size: 0.64rem; font-variant-numeric: tabular-nums; }
+.dbar-nums .down { color: #c0554a; font-weight: 800; font-size: 0.64rem; font-variant-numeric: tabular-nums; }
+
+.dbar-lb { font-size: 0.68rem; color: var(--ink-soft); white-space: nowrap; }
+

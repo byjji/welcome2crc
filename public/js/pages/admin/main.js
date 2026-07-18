@@ -14,6 +14,7 @@ import { esc, escMultiline } from "../../lib/format.js";
 import {
   toAuthEmail, displayAccount, normAnswer, hintDocId, sealText, openSealed,
 } from "../../lib/account.js";
+import { initStats } from "./stats.js";
 
 /* ---------- 화면 요소 ---------- */
 const views = {
@@ -33,6 +34,7 @@ function activateTab(name) {
     t.classList.toggle("active", t.dataset.atab === name));
   document.querySelectorAll("#viewAdmin .admin-panel").forEach((p) =>
     p.classList.toggle("active", p.id === `apanel-${name}`));
+  if (name === "stats") initStats(); // 통계는 탭을 처음 열 때만 로드 (stats.js 가 캐시)
 }
 
 $("adminTabs").addEventListener("click", (e) => {
