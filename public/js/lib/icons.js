@@ -33,8 +33,3 @@ export function ic(name, cls = "") {
   if (!d) return "";
   return `<svg class="svg-ic${cls ? " " + cls : ""}" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true">${d}</svg>`;
 }
-
-/* 로고용 두 색 당근 마크 (몸통 주황 + 잎 초록) — 헤더·스피너·auth 로고 */
-export function carrotMark(cls = "") {
-  return `<svg class="svg-ic${cls ? " " + cls : ""}" viewBox="0 0 24 24" width="1em" height="1em" fill="none" stroke-width="2.2" stroke-linecap="square" stroke-linejoin="miter" aria-hidden="true"><path stroke="var(--leaf, #3a7e31)" d="M12 8.5 7.5 3.5M12 8.5V2.8M12 8.5l4.5-5"/><path stroke="var(--carrot-vivid, #e07a2c)" d="M8.2 9h7.6L12 21.5 8.2 9zM9.8 13h4.4M10.9 16.8h2.2"/></svg>`;
-}

@@ -207,23 +207,6 @@
   font-size: 0.92rem;
 }
 
-.auth-divider {
-  display: flex;
-  align-items: center;
-  gap: 0.9rem;
-  margin: 1.5rem 0 1.1rem;
-  color: var(--ink-soft);
-  font-size: 0.82rem;
-}
-
-.auth-divider::before,
-.auth-divider::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: var(--line);
-}
-
 .auth-mode-tabs {
   display: grid;
   grid-template-columns: 1fr 1fr;

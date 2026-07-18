@@ -49,13 +49,6 @@
   /* 스피드 마크(//): 제목 앞에 붙는 기울어진 줄무늬 */
   --speed-marks: repeating-linear-gradient(100deg, var(--carrot-vivid) 0 5px, transparent 5px 9px);
 
-  /* ── 타이포 스케일 (신규 작성분부터 이 6단계만 사용) ── */
-  --fs-xs: 0.75rem;   /* 메타·캡션 */
-  --fs-sm: 0.85rem;   /* 리스트 보조 */
-  --fs-md: 0.95rem;   /* 본문 */
-  --fs-lg: 1.1rem;    /* 카드 제목 */
-  --fs-xl: 1.35rem;   /* 섹션 히어로 */
-  --fs-num: 1.9rem;   /* D-day·통계 숫자 (tabular-nums와 함께) */
   --lh-tight: 1.35;   /* 리스트·테이블 (본문은 1.65 유지) */
 
   --font: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,

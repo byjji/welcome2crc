@@ -536,18 +536,82 @@ details.notice-row[open] .notice-arrow {
   display: none;
 }
 
-/* 일정·출첵 서브탭: 화면 폭과 무관하게 3개가 한 줄에 들어가도록 */
-#eventSubTabs {
+/* 일정·소식 서브탭 — 갤러리와 같은 책갈피(폴더 탭) 형태
+   당근색 연석 라인 위에 탭이 걸치고, 활성 탭만 라인을 끊어 본문과 이어짐 */
+#eventSubTabs,
+#newsFilter {
+  gap: 0.3rem;
+  margin: 1.3rem 0 1rem;
   flex-wrap: nowrap;
+  align-items: flex-end;              /* 갈피가 아래 연석 라인에 나란히 서도록 */
+  border-bottom: 2px solid var(--carrot);
+  padding-top: 0.3rem;
 }
 
+#newsFilter {
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+#newsFilter::-webkit-scrollbar { display: none; }
+
+#eventSubTabs .sub-tab,
+#newsFilter .sub-tab {
+  position: relative;
+  margin-bottom: -2px;                /* 아래 연석 라인 위에 걸치게 */
+  border: 1.5px solid var(--line);
+  border-bottom: 2px solid var(--carrot);
+  border-radius: 12px 12px 0 0;
+  background: var(--surface-tint);
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+/* 일정: 3개가 한 줄을 균등하게 채움 / 소식: 내용 폭 */
 #eventSubTabs .sub-tab {
   flex: 1 1 0;
   min-width: 0;
-  padding: 0.5em 0.2em;
+  padding: 0.6em 0.2em 0.7em;
   text-align: center;
-  white-space: nowrap;
-  font-size: clamp(0.72rem, 3.2vw, 0.92rem);
+  font-size: clamp(0.74rem, 3.2vw, 0.92rem);
+}
+
+#newsFilter .sub-tab {
+  flex: 0 0 auto;
+  padding: 0.6em 1.15em 0.7em;
+}
+
+#eventSubTabs .sub-tab:not(.active),
+#newsFilter .sub-tab:not(.active) {
+  transform: translateY(2px);         /* 비활성 갈피는 살짝 내려가 덜 꽂힌 느낌 */
+}
+
+#eventSubTabs .sub-tab:hover:not(.active),
+#newsFilter .sub-tab:hover:not(.active) {
+  background: var(--carrot-pale);
+  color: var(--carrot-deep);
+}
+
+/* 활성 갈피: 아래 연석 라인을 페이지 배경색(cream)으로 덮어 본문과 이어짐 */
+#eventSubTabs .sub-tab.active,
+#newsFilter .sub-tab.active {
+  background: var(--cream);
+  border-color: var(--carrot);
+  border-bottom-color: var(--cream);
+  color: var(--carrot-deep);
+  padding-top: 0.85em;                /* 위쪽 스피드 마크 자리 */
+}
+
+/* 활성 갈피 머리의 스피드 마크 */
+#eventSubTabs .sub-tab.active::before,
+#newsFilter .sub-tab.active::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 5px;
+  height: 4px;
+  background: repeating-linear-gradient(100deg, var(--carrot-vivid) 0 4px, transparent 4px 8px);
+  border-radius: 2px;
 }
 
 /* 멤버 서브탭(승인 대기·거절·내보내기): 조금 작게 줄여 한 줄 유지 */
