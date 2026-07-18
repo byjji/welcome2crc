@@ -4,49 +4,49 @@
    ============================================================ */
 
 /* ============================================================
-   좌측 책갈피 서브탭 — 책에 꽂힌 갈피 모양
+   상단 책갈피 서브탭 — 가로 폴더 탭 (레이스 데이 연석 라인)
    ------------------------------------------------------------
-   오른쪽에 세로줄(연석 라인)을 세우고, 활성 탭만 그 줄을 덮으며
-   본문과 이어지게 만듭니다. 활성 탭 왼쪽엔 스피드 마크.
+   아래에 가로 연석 라인을 긋고, 활성 탭만 그 줄을 덮으며 본문과
+   이어지게 만듭니다. 활성 탭 머리엔 스피드 마크.
    크루원은 '정보수정' 1개, 운영진은 +페이지관리·통계.
    ============================================================ */
 .hub {
-  display: flex;
-  align-items: flex-start;
   margin-top: 1.1rem;
 }
 
 .admin-tabs {
-  flex: 0 0 auto;
   display: flex;
-  flex-direction: column;
   gap: 0.3rem;
-  padding: 0.4rem 0;
-  border-right: 2px solid var(--carrot);
-  position: sticky;
-  top: 84px;
+  align-items: flex-end;              /* 갈피가 아래 연석 라인에 나란히 서도록 */
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 2px solid var(--carrot);
+  padding-top: 0.3rem;
+  margin-bottom: 1.1rem;
 }
+.admin-tabs::-webkit-scrollbar { display: none; }
 
 .admin-tab {
   position: relative;
-  margin-right: -2px; /* 오른쪽 세로줄 위에 걸치게 */
+  flex: 0 0 auto;
+  margin-bottom: -2px;                /* 아래 연석 라인 위에 걸치게 */
   font-family: var(--font);
   font-size: 0.85rem;
   font-weight: 800;
-  padding: 0.75em 0.8em 0.75em 1.15em;
+  padding: 0.6em 1.15em 0.7em;
   border: 1.5px solid var(--line);
-  border-right: 2px solid var(--carrot);
-  border-radius: 12px 0 0 12px;
+  border-bottom: 2px solid var(--carrot);
+  border-radius: 12px 12px 0 0;
   background: var(--surface-tint);
   color: var(--ink-soft);
   cursor: pointer;
-  text-align: left;
   white-space: nowrap;
   transition: background 0.15s ease, color 0.15s ease;
 }
 
 .admin-tab:not(.active) {
-  transform: translateX(2px); /* 비활성 갈피는 살짝 들어가 뒤에 꽂힌 느낌 */
+  transform: translateY(2px);         /* 비활성 갈피는 살짝 내려가 덜 꽂힌 느낌 */
 }
 
 .admin-tab:hover:not(.active) {
@@ -54,30 +54,29 @@
   color: var(--carrot-deep);
 }
 
-/* 활성 갈피: 오른쪽 세로줄을 페이지 배경색으로 덮어 본문과 이어짐 */
+/* 활성 갈피: 아래 연석 라인을 페이지 배경색(cream)으로 덮어 본문과 이어짐 */
 .admin-tab.active {
   background: var(--cream);
   border-color: var(--carrot);
-  border-right-color: var(--cream);
+  border-bottom-color: var(--cream);
   color: var(--carrot-deep);
+  padding-top: 0.85em;                /* 위쪽 스피드 마크 자리 */
 }
 
-/* 활성 갈피 왼쪽의 스피드 마크 — 레이스 데이 모티프 */
+/* 활성 갈피 머리의 스피드 마크 — 레이스 데이 모티프 */
 .admin-tab.active::before {
   content: "";
   position: absolute;
-  left: 5px;
-  top: 9px;
-  bottom: 9px;
-  width: 4px;
-  background: repeating-linear-gradient(10deg, var(--carrot-vivid) 0 4px, transparent 4px 8px);
+  left: 10px;
+  right: 10px;
+  top: 5px;
+  height: 4px;
+  background: repeating-linear-gradient(100deg, var(--carrot-vivid) 0 4px, transparent 4px 8px);
   border-radius: 2px;
 }
 
 .hub-panels {
-  flex: 1;
   min-width: 0;
-  padding-left: 0.9rem;
 }
 
 .admin-panel {
@@ -95,12 +94,11 @@
 
 @media (max-width: 480px) {
   .admin-tab {
-    font-size: 0.78rem;
-    padding: 0.7em 0.55em 0.7em 0.95em;
+    font-size: 0.8rem;
+    padding: 0.6em 0.9em 0.7em;
   }
-
-  .hub-panels {
-    padding-left: 0.7rem;
+  .admin-tab.active {
+    padding-top: 0.8em;
   }
 }
 
