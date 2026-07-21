@@ -64,7 +64,7 @@ export function renderNotices() {
         <span class="notice-arrow" aria-hidden="true">▾</span>
       </summary>
       <div class="notice-tools">
-        <span class="app-card-meta">${esc(n.author || "")}${n.updatedAt ? " · (수정됨)" : ""}</span>
+        <span class="app-card-meta">${esc(n.author || "")}</span>
         ${isAdmin ? `
         <div class="card-actions">
           <button class="btn-mini dark" data-action="pin-notice" data-id="${n.id}" data-pinned="${!!n.pinned}">${n.pinned ? "고정 해제" : "고정"}</button>
@@ -240,7 +240,7 @@ export function renderPolls() {
       <div class="app-card-head">
         <div>
           <h4>${esc(p.question)}</h4>
-          <p class="app-card-meta">${esc(p.author || "")} · ${fmtDate(p.createdAt)}${p.updatedAt ? " (수정됨)" : ""} ·
+          <p class="app-card-meta">${esc(p.author || "")} · ${fmtDate(p.createdAt)} ·
             <span class="poll-status ${closed ? "closed" : "open"}">${closed ? "마감" : "진행 중"}</span>
             ${p.deadline ? `<span class="poll-due">${fmtDeadline(p.deadline)}${closed ? " 마감됨" : "까지"}</span>` : ""}
           </p>

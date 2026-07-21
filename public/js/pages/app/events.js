@@ -313,7 +313,7 @@ function eventCardHtml(ev, isPast) {
         <div class="app-card-head">
           <h4>${ev.category ? `<span class="event-cat" style="${catBadgeStyle(ev.category)}">${esc(ev.category)}</span>` : ""}${esc(ev.title)}</h4>
         </div>
-        <p class="event-info">${ic("clock")} ${esc(ev.time)} · ${ic("pin")} ${esc(ev.place)}${ev.note ? ` · ${esc(ev.note)}` : ""}${ev.updatedAt ? ` <span class="muted">(수정됨)</span>` : ""}</p>
+        <p class="event-info">${ic("clock")} ${esc(ev.time)} · ${ic("pin")} ${esc(ev.place)}${ev.note ? ` · ${esc(ev.note)}` : ""}</p>
         ${footHtml}
       </div>
     </article>
