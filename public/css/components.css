@@ -541,6 +541,7 @@ body.app-page .app-main {
 /* ---------- 카드 목록 공통 ---------- */
 .card-list {
   display: grid;
+  grid-template-columns: minmax(0, 1fr); /* 내용(참석자 이름 등)이 길어도 열이 화면 밖으로 늘어나지 않게 */
   gap: 1rem;
 }
 
