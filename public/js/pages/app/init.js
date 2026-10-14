@@ -360,7 +360,8 @@ export function switchTab(name) {
     void panel.offsetWidth;                 // 리플로우 → 애니메이션 재실행 보장
     panel.style.animation = `${dir} 0.24s ease`;
   }
-  window.scrollTo(0, 0);
+  // html 에 scroll-behavior: smooth 가 걸려 있어 기본 scrollTo 는 위로 스르륵 올라가므로 즉시 이동
+  window.scrollTo({ top: 0, left: 0, behavior: "instant" });
 }
 
 $("appTabs").addEventListener("click", (e) => {
