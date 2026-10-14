@@ -211,30 +211,17 @@ $("nameForm").addEventListener("submit", async (e) => {
 
 $("pwForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const currentPw = $("pwCurrent").value;
   const newPw = $("pwNew").value;
   try {
-    // 본인 확인(현재 비밀번호) 후 새 비밀번호 적용
-    const cred = EmailAuthProvider.credential(me.email, currentPw);
-    await reauthenticateWithCredential(me, cred);
+    // 현재 비밀번호 확인 없이 로그인 상태에서 바로 변경
     await updatePassword(me, newPw);
-    // 비밀번호 힌트도 새 비밀번호 기준으로 자동 갱신 (기존 답변 재사용)
-    try {
-      const snap = await getDoc(doc(db, "pwhints", hintDocId(me.email)));
-      if (snap.exists()) {
-        const hint = snap.data();
-        const answer = await openSealed(hint.ansSealed, currentPw);
-        if (answer) await savePwHint(me.uid, me.email, newPw, hint.question, answer);
-      }
-    } catch (err) {
-      console.error("비밀번호 힌트 갱신 실패:", err);
-    }
+    // 현재 비밀번호를 모르는 상태라 기존 힌트(옛 비밀번호로 잠김)는 갱신할 수 없음
+    // → 힌트가 있으면 아래 '비밀번호 힌트'에서 다시 저장하도록 안내
     e.target.reset();
-    showFormMsg("pwMsg", "비밀번호를 변경했어요. 다음 로그인부터 새 비밀번호를 사용하세요.", "ok");
+    showFormMsg("pwMsg", "비밀번호를 변경했어요. 다음 로그인부터 새 비밀번호를 사용하세요. 비밀번호 찾기를 쓰려면 아래 '비밀번호 힌트'를 다시 저장해 주세요.", "ok");
   } catch (err) {
     const map = {
-      "auth/invalid-credential": "현재 비밀번호가 올바르지 않아요.",
-      "auth/wrong-password": "현재 비밀번호가 올바르지 않아요.",
+      "auth/requires-recent-login": "보안을 위해 다시 로그인한 뒤 변경해 주세요.",
       "auth/weak-password": "새 비밀번호는 6자 이상으로 해주세요.",
     };
     showFormMsg("pwMsg", map[err.code] || authErrorMsg(err), "error");
